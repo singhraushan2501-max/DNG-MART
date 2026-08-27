@@ -2,1497 +2,772 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DNG Mart | Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNG MART - Ghar ka Saman Ghar Tak</title>
 
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:"Segoe UI", system-ui, -apple-system, sans-serif;
-    -webkit-tap-highlight-color: transparent;
+:root{
+    --blinkit-yellow: #f7d417;
+    --blinkit-green: #0c831f;
+    --blinkit-green-dark: #075e15;
+    --blinkit-green-light: #e8f7ee;
+    --blinkit-bg: #f4f6fb;
+    --card-bg: #ffffff;
+    --text-main: #1c1c1c;
+    --text-muted: #666666;
+    --border-color: #ebebeb;
+    --badge-discount: #256fef;
+    --whatsapp: #25D366;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
-:root{
-    --primary:#16a34a;
-    --primary-dark:#15803d;
-    --primary-light:#dcfce7;
-    --dark:#0f172a;
-    --bg:#f8fafc;
-    --card:#ffffff;
-    --text:#0f172a;
-    --muted:#64748b;
-    --border:#e2e8f0;
-    --green:#16a34a;
-    --orange:#f59e0b;
-    --red:#dc2626;
-    --blue:#0284c7;
-    --sidebar:#0f172a;
-    --header-height:64px;
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body{
-    background:var(--bg);
-    color:var(--text);
-    overflow-x:hidden;
-}
-
-body.dark{
-    --bg:#090d16;
-    --card:#1e293b;
-    --text:#f8fafc;
-    --muted:#94a3b8;
-    --border:#334155;
-    --sidebar:#0f172a;
-    --primary-light:#14532d;
-}
-
-button, input, select, textarea{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-.app{
-    display:flex;
-    min-height:100vh;
-    position:relative;
-}
-
-/* SIDEBAR & MOBILE DRAWER */
-.sidebar{
-    width:250px;
-    background:var(--sidebar);
-    color:white;
-    padding:20px 14px;
-    position:fixed;
-    left:0;
-    top:0;
-    bottom:0;
-    z-index:1000;
-    transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display:flex;
-    flex-direction:column;
-}
-
-.logo{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    padding:10px 8px;
-    margin-bottom:20px;
-}
-
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:8px;
-    background:var(--primary);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    font-weight:900;
-}
-
-.logo strong{
-    display:block;
-    font-size:16px;
-    letter-spacing:0.5px;
-}
-
-.logo small{
-    color:#94a3b8;
-    font-size:11px;
-}
-
-.nav-list{
-    flex:1;
-    overflow-y:auto;
-}
-
-.nav{
-    width:100%;
-    border:0;
-    background:transparent;
-    color:#cbd5e1;
-    padding:12px 14px;
-    border-radius:8px;
-    text-align:left;
-    margin-bottom:4px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    font-weight:500;
-    font-size:14px;
-    transition:background 0.2s;
-}
-
-.nav:hover,
-.nav.active{
-    background:var(--primary);
-    color:white;
-}
-
-.nav-icon{
-    width:22px;
-    text-align:center;
-    font-size:16px;
-}
-
-.store-link{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:#94a3b8;
-    text-decoration:none;
-    padding:12px 14px;
-    font-size:13px;
-    font-weight:600;
-    border-top:1px solid #1e293b;
-    margin-top:auto;
-}
-.store-link:hover{ color:#fff; }
-
-/* BACKDROP FOR MOBILE */
-.sidebar-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    z-index:900;
-    display:none;
-    opacity:0;
-    transition:opacity 0.3s ease;
-}
-.sidebar-overlay.active{
-    display:block;
-    opacity:1;
-}
-
-/* MAIN CONTENT */
-.main{
-    margin-left:250px;
-    width:calc(100% - 250px);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    transition:margin-left 0.3s;
-}
-
-.topbar{
-    height:var(--header-height);
-    background:var(--card);
-    border-bottom:1px solid var(--border);
-    padding:0 24px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    position:sticky;
-    top:0;
-    z-index:100;
-}
+    background: var(--blinkit-bg);
+    color: var(--text-main);
+    line-height: 1.4;
+    overflow-x: hidden;
+}
+
+/* HEADER */
+.bk-header{
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.bk-main-nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.bk-logo-block{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    flex-shrink: 0;
+}
+
+.bk-logo-badge{
+    background: var(--blinkit-yellow);
+    color: #000;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bk-logo-badge span{
+    color: var(--blinkit-green);
+}
+
+.bk-eta-pill{
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+.bk-eta-pill:hover{ background: #f8f8f8; }
+.bk-eta-time{ font-size: 15px; font-weight: 800; color: #000; display: flex; align-items: center; gap: 4px;}
+.bk-eta-loc{ font-size: 12px; color: var(--text-muted); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+
+.bk-search-bar{
+    flex: 1;
+    max-width: 650px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 1px solid #e2e5e9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+.bk-search-bar:focus-within{
+    border-color: var(--blinkit-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(12, 131, 31, 0.12);
+}
+.bk-search-icon{
+    padding: 0 14px;
+    font-size: 16px;
+    color: #777;
+}
+.bk-search-input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 14px 12px 0;
+    font-size: 14px;
+    outline: none;
+    color: var(--text-main);
+}
+
+.bk-nav-actions{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.bk-cart-pill{
+    background: var(--blinkit-green);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(12, 131, 31, 0.25);
+}
+.bk-cart-pill:hover{ background: var(--blinkit-green-dark); }
+.bk-cart-pill:active{ transform: scale(0.98); }
+
+/* CATEGORY STRIP */
+.bk-category-strip{
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.bk-category-strip::-webkit-scrollbar{ display: none; }
+.bk-cat-list{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    white-space: nowrap;
+}
+.bk-cat-chip{
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.bk-cat-chip:hover{
+    border-color: var(--blinkit-green);
+    background: var(--blinkit-green-light);
+    color: var(--blinkit-green-dark);
+}
+.bk-cat-chip.active{
+    background: var(--blinkit-green-light);
+    border-color: var(--blinkit-green);
+    color: var(--blinkit-green-dark);
+}
+
+/* HERO SLIDER */
+.bk-banner-container{
+    max-width: 1400px;
+    margin: 16px auto;
+    padding: 0 24px;
+    position: relative;
+}
+.bk-banner-slider-wrap{
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 220px;
+    box-shadow: var(--shadow-subtle);
+}
+.bk-banner-slider{
+    display: flex;
+    width: 400%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bk-slide{
+    width: 25%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    position: relative;
+}
+.bk-slide-1{ background: linear-gradient(110deg, #fceb92 0%, #ffd000 100%); }
+.bk-slide-2{ background: linear-gradient(110deg, #d3f3db 0%, #68cf89 100%); }
+.bk-slide-3{ background: linear-gradient(110deg, #fddbe7 0%, #fa7ba7 100%); }
+.bk-slide-4{ background: linear-gradient(110deg, #dbeafe 0%, #60a5fa 100%); }
+
+.bk-slide-info h2{ font-size: 28px; font-weight: 900; color: #111; margin-bottom: 6px; }
+.bk-slide-info p{ font-size: 14px; font-weight: 600; color: #2a2a2a; margin-bottom: 12px; }
+.bk-slide-btn{
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.bk-slide-art{ font-size: 85px; }
+
+/* APP LAYOUT */
+.bk-app-layout{
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 20px auto 40px;
+    padding: 0 24px;
+}
+
+.bk-sidebar{
+    width: 260px;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    height: fit-content;
+    position: sticky;
+    top: 130px;
+}
+.bk-sidebar h3{
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-left: 8px;
+}
+.bk-subcat-list{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.bk-subcat-item{
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s;
+    color: var(--text-main);
+}
+.bk-subcat-item:hover{ background: #f4f6fb; }
+.bk-subcat-item.active{
+    background: var(--blinkit-green-light);
+    color: var(--blinkit-green-dark);
+    font-weight: 700;
+}
+.bk-subcat-count{
+    font-size: 11px;
+    background: #e5e7eb;
+    color: #4b5563;
+    padding: 2px 6px;
+    border-radius: 12px;
+}
+.bk-subcat-item.active .bk-subcat-count{
+    background: var(--blinkit-green);
+    color: #fff;
+}
+
+.bk-main-feed{ flex: 1; }
+
+.bk-feed-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.bk-feed-title{ font-size: 20px; font-weight: 800; }
+.bk-feed-count{ font-size: 13px; color: var(--text-muted); }
+
+.bk-product-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.bk-card{
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.bk-card:hover{
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+}
+
+.bk-card-badge{
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--badge-discount);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.bk-card-time{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #f1f3f6;
+    color: #444;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.bk-card-img{
+    height: 120px;
+    background: #fbfbfb;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 54px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.bk-card-img img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.bk-card-name{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 34px;
+    margin-bottom: 4px;
+}
+.bk-card-unit{
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.bk-card-footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+}
+
+.bk-price-block{ display: flex; flex-direction: column; }
+.bk-current-price{ font-size: 14px; font-weight: 800; color: #000; }
+.bk-mrp{ font-size: 11px; color: var(--text-muted); text-decoration: line-through; }
+
+.bk-add-btn{
+    background: #ffffff;
+    border: 1px solid var(--blinkit-green);
+    color: var(--blinkit-green);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+}
+.bk-add-btn:hover{
+    background: var(--blinkit-green);
+    color: #ffffff;
+}
+
+.bk-qty-controller{
+    display: flex;
+    align-items: center;
+    background: var(--blinkit-green);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.bk-qty-controller button{
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    width: 26px;
+    height: 28px;
+    cursor: pointer;
+}
+.bk-qty-controller span{
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+/* CART & CHECKOUT MODALS */
+.bk-drawer{
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: flex-end;
+    z-index: 2000;
+}
+.bk-drawer.active{ display: flex; }
+
+.bk-drawer-content{
+    width: 100%;
+    max-width: 440px;
+    background: var(--blinkit-bg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: slideInRight 0.25s cubic-bezier(0, 0, 0.2, 1);
+}
+@keyframes slideInRight{
+    from{ transform: translateX(100%); }
+    to{ transform: translateX(0); }
+}
+
+.bk-drawer-header{
+    background: #fff;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.bk-drawer-header h2{ font-size: 16px; font-weight: 800; }
+.bk-drawer-close{ font-size: 24px; cursor: pointer; border: none; background: transparent; }
+
+.bk-drawer-body{
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bk-cart-box{
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    box-shadow: var(--shadow-subtle);
+}
+
+.bk-cart-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f2;
+}
+.bk-cart-item:last-child{ border-bottom: none; }
+.bk-cart-item-info strong{ font-size: 13px; display: block; }
+.bk-cart-item-info small{ color: var(--text-muted); font-size: 11px; }
+
+.bk-bill-row{
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    margin-bottom: 6px;
+    color: #444;
+}
+.bk-bill-row.bold{
+    font-size: 14px;
+    font-weight: 800;
+    color: #000;
+    border-top: 1px dashed #ddd;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.bk-drawer-footer{
+    background: #fff;
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.bk-checkout-btn{
+    width: 100%;
+    background: var(--blinkit-green);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bk-checkout-btn:hover{ background: var(--blinkit-green-dark); }
 
-.topbar-left{
-    display:flex;
-    align-items:center;
-    gap:14px;
-}
-
-.hamburger{
-    display:none;
-    background:transparent;
-    border:0;
-    font-size:24px;
-    color:var(--text);
-    padding:4px;
-}
-
-.topbar h1{
-    font-size:20px;
-    font-weight:700;
-}
-
-.top-actions{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.icon-button{
-    border:1px solid var(--border);
-    background:var(--card);
-    color:var(--text);
-    width:38px;
-    height:38px;
-    border-radius:8px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:16px;
-}
-
-.profile{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.avatar{
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    background:var(--primary-light);
-    color:var(--primary);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    font-size:13px;
-}
-
-/* CONTENT */
-.content{
-    padding:24px;
-    flex:1;
-}
-
-.page{
-    display:none;
-}
-
-.page.active{
-    display:block;
-    animation:fadeIn 0.25s ease-in-out;
-}
-
-@keyframes fadeIn{
-    from{ opacity:0; transform:translateY(4px); }
-    to{ opacity:1; transform:translateY(0); }
-}
-
-/* CARDS */
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:20px;
-}
-
-.card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:18px;
-}
-
-.stat{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-}
-
-.stat-icon{
-    width:42px;
-    height:42px;
-    border-radius:8px;
-    background:var(--primary-light);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-}
-
-.stat small{
-    color:var(--muted);
-    font-weight:600;
-    font-size:12px;
-}
-
-.stat h2{
-    margin-top:6px;
-    font-size:22px;
-    font-weight:800;
-}
-
-.green{ color:var(--green); }
-.orange{ color:var(--orange); }
-.red{ color:var(--red); }
-.blue{ color:var(--blue); }
-
-/* GRID */
-.grid-2{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-}
-
-.panel{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:20px;
-    margin-bottom:20px;
-}
-
-.panel-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.panel-header h2{
-    font-size:17px;
-    font-weight:700;
-}
-
-/* CHART */
-.chart{
-    height:220px;
-    display:flex;
-    align-items:flex-end;
-    gap:8px;
-    padding-top:20px;
-}
-
-.bar{
-    flex:1;
-    background:linear-gradient(to top, var(--primary), #4ade80);
-    border-radius:4px 4px 0 0;
-    min-height:16px;
-}
-
-.chart-labels{
-    display:flex;
-    justify-content:space-between;
-    color:var(--muted);
-    font-size:11px;
-    margin-top:10px;
-}
-
-/* TABLE */
-.table-wrap{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:600px;
-}
-
-th, td{
-    padding:12px 10px;
-    text-align:left;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-    font-size:13px;
-}
-
-th{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-    font-weight:700;
-}
-
-.badge{
-    padding:4px 8px;
-    border-radius:12px;
-    font-size:11px;
-    display:inline-block;
-    background:#eee;
-    font-weight:700;
-}
-
-.badge.green{ background:#dcfce7; color:#15803d; }
-.badge.orange{ background:#fef3c7; color:#b45309; }
-.badge.blue{ background:#e0f2fe; color:#0369a1; }
-.badge.red{ background:#fee2e2; color:#b91c1c; }
-
-/* BUTTON */
-.btn{
-    border:0;
-    border-radius:6px;
-    padding:9px 14px;
-    background:#e2e8f0;
-    color:#334155;
-    font-weight:600;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    text-decoration:none;
-    font-size:13px;
-    transition:background 0.2s, opacity 0.2s;
-}
-
-.btn.primary{
-    background:var(--primary);
-    color:white;
-}
-
-.btn.primary:hover{ background:var(--primary-dark); }
-
-.btn.whatsapp{
-    background:#25D366;
-    color:white;
-}
-
-.btn.small{
-    padding:5px 9px;
-    font-size:12px;
-}
-
-.btn:active{ transform:scale(0.98); }
-
-/* FORM */
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-}
-
-.form-grid-3{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-}
-
-.form-grid-4{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-}
-
-.field{
-    margin-bottom:14px;
-}
-
-.field label{
-    display:block;
-    margin-bottom:5px;
-    font-size:12px;
-    color:var(--muted);
-    font-weight:600;
-}
-
-.input, .select, textarea{
-    width:100%;
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    background:var(--card);
-    color:var(--text);
-    outline:none;
-    font-size:13px;
-}
-
-.input:focus, .select:focus, textarea:focus{
-    border-color:var(--primary);
-}
-
-/* TOOLBAR */
-.toolbar{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:16px;
-    align-items:center;
-}
-
-/* DROP */
-.drop-zone{
-    border:2px dashed #cbd5e1;
-    background:#f8fafc;
-    border-radius:8px;
-    padding:20px;
-    text-align:center;
-    margin-bottom:16px;
-    color:#64748b;
-    cursor:pointer;
-    font-size:13px;
-}
-
-.drop-zone.drag{
-    background:#dcfce7;
-    border-color:var(--primary);
-}
-
-.preview{
-    margin-top:10px;
-}
-
-.preview img{
-    max-width:120px;
-    max-height:100px;
-    border-radius:6px;
-}
-
-/* PRODUCT GRID */
-.product-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
-    gap:16px;
-}
-
-.product-card{
-    border:1px solid var(--border);
-    border-radius:8px;
-    overflow:hidden;
-    background:var(--card);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-}
-
-.product-image{
-    height:140px;
-    background:#f8fafc;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:50px;
-    overflow:hidden;
-}
-
-.product-image img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.product-body{
-    padding:14px;
-}
-
-.product-body h3{
-    margin-bottom:4px;
-    font-size:15px;
-    font-weight:700;
-}
-
-.product-body p{
-    color:var(--muted);
-    font-size:12px;
-}
-
-.product-actions{
-    display:flex;
-    gap:8px;
-    margin-top:12px;
-}
-
-/* MINI LIST */
-.list{
-    display:flex;
-    flex-direction:column;
-}
-
-.list-row{
-    padding:10px 0;
-    border-bottom:1px solid var(--border);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    font-size:13px;
-}
-
-.list-row:last-child{ border-bottom:0; }
-
-/* BILLING POS */
-.billing-grid{
-    display:grid;
-    grid-template-columns:1.4fr 1fr;
-    gap:20px;
-}
-
-.bill-line{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 0;
-    border-bottom:1px solid var(--border);
-    font-size:13px;
-}
-
-.summary-row{
-    display:flex;
-    justify-content:space-between;
-    padding:5px 0;
-    font-size:13px;
-    color:var(--muted);
-}
-
-.summary-row.total-row{
-    font-size:18px;
-    color:var(--text);
-    font-weight:bold;
-    border-top:2px solid var(--border);
-    margin-top:8px;
-    padding-top:10px;
-}
-
-.summary-row.due-row{
-    font-size:14px;
-    font-weight:bold;
-    padding-top:4px;
-}
-
-/* WALLET */
-.wallet{
-    background:linear-gradient(135deg, var(--primary), #22c55e);
-    color:white;
-    border-radius:10px;
-    padding:20px;
-}
-
-.wallet h2{
-    font-size:30px;
-    margin-top:8px;
-}
-
-/* REFERRAL */
-.ref-code{
-    background:#e0f2fe;
-    color:#0369a1;
-    padding:3px 6px;
-    border-radius:4px;
-    font-family:monospace;
-    font-weight:bold;
-    font-size:12px;
-}
-
-/* TOAST */
 #toast{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:var(--dark);
-    color:white;
-    padding:12px 18px;
-    border-radius:8px;
-    display:none;
-    z-index:9999;
-    box-shadow:0 10px 20px rgba(0,0,0,0.2);
-    font-size:13px;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e1e1e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
-/* MODAL */
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.6);
-    z-index:3000;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
+@media(max-width: 900px){
+    .bk-sidebar{ display: none; }
+    .bk-app-layout{ padding: 0 16px; }
 }
-
-.modal.active{ display:flex; }
-
-.modal-card{
-    width:100%;
-    max-width:560px;
-    max-height:90vh;
-    overflow-y:auto;
-    background:var(--card);
-    color:var(--text);
-    border-radius:10px;
-    padding:20px;
-    box-shadow:0 20px 25px rgba(0,0,0,0.2);
-}
-
-/* MOBILE BOTTOM NAV BAR */
-.mobile-bottom-nav{
-    display:none;
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    height:56px;
-    background:var(--card);
-    border-top:1px solid var(--border);
-    z-index:800;
-    justify-content:space-around;
-    align-items:center;
-}
-
-.mob-nav-item{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    background:transparent;
-    border:0;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:600;
-    gap:2px;
-    flex:1;
-    height:100%;
-}
-
-.mob-nav-item span:first-child{
-    font-size:18px;
-}
-
-.mob-nav-item.active{
-    color:var(--primary);
-}
-
-/* RESPONSIVE BREAKPOINTS */
-@media(max-width:1050px){
-    .cards{ grid-template-columns:repeat(2,1fr); }
-    .grid-2, .billing-grid{ grid-template-columns:1fr; }
-}
-
-@media(max-width:768px){
-    .sidebar{
-        transform:translateX(-100%);
-    }
-    .sidebar.open{
-        transform:translateX(0);
-    }
-    .main{
-        margin-left:0;
-        width:100%;
-        padding-bottom:60px;
-    }
-    .hamburger{
-        display:flex;
-    }
-    .content{
-        padding:16px;
-    }
-    .cards{
-        grid-template-columns:1fr;
-    }
-    .form-grid, .form-grid-3, .form-grid-4{
-        grid-template-columns:1fr;
-    }
-    .mobile-bottom-nav{
-        display:flex;
-    }
-    .profile div{
-        display:none;
-    }
-    .topbar{
-        padding:0 16px;
-    }
+@media(max-width: 600px){
+    .bk-main-nav{ padding: 10px 14px; gap: 8px; }
+    .bk-eta-pill{ display: none; }
+    .bk-banner-slider-wrap{ height: 160px; }
+    .bk-slide-info h2{ font-size: 18px; }
+    .bk-slide-art{ display: none; }
+    .bk-product-grid{ grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
-
-<!-- SIDEBAR OVERLAY FOR MOBILE -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-    <div class="logo">
-        <div class="logo-icon">DNG</div>
-        <div>
-            <strong>DNG Mart</strong>
-            <small>Grocery Merchant</small>
-        </div>
-    </div>
-
-    <div class="nav-list">
-        <button class="nav active" onclick="showPage('dashboard',this)">
-            <span class="nav-icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-
-        <button class="nav" onclick="showPage('orders',this)">
-            <span class="nav-icon">🧾</span>
-            <span>Orders & Delivery</span>
-        </button>
-
-        <button class="nav" onclick="showPage('billing',this)">
-            <span class="nav-icon">₹</span>
-            <span>Counter POS</span>
-        </button>
-
-        <button class="nav" onclick="showPage('products',this)">
-            <span class="nav-icon">🛒</span>
-            <span>Products</span>
-        </button>
-
-        <button class="nav" onclick="showPage('inventory',this)">
-            <span class="nav-icon">📦</span>
-            <span>Inventory & Margins</span>
-        </button>
-
-        <button class="nav" onclick="showPage('crm',this)">
-            <span class="nav-icon">👥</span>
-            <span>Customer CRM</span>
-        </button>
-
-        <button class="nav" onclick="showPage('referrals',this)">
-            <span class="nav-icon">🏷️</span>
-            <span>Coupons</span>
-        </button>
-
-        <button class="nav" onclick="showPage('wallet',this)">
-            <span class="nav-icon">💰</span>
-            <span>Wallet</span>
-        </button>
-    </div>
-
-    <a class="store-link" href="/">
-        <span>🌐</span> View Storefront
-    </a>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-<header class="topbar">
-    <div class="topbar-left">
-        <button class="hamburger" onclick="toggleSidebar()">☰</button>
-        <div>
-            <h1 id="pageTitle">Dashboard</h1>
-        </div>
-    </div>
-
-    <div class="top-actions">
-        <button class="icon-button" onclick="testSoundAlert()" title="Test Order Notification Chime">🔔</button>
-        <button class="icon-button" onclick="toggleTheme()" title="Toggle Dark/Light Mode">◐</button>
-        <div class="profile">
-            <div class="avatar">DM</div>
-            <div>
-                <strong style="font-size:13px">DNG Admin</strong>
+<!-- HEADER -->
+<header class="bk-header">
+    <div class="bk-main-nav">
+        <!-- Logo -->
+        <a href="#" class="bk-logo-block">
+            <div class="bk-logo-badge">
+                DNG<span>MART</span>
             </div>
+            <div style="font-size:12px;font-weight:700;color:var(--blinkit-green-dark);letter-spacing:-0.2px;">
+                Ghar ka Saman Ghar Tak
+            </div>
+        </a>
+
+        <!-- 10 MIN GPS Pin -->
+        <div class="bk-eta-pill" onclick="detectLocation()">
+            <div class="bk-eta-time">⚡ Delivery in 10 Mins</div>
+            <div class="bk-eta-loc" id="etaLocation">Patna, Bihar</div>
         </div>
+
+        <!-- Search -->
+        <div class="bk-search-bar">
+            <span class="bk-search-icon">🔍</span>
+            <input class="bk-search-input" id="bkSearchInput" placeholder='Search "oil", "atta", "dal", "chips", "dhoop"...' oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- Cart Action Only -->
+        <div class="bk-nav-actions">
+            <button class="bk-cart-pill" onclick="openCartDrawer()">
+                <span>🛒</span>
+                <span id="navCartCount">0 items</span>
+                <span>•</span>
+                <span id="navCartTotal">₹0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Chips Strip -->
+    <div class="bk-category-strip">
+        <div class="bk-cat-list" id="mainCatList"></div>
     </div>
 </header>
 
-<div class="content">
-
-<!-- DASHBOARD -->
-<section id="dashboard" class="page active">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Total Grocery Orders</small>
-                <h2 id="totalOrders">0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Live Synchronized</span>
+<!-- HERO SLIDER -->
+<div class="bk-banner-container">
+    <div class="bk-banner-slider-wrap">
+        <div class="bk-banner-slider" id="heroSlider">
+            <div class="bk-slide bk-slide-1">
+                <div class="bk-slide-info">
+                    <h2>Fresh Atta, Rice & Dals</h2>
+                    <p>100% Sharbati wheat, basmati & unpolished dals delivered in 10 minutes</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Atta & Dal')">Order Staples</button>
+                </div>
+                <div class="bk-slide-art">🌾</div>
             </div>
-            <div class="stat-icon">🧾</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Total Revenue</small>
-                <h2 id="totalRevenue">₹0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Total Sales</span>
+            <div class="bk-slide-2 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Pure Desi Ghee & Mustard Oils</h2>
+                    <p>Cold pressed kachi ghani mustard oil & cow ghee at wholesale rates</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Oil & Ghee')">Explore Oils</button>
+                </div>
+                <div class="bk-slide-art">🪔</div>
             </div>
-            <div class="stat-icon">₹</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Cataloged Items</small>
-                <h2 id="totalProducts">0</h2>
-                <span class="orange" style="font-size:11px;font-weight:bold;">● In Store</span>
+            <div class="bk-slide-3 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Munchies, Tea & Refreshments</h2>
+                    <p>Tea leaves, namkeen, biscuits & beverages at your doorstep</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Snacks & Beverages')">Grab Snacks</button>
+                </div>
+                <div class="bk-slide-art">☕</div>
             </div>
-            <div class="stat-icon">🛒</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Customer Base</small>
-                <h2 id="totalCustomers">0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Active CRM</span>
-            </div>
-            <div class="stat-icon">👥</div>
-        </div>
-    </div>
-
-    <div class="grid-2">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Grocery Sales Activity (2026)</h2>
-                <span class="badge green">Real-Time</span>
-            </div>
-            <div class="chart">
-                <div class="bar" style="height:45%"></div>
-                <div class="bar" style="height:60%"></div>
-                <div class="bar" style="height:50%"></div>
-                <div class="bar" style="height:75%"></div>
-                <div class="bar" style="height:65%"></div>
-                <div class="bar" style="height:85%"></div>
-                <div class="bar" style="height:70%"></div>
-                <div class="bar" style="height:92%"></div>
-                <div class="bar" style="height:78%"></div>
-                <div class="bar" style="height:88%"></div>
-                <div class="bar" style="height:82%"></div>
-                <div class="bar" style="height:100%"></div>
-            </div>
-            <div class="chart-labels">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
-                <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Low Stock Alert (< 10 units)</h2>
-            </div>
-            <div id="lowStock" class="list"></div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Recent Store & Online Orders</h2>
-            <button class="btn small" onclick="showPage('orders')">View All</button>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>WhatsApp Notification</th>
-                    </tr>
-                </thead>
-                <tbody id="recentOrders"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- ORDERS & FEE MANAGEMENT -->
-<section id="orders" class="page">
-    <div class="panel" style="background:#f0fdf4;border:1px solid #bbf7d0;">
-        <div class="panel-header">
-            <div>
-                <h2>Storefront Delivery & Tax Configurations</h2>
-                <p style="color:var(--muted);font-size:12px;">Default delivery fees, handling rates, and GST applied to online orders.</p>
-            </div>
-            <button class="btn primary small" onclick="saveOnlineFeeSettings()">Save Rates</button>
-        </div>
-        <div class="form-grid-3">
-            <div class="field">
-                <label>Default Grocery Delivery (₹)</label>
-                <input class="input" id="feeDeliveryDefault" type="number" placeholder="30">
-            </div>
-            <div class="field">
-                <label>Packaging / Handling Fee (₹)</label>
-                <input class="input" id="feeHandlingDefault" type="number" placeholder="10">
-            </div>
-            <div class="field">
-                <label>Default GST Tax Rate (%)</label>
-                <select class="select" id="feeGSTDefault">
-                    <option value="0">0% (Essential Grains)</option>
-                    <option value="5">5% (Packaged Food & Ghee)</option>
-                    <option value="12">12% (Standard)</option>
-                    <option value="18">18% (Household Cleaners)</option>
-                </select>
+            <div class="bk-slide-4 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Household & Daily Cleaning</h2>
+                    <p>Detergents, surface cleaners & everyday mart essentials</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Cleaning & Household')">Shop Essentials</button>
+                </div>
+                <div class="bk-slide-art">🧼</div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Orders Pipeline</h2>
-            <button class="btn small" onclick="exportOrders()">Export CSV</button>
-        </div>
-        <div class="toolbar">
-            <input class="input" placeholder="Search orders by customer or ID..." oninput="searchOrders(this.value)">
-        </div>
-        <div class="table-wrap" id="ordersTable"></div>
-    </div>
-</section>
+<!-- MAIN LAYOUT -->
+<div class="bk-app-layout">
+    <aside class="bk-sidebar">
+        <h3 id="sidebarHeading">Categories</h3>
+        <div class="bk-subcat-list" id="sidebarSubcats"></div>
+    </aside>
 
-<!-- POS BILLING -->
-<section id="billing" class="page">
-    <div class="billing-grid">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Counter POS Billing</h2>
-                <span class="badge green">POS Counter</span>
-            </div>
-            <div class="form-grid">
-                <div class="field">
-                    <label>Customer Name</label>
-                    <input class="input" id="billCustomer" placeholder="Walk-in Customer">
-                </div>
-                <div class="field">
-                    <label>WhatsApp Number</label>
-                    <input class="input" id="billPhone" placeholder="10-digit mobile number">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Select Item</label>
-                <select class="select" id="billProduct"></select>
-            </div>
-
-            <div class="form-grid">
-                <input class="input" id="billQty" type="number" value="1" min="1" placeholder="Qty">
-                <button class="btn primary" onclick="addBillItem()">+ Add to Bill</button>
-            </div>
-
-            <div id="billItems" style="margin-top:16px"></div>
-
-            <hr style="border:0;border-top:1px solid var(--border);margin:16px 0;">
-
-            <div class="form-grid-3">
-                <div class="field">
-                    <label>GST Rate (%)</label>
-                    <select class="select" id="billGSTRate" onchange="renderBill()">
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="12">12%</option>
-                        <option value="18">18%</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Bag Fee (₹)</label>
-                    <input class="input" id="billHandling" type="number" value="0" min="0" oninput="renderBill()">
-                </div>
-                <div class="field">
-                    <label>Delivery Fee (₹)</label>
-                    <input class="input" id="billDelivery" type="number" value="0" min="0" oninput="renderBill()">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Amount Collected (₹)</label>
-                <input class="input" id="billPaid" type="number" placeholder="Enter collected amount" oninput="renderBill()">
+    <main class="bk-main-feed">
+        <div class="bk-feed-header">
+            <div>
+                <h1 class="bk-feed-title" id="feedTitle">All Grocery Essentials</h1>
+                <span class="bk-feed-count" id="feedCount">Showing items</span>
             </div>
         </div>
+        <div class="bk-product-grid" id="productGrid"></div>
+    </main>
+</div>
 
-        <div class="panel">
-            <h2>POS Bill Summary</h2>
-            <div id="billSummary" style="margin-top:16px">No items added to bill.</div>
+<!-- CART DRAWER -->
+<div class="bk-drawer" id="cartDrawer">
+    <div class="bk-drawer-content">
+        <div class="bk-drawer-header">
+            <h2>My Cart (<span id="cartDrawerCount">0</span>)</h2>
+            <button class="bk-drawer-close" onclick="closeCartDrawer()">×</button>
+        </div>
 
-            <button class="btn primary" style="width:100%;margin-top:14px" onclick="completeBill()">
-                Generate Invoice & Print
-            </button>
-            <button class="btn whatsapp" style="width:100%;margin-top:8px" onclick="sendBillWhatsApp()">
-                💬 Send Bill to WhatsApp
+        <div class="bk-drawer-body" id="cartDrawerBody"></div>
+
+        <div class="bk-drawer-footer">
+            <button class="bk-checkout-btn" onclick="openCheckoutModal()">
+                <div>
+                    <div style="font-size:11px;text-align:left;opacity:0.8;">TOTAL PAYABLE</div>
+                    <div id="drawerTotalPayable" style="font-size:16px;">₹0</div>
+                </div>
+                <div>Proceed to Pay ➔</div>
             </button>
         </div>
     </div>
-</section>
-
-<!-- PRODUCTS -->
-<section id="products" class="page">
-    <div class="grid-2">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Add Grocery Product</h2>
-            </div>
-            
-            <div class="form-grid">
-                <div class="field">
-                    <label>Product Name</label>
-                    <input class="input" id="productName" placeholder="e.g. Fortune Mustard Oil 1L">
-                </div>
-                <div class="field">
-                    <label>Category</label>
-                    <select class="select" id="productCategory">
-                        <option>Atta & Dal</option>
-                        <option>Oil & Ghee</option>
-                        <option>Daily Essentials</option>
-                        <option>Snacks & Beverages</option>
-                        <option>Cleaning & Household</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-grid-4">
-                <div class="field">
-                    <label>Cost (₹)</label>
-                    <input class="input" id="productPurchasePrice" type="number" placeholder="Cost" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>MRP (₹)</label>
-                    <input class="input" id="productMRP" type="number" placeholder="MRP" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>Discount (%)</label>
-                    <input class="input" id="productDiscount" type="number" value="0" min="0" max="100" placeholder="0" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>Selling Price (₹)</label>
-                    <input class="input" id="productPrice" type="number" placeholder="Selling" style="font-weight:bold;color:var(--primary);">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Initial Stock Units</label>
-                <input class="input" id="productStock" type="number" placeholder="e.g. 50">
-            </div>
-
-            <div id="dropZone" class="drop-zone">
-                <strong>Drag & Drop Image</strong> or click to upload
-                <input id="productImage" type="file" accept="image/*" hidden>
-                <div id="imagePreview" class="preview"></div>
-            </div>
-
-            <button class="btn primary" style="width:100%" onclick="saveProduct()">Save Product & Update Inventory</button>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Bulk CSV Grocery Sync</h2>
-            </div>
-            <div class="toolbar">
-                <button class="btn small" onclick="exportProductsCSV()">Export Complete CSV</button>
-                <button class="btn small" onclick="downloadProductTemplate()">Template</button>
-                <label class="btn primary small">
-                    Import CSV
-                    <input type="file" accept=".csv" hidden onchange="importProductsCSV(this.files[0])">
-                </label>
-            </div>
-            <div style="background:#f8fafc;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:11px;line-height:1.6;color:var(--text);">
-                <strong>Required CSV Headers:</strong><br>
-                <code>id, name, category, purchase_price, mrp, discount_percent, price, stock, description, image_url</code>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Live Grocery Catalog</h2>
-            <input class="input" style="max-width:220px" placeholder="Search catalog..." oninput="renderProducts(this.value)">
-        </div>
-        <div id="productGrid" class="product-grid"></div>
-    </div>
-</section>
-
-<!-- INVENTORY -->
-<section id="inventory" class="page">
-    <div class="panel">
-        <div class="panel-header">
-            <div>
-                <h2>Stock Levels & Profit Margins</h2>
-                <p style="color:var(--muted);font-size:12px;">Manage inventory stock counts, unit costs, and live margins.</p>
-            </div>
-            <div class="toolbar" style="margin-bottom:0">
-                <button class="btn small" onclick="exportProductsCSV()">Export Stock CSV</button>
-            </div>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" placeholder="Search inventory by item or category..." oninput="renderInventory(this.value)">
-        </div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product / SKU</th>
-                        <th>Category</th>
-                        <th>Cost Price</th>
-                        <th>MRP</th>
-                        <th>Discount</th>
-                        <th>Selling Price</th>
-                        <th>Stock Level</th>
-                        <th>Quick Adjust</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryTable"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- CRM -->
-<section id="crm" class="page">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Total Customers</small>
-                <h2 id="crmTotal">0</h2>
-            </div>
-            <div class="stat-icon">👥</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Repeat Buyers</small>
-                <h2 id="repeatCustomers">0</h2>
-            </div>
-            <div class="stat-icon">🔁</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Follow-up Required</small>
-                <h2 id="followUps">0</h2>
-            </div>
-            <div class="stat-icon">📞</div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Customer Relationship Management</h2>
-            <div class="toolbar" style="margin-bottom:0">
-                <button class="btn small" onclick="exportCRM()">Export CSV</button>
-                <button class="btn primary small" onclick="addCustomer()">+ Add Customer</button>
-            </div>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" placeholder="Search customer records..." oninput="renderCRM(this.value)">
-        </div>
-
-        <div class="table-wrap" id="crmTable"></div>
-    </div>
-</section>
-
-<!-- REFERRALS & CUSTOM COUPONS -->
-<section id="referrals" class="page">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Campaigns / Promoters</small>
-                <h2 id="refUsers">0</h2>
-            </div>
-            <div class="stat-icon">↗</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Successful Orders</small>
-                <h2 id="successReferrals">0</h2>
-            </div>
-            <div class="stat-icon">🎯</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Active Coupons</small>
-                <h2 id="activeCouponsCount">0</h2>
-            </div>
-            <div class="stat-icon">🏷️</div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Coupons & Referral Promotions</h2>
-            <button class="btn primary small" onclick="openCustomCouponModal()">+ Create Coupon</button>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" id="refSearch" placeholder="Search coupons..." oninput="renderReferrals()">
-            <select class="select" id="refStatus" onchange="renderReferrals()" style="max-width:140px;">
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-            </select>
-        </div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Campaign / User</th>
-                        <th>Coupon Code</th>
-                        <th>Discount Value</th>
-                        <th>Min Order</th>
-                        <th>Used Count</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="referralTable"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- WALLET -->
-<section id="wallet" class="page">
-    <div class="grid-2">
-        <div class="wallet">
-            <small>Mart Customer Wallet System</small>
-            <h2 id="walletBalance">₹0</h2>
-            <p style="font-size:12px;margin-top:4px;opacity:0.9;">Cashback & promoter reward credits</p>
-        </div>
-
-        <div class="panel">
-            <h2>Manual Wallet Credit</h2>
-            <br>
-            <div class="field">
-                <label>Customer Name / Phone</label>
-                <input class="input" id="walletName">
-            </div>
-            <div class="field">
-                <label>Amount (₹)</label>
-                <input class="input" id="walletAmount" type="number">
-            </div>
-            <button class="btn primary" style="width:100%" onclick="creditWallet()">Credit Wallet</button>
-        </div>
-    </div>
-
-    <div class="panel">
-        <h2>Wallet Transactions Log</h2>
-        <br>
-        <div id="walletTransactions"></div>
-    </div>
-</section>
-
-</div>
-</main>
 </div>
 
-<!-- MOBILE BOTTOM NAVIGATION -->
-<nav class="mobile-bottom-nav">
-    <button class="mob-nav-item active" onclick="showPage('dashboard', this)">
-        <span>📊</span>
-        <span>Stats</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('orders', this)">
-        <span>🧾</span>
-        <span>Orders</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('billing', this)">
-        <span>₹</span>
-        <span>POS</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('products', this)">
-        <span>🛒</span>
-        <span>Items</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('inventory', this)">
-        <span>📦</span>
-        <span>Stock</span>
-    </button>
-</nav>
-
-<!-- EDIT PRODUCT MODAL -->
-<div id="editProductModal" class="modal">
-    <div class="modal-card">
-        <div class="panel-header">
-            <h2>Edit Grocery Item & Stock</h2>
-            <button class="btn small" onclick="closeEditModal()">✕</button>
+<!-- CHECKOUT MODAL -->
+<div class="bk-drawer" id="checkoutModal">
+    <div class="bk-drawer-content" style="max-width:460px;">
+        <div class="bk-drawer-header">
+            <h2>Complete Your Order</h2>
+            <button class="bk-drawer-close" onclick="closeCheckoutModal()">×</button>
         </div>
-        <input type="hidden" id="editProductId">
-        
-        <div class="form-grid">
-            <div class="field">
-                <label>Product Name</label>
-                <input class="input" id="editProductName">
-            </div>
-            <div class="field">
-                <label>Category</label>
-                <select class="select" id="editProductCategory">
-                    <option>Atta & Dal</option>
-                    <option>Oil & Ghee</option>
-                    <option>Daily Essentials</option>
-                    <option>Snacks & Beverages</option>
-                    <option>Cleaning & Household</option>
+
+        <div class="bk-drawer-body">
+            <div class="bk-cart-box">
+                <label style="font-size:12px;font-weight:700;">Full Name *</label>
+                <input id="checkoutName" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="Recipient Name">
+
+                <label style="font-size:12px;font-weight:700;">WhatsApp Mobile *</label>
+                <input id="checkoutPhone" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="10-digit mobile number">
+
+                <label style="font-size:12px;font-weight:700;">Complete Delivery Address *</label>
+                <textarea id="checkoutAddress" rows="2" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="House/Flat No, Landmark, Area in Patna"></textarea>
+
+                <label style="font-size:12px;font-weight:700;">Payment Mode</label>
+                <select id="checkoutPayment" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;">
+                    <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                    <option value="UPI / Online QR">UPI / QR on Delivery</option>
                 </select>
             </div>
-        </div>
 
-        <div class="form-grid-4">
-            <div class="field">
-                <label>Cost (₹)</label>
-                <input class="input" id="editProductPurchasePrice" type="number" oninput="calculateEditSellingPrice()">
+            <!-- Promo Code -->
+            <div class="bk-cart-box">
+                <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Have a Promo / Referral Code?</label>
+                <div style="display:flex;gap:6px;">
+                    <input id="couponInput" placeholder="Enter coupon code" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;text-transform:uppercase;font-size:13px;">
+                    <button type="button" class="bk-add-btn" style="padding:8px 14px;" onclick="applyPromoCode()">Apply</button>
+                </div>
+                <div id="couponStatus" style="font-size:11px;margin-top:5px;"></div>
             </div>
-            <div class="field">
-                <label>MRP (₹)</label>
-                <input class="input" id="editProductMRP" type="number" oninput="calculateEditSellingPrice()">
-            </div>
-            <div class="field">
-                <label>Discount (%)</label>
-                <input class="input" id="editProductDiscount" type="number" min="0" max="100" oninput="calculateEditSellingPrice()">
-            </div>
-            <div class="field">
-                <label>Selling Price (₹)</label>
-                <input class="input" id="editProductPrice" type="number" style="font-weight:bold;color:var(--primary);">
-            </div>
-        </div>
 
-        <div class="field">
-            <label>Stock Count</label>
-            <input class="input" id="editProductStock" type="number">
-        </div>
-
-        <div class="field">
-            <label>Update Product Photo</label>
-            <input type="file" id="editProductImageInput" accept="image/*" onchange="handleEditImage(this.files[0])">
-            <div id="editImagePreview" class="preview"></div>
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:15px;">
-            <button class="btn" onclick="closeEditModal()">Cancel</button>
-            <button class="btn primary" onclick="saveProductEdit()">Save Changes</button>
-        </div>
-    </div>
-</div>
-
-<!-- CREATE CUSTOM COUPON MODAL -->
-<div id="customCouponModal" class="modal">
-    <div class="modal-card">
-        <div class="panel-header">
-            <h2>Create Custom Promo Coupon</h2>
-            <button class="btn small" onclick="closeCustomCouponModal()">✕</button>
-        </div>
-        <div class="form-grid">
-            <div class="field">
-                <label>Campaign Title / Promoter Name</label>
-                <input class="input" id="couponUser" placeholder="e.g. Welcome Deal or Suresh">
-            </div>
-            <div class="field">
-                <label>Coupon Code</label>
-                <input class="input" id="couponCode" placeholder="e.g. DNG50, GROCERY10" style="text-transform:uppercase;">
+            <!-- Live Admin-Synced Breakdown -->
+            <div class="bk-cart-box">
+                <h4 style="font-size:13px;margin-bottom:10px;">Bill Breakdown</h4>
+                <div class="bk-bill-row"><span>Items Subtotal</span><span id="billSubtotal">₹0</span></div>
+                <div class="bk-bill-row"><span>Delivery Fee</span><span id="billDelivery">₹0</span></div>
+                <div class="bk-bill-row"><span>Packaging / Bag Fee</span><span id="billHandling">₹0</span></div>
+                <div class="bk-bill-row"><span>GST Tax (<span id="billGSTRate">0</span>%)</span><span id="billGST">₹0</span></div>
+                <div class="bk-bill-row" id="billDiscountRow" style="display:none;color:var(--blinkit-green);font-weight:bold;">
+                    <span>Coupon Discount</span>
+                    <span id="billDiscount">-₹0</span>
+                </div>
+                <div class="bk-bill-row bold"><span>Final Payable Total</span><span id="billGrandTotal">₹0</span></div>
             </div>
         </div>
 
-        <div class="form-grid-3">
-            <div class="field">
-                <label>Discount Type</label>
-                <select class="select" id="couponType">
-                    <option value="fixed">Flat ₹ Off</option>
-                    <option value="percent">Percentage (%) Off</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Discount Value</label>
-                <input class="input" id="couponValue" type="number" placeholder="50">
-            </div>
-            <div class="field">
-                <label>Min Order (₹)</label>
-                <input class="input" id="couponMinOrder" type="number" value="299">
-            </div>
-        </div>
-
-        <div class="field">
-            <label>Affiliate Reward per Use (₹)</label>
-            <input class="input" id="couponOwnerReward" type="number" value="50">
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:15px;">
-            <button class="btn" onclick="closeCustomCouponModal()">Cancel</button>
-            <button class="btn primary" onclick="saveCustomCoupon()">Publish Coupon</button>
+        <div class="bk-drawer-footer">
+            <button class="bk-checkout-btn" style="background:var(--whatsapp);" onclick="placeDngOrder(true)">
+                <span>💬 Order via WhatsApp</span>
+                <span id="btnFinalPayAmount">₹0</span>
+            </button>
+            <button class="bk-checkout-btn" style="margin-top:8px;" onclick="placeDngOrder(false)">
+                <span>⚡ Place Instant Order</span>
+            </button>
         </div>
     </div>
 </div>
@@ -1500,9 +775,6 @@ th{
 <div id="toast"></div>
 
 <script>
-/* =========================================
-   DATABASE INITIALIZATION (DNG MART)
-========================================= */
 const DEFAULT_PRODUCTS = [
     { id:"g1", name:"Chakki Fresh Sharbati Atta (10kg)", category:"Atta & Dal", purchasePrice:320, mrp:450, discountPercent:15.55, price:380, stock:35, description:"100% pure whole wheat flour", image:"" },
     { id:"g2", name:"Royal Basmati Rice Mogra (5kg)", category:"Atta & Dal", purchasePrice:240, mrp:360, discountPercent:16.94, price:299, stock:25, description:"Aromatic long grain basmati rice", image:"" },
@@ -1512,1322 +784,572 @@ const DEFAULT_PRODUCTS = [
     { id:"g6", name:"Tata Tea Premium Leaf (1kg Pouch)", category:"Daily Essentials", purchasePrice:340, mrp:460, discountPercent:15.43, price:389, stock:30, description:"Rich taste and aroma tea", image:"" }
 ];
 
-function load(key, defaultValue){
+function loadData(key, fallback){
     try {
         const val = localStorage.getItem(key);
-        return val ? JSON.parse(val) : defaultValue;
+        return val ? JSON.parse(val) : fallback;
     } catch(e) {
-        return defaultValue;
+        return fallback;
     }
 }
 
-let products = load("dng_products", DEFAULT_PRODUCTS);
-let orders = load("dng_orders", []);
-let customers = load("dng_customers", []);
-let referrals = load("dng_referrals", []);
-let wallet = load("dng_wallet", { balance:0, transactions:[] });
-let onlineSettings = load("dng_online_settings", { delivery:30, handling:10, gst:5 });
+let products = loadData("dng_products", DEFAULT_PRODUCTS);
+let orders = loadData("dng_orders", []);
+let customers = loadData("dng_customers", []);
+let referrals = loadData("dng_referrals", []);
+let onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+let cart = loadData("dng_cart", []);
 
-let imageData = "";
-let editImageData = "";
-let bill = [];
+let selectedCategory = "All";
+let searchQuery = "";
+let userCoordinates = null;
+let appliedCoupon = null;
 
-/* =========================================
-   UTILITIES & SOUND SYNTHESIS
-========================================= */
-function save(){
+function syncDatabase(){
     localStorage.setItem("dng_products", JSON.stringify(products));
     localStorage.setItem("dng_orders", JSON.stringify(orders));
     localStorage.setItem("dng_customers", JSON.stringify(customers));
     localStorage.setItem("dng_referrals", JSON.stringify(referrals));
-    localStorage.setItem("dng_wallet", JSON.stringify(wallet));
-    localStorage.setItem("dng_online_settings", JSON.stringify(onlineSettings));
+    localStorage.setItem("dng_cart", JSON.stringify(cart));
 }
 
-function money(value){
-    return "₹" + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+function money(v){
+    return "₹" + Number(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-function toast(message){
+function toast(msg){
     const t = document.getElementById("toast");
-    t.innerText = message;
+    t.innerText = msg;
     t.style.display = "block";
-    setTimeout(() => t.style.display = "none", 3000);
+    setTimeout(() => t.style.display = "none", 2500);
 }
 
-function playOrderChime(){
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if(!AudioContext) return;
-        const ctx = new AudioContext();
-        
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(587.33, now);
-        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.15);
-        osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.35);
-
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.8);
-    } catch(e) {
-        console.log("Audio chime error:", e);
-    }
-}
-
-function testSoundAlert(){
-    playOrderChime();
-    toast("🔔 Order notification sound tested!");
-}
-
-/* =========================================
-   DRAWER / MOBILE MENU
-========================================= */
-function toggleSidebar(){
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
-    sidebar.classList.toggle("open");
-    overlay.classList.toggle("active");
-}
-
-function closeSidebar(){
-    document.getElementById("sidebar").classList.remove("open");
-    document.getElementById("sidebarOverlay").classList.remove("active");
-}
-
-/* =========================================
-   PRICING AUTO-CALCULATORS
-========================================= */
-function calculateSellingPrice(){
-    const mrp = Number(document.getElementById("productMRP").value) || 0;
-    const discount = Number(document.getElementById("productDiscount").value) || 0;
-    const finalPrice = Math.max(0, mrp - (mrp * discount / 100));
-    document.getElementById("productPrice").value = Math.round(finalPrice);
-}
-
-function calculateEditSellingPrice(){
-    const mrp = Number(document.getElementById("editProductMRP").value) || 0;
-    const discount = Number(document.getElementById("editProductDiscount").value) || 0;
-    const finalPrice = Math.max(0, mrp - (mrp * discount / 100));
-    document.getElementById("editProductPrice").value = Math.round(finalPrice);
-}
-
-/* =========================================
-   ONLINE ORDER CHARGES
-========================================= */
-function loadOnlineFeeSettings(){
-    document.getElementById("feeDeliveryDefault").value = onlineSettings.delivery ?? 30;
-    document.getElementById("feeHandlingDefault").value = onlineSettings.handling ?? 10;
-    document.getElementById("feeGSTDefault").value = onlineSettings.gst ?? 5;
-}
-
-function saveOnlineFeeSettings(){
-    onlineSettings.delivery = Number(document.getElementById("feeDeliveryDefault").value) || 0;
-    onlineSettings.handling = Number(document.getElementById("feeHandlingDefault").value) || 0;
-    onlineSettings.gst = Number(document.getElementById("feeGSTDefault").value) || 0;
-    
-    save();
-    toast("Storefront delivery and tax configurations updated!");
-}
-
-/* =========================================
-   CROSS-TAB SYNC
-========================================= */
 window.addEventListener("storage", (e) => {
     if(e.key === "dng_products"){
-        products = load("dng_products", DEFAULT_PRODUCTS);
+        products = loadData("dng_products", DEFAULT_PRODUCTS);
+        renderCategoryChips();
+        renderSidebar();
         renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
+        renderCartDrawerItems();
     }
     if(e.key === "dng_orders"){
-        orders = load("dng_orders", []);
-        renderOrders();
-        dashboard();
-        playOrderChime();
-        toast("🔔 New Store Order Received!");
+        orders = loadData("dng_orders", []);
     }
     if(e.key === "dng_customers"){
-        customers = load("dng_customers", []);
-        renderCRM();
-        dashboard();
-    }
-    if(e.key === "dng_wallet"){
-        wallet = load("dng_wallet", { balance:0, transactions:[] });
-        renderWallet();
+        customers = loadData("dng_customers", []);
     }
     if(e.key === "dng_referrals"){
-        referrals = load("dng_referrals", []);
-        renderReferrals();
+        referrals = loadData("dng_referrals", []);
+    }
+    if(e.key === "dng_online_settings"){
+        onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+        if(document.getElementById("checkoutModal").classList.contains("active")){
+            updateCheckoutTotals();
+        }
     }
 });
 
-/* =========================================
-   CSV ENGINE
-========================================= */
-function csvEscape(value){
-    return `"${String(value ?? "").replace(/"/g, '""')}"`;
+let slideIdx = 0;
+setInterval(() => {
+    slideIdx = (slideIdx + 1) % 4;
+    const slider = document.getElementById("heroSlider");
+    if(slider) slider.style.transform = `translateX(-${slideIdx * 25}%)`;
+}, 4000);
+
+function getUniqueCategories(){
+    const cats = new Set(["All", "Atta & Dal", "Oil & Ghee", "Daily Essentials", "Snacks & Beverages", "Cleaning & Household"]);
+    products.forEach(p => { if(p.category) cats.add(p.category); });
+    return Array.from(cats);
 }
 
-function downloadCSVFile(filename, rows){
-    const csv = rows.map(row => row.map(csvEscape).join(",")).join("\n");
-    const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+function renderCategoryChips(){
+    const list = document.getElementById("mainCatList");
+    list.innerHTML = "";
+
+    getUniqueCategories().forEach(cat => {
+        const chip = document.createElement("div");
+        chip.className = `bk-cat-chip ${cat === selectedCategory ? 'active' : ''}`;
+        
+        let icon = "🛒";
+        if(cat.includes("Atta")) icon = "🌾";
+        if(cat.includes("Oil")) icon = "🪔";
+        if(cat.includes("Daily")) icon = "🥛";
+        if(cat.includes("Snacks")) icon = "🍟";
+        if(cat.includes("Cleaning")) icon = "🧼";
+
+        chip.innerHTML = `<span>${icon}</span> <span>${cat}</span>`;
+        chip.onclick = () => selectMainCategory(cat);
+        list.appendChild(chip);
+    });
 }
 
-function parseCSVLine(line){
-    let result = [];
-    let current = "";
-    let quote = false;
-    for(let i = 0; i < line.length; i++){
-        const char = line[i];
-        if(char === '"'){
-            quote = !quote;
-            continue;
-        }
-        if(char === "," && !quote){
-            result.push(current.trim());
-            current = "";
-        } else {
-            current += char;
-        }
-    }
-    result.push(current.trim());
-    return result;
-}
+function renderSidebar(){
+    const subList = document.getElementById("sidebarSubcats");
+    subList.innerHTML = "";
 
-function exportProductsCSV(){
-    const rows = [
-        ["id", "name", "category", "purchase_price", "mrp", "discount_percent", "price", "stock", "description", "image_url"],
-        ...products.map(p => [
-            p.id,
-            p.name,
-            p.category,
-            p.purchasePrice || 0,
-            p.mrp || p.price || 0,
-            p.discountPercent || 0,
-            p.price || 0,
-            p.stock || 0,
-            p.description || "",
-            p.image || ""
-        ])
-    ];
-    downloadCSVFile("dng-mart-products.csv", rows);
-}
+    getUniqueCategories().forEach(cat => {
+        const item = document.createElement("div");
+        item.className = `bk-subcat-item ${cat === selectedCategory ? 'active' : ''}`;
+        
+        const count = products.filter(p => cat === "All" || p.category === cat).length;
 
-function downloadProductTemplate(){
-    downloadCSVFile("dng-mart-template.csv", [
-        ["name", "category", "purchase_price", "mrp", "discount_percent", "price", "stock", "description", "image_url"],
-        ["Fortune Mustard Oil 1L", "Oil & Ghee", 120, 175, 14.85, 149, 50, "Kachi Ghani Sarson Tel", ""]
-    ]);
-    toast("CSV template downloaded");
-}
-
-function importProductsCSV(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        const lines = e.target.result.trim().split(/\r?\n/);
-        if(lines.length < 2){
-            toast("CSV file is empty");
-            return;
-        }
-
-        const headers = lines[0].split(",").map(x => x.replace(/^"|"$/g, "").trim().toLowerCase());
-        let imported = 0;
-
-        for(let i = 1; i < lines.length; i++){
-            if(!lines[i].trim()) continue;
-            const values = parseCSVLine(lines[i]);
-            let row = {};
-            headers.forEach((h, index) => { row[h] = values[index] || ""; });
-
-            if(!row.name) continue;
-
-            const purchasePrice = Number(row.purchase_price) || 0;
-            const mrp = Number(row.mrp) || Number(row.price) || 0;
-            const discountPercent = Number(row.discount_percent) || 0;
-            let price = Number(row.price);
-            if(isNaN(price) || price <= 0){
-                price = Math.max(0, mrp - (mrp * discountPercent / 100));
-            }
-
-            const existing = products.find(p => 
-                (row.id && p.id.toLowerCase() === row.id.toLowerCase()) || 
-                p.name.toLowerCase() === row.name.toLowerCase()
-            );
-
-            if(existing){
-                existing.category = row.category || existing.category;
-                existing.purchasePrice = purchasePrice;
-                existing.mrp = mrp;
-                existing.discountPercent = discountPercent;
-                existing.price = price;
-                existing.stock = Number(row.stock) || existing.stock;
-                existing.description = row.description || existing.description;
-                if(row.image_url) existing.image = row.image_url;
-            } else {
-                products.push({
-                    id: row.id || ("g" + Date.now() + i),
-                    name: row.name,
-                    category: row.category || "Daily Essentials",
-                    purchasePrice,
-                    mrp,
-                    discountPercent,
-                    price,
-                    stock: Number(row.stock) || 0,
-                    description: row.description || "",
-                    image: row.image_url || ""
-                });
-            }
-            imported++;
-        }
-
-        save();
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-        toast(`${imported} products synced from CSV!`);
-    };
-    reader.readAsText(file);
-}
-
-/* =========================================
-   NAVIGATION (DESKTOP & MOBILE BOTTOM BAR)
-========================================= */
-function showPage(page, button){
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const target = document.getElementById(page);
-    if(target) target.classList.add("active");
-
-    // Sync Desktop Nav
-    document.querySelectorAll(".nav").forEach(n => n.classList.remove("active"));
-    const activeNav = Array.from(document.querySelectorAll(".nav")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
-    if(activeNav) activeNav.classList.add("active");
-
-    // Sync Mobile Bottom Nav
-    document.querySelectorAll(".mob-nav-item").forEach(m => m.classList.remove("active"));
-    const activeMob = Array.from(document.querySelectorAll(".mob-nav-item")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
-    if(activeMob) activeMob.classList.add("active");
-
-    document.getElementById("pageTitle").innerText =
-        page === "crm" ? "Customer CRM" : page.charAt(0).toUpperCase() + page.slice(1);
-
-    closeSidebar();
-    refreshPage(page);
-}
-
-function refreshPage(page){
-    if(page === "dashboard") dashboard();
-    if(page === "orders") { renderOrders(); loadOnlineFeeSettings(); }
-    if(page === "products") renderProducts();
-    if(page === "inventory") renderInventory();
-    if(page === "crm") renderCRM();
-    if(page === "referrals") renderReferrals();
-    if(page === "wallet") renderWallet();
-    if(page === "billing") setupBilling();
-}
-
-/* =========================================
-   DASHBOARD
-========================================= */
-function dashboard(){
-    document.getElementById("totalOrders").innerText = orders.length;
-    document.getElementById("totalRevenue").innerText = money(orders.reduce((a, o) => a + Number(o.total || 0), 0));
-    document.getElementById("totalProducts").innerText = products.length;
-    document.getElementById("totalCustomers").innerText = customers.length;
-
-    let low = products.filter(p => Number(p.stock) < 10);
-    document.getElementById("lowStock").innerHTML = low.map(p => `
-        <div class="list-row">
-            <span>${p.name}</span>
-            <b class="orange">${p.stock} units left</b>
-        </div>
-    `).join("") || "<p style='color:var(--muted);padding:10px 0;'>All grocery items well-stocked.</p>";
-
-    document.getElementById("recentOrders").innerHTML = orders.slice(-5).reverse().map(o => {
-        let badgeClass = "orange";
-        if(o.status === "Delivered") badgeClass = "green";
-        if(o.status === "Shipped") badgeClass = "blue";
-        if(o.status === "Preparing") badgeClass = "orange";
-
-        return `
-            <tr>
-                <td>#${o.id}</td>
-                <td>${o.customer?.name || "Walk-in"}</td>
-                <td>${o.items?.length || 0}</td>
-                <td>${money(o.total)}</td>
-                <td><span class="badge ${badgeClass}">${o.status || "Pending"}</span></td>
-                <td>
-                    <button class="btn small whatsapp" onclick="sendOrderWhatsApp('${o.id}')">💬 WhatsApp</button>
-                </td>
-            </tr>
+        item.innerHTML = `
+            <span>${cat}</span>
+            <span class="bk-subcat-count">${count}</span>
         `;
-    }).join("") || "<tr><td colspan='6' style='text-align:center;color:var(--muted)'>No grocery orders yet</td></tr>";
+        item.onclick = () => selectMainCategory(cat);
+        subList.appendChild(item);
+    });
 }
 
-/* =========================================
-   ORDERS MANAGEMENT
-========================================= */
-function renderOrdersTable(list){
-    document.getElementById("ordersTable").innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Subtotal</th>
-                    <th>GST</th>
-                    <th>Delivery</th>
-                    <th>Handling</th>
-                    <th>Total</th>
-                    <th>Status Action</th>
-                    <th>WhatsApp Status</th>
-                    <th>Invoice</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${list.map(o => `
-                    <tr>
-                        <td><strong>#${o.id}</strong></td>
-                        <td>${o.customer?.name || "Walk-in"}<br><small style="color:var(--muted)">${o.customer?.phone || "-"}</small></td>
-                        <td>${money(o.subtotal || o.total)}</td>
-                        <td>${money(o.gst || 0)}</td>
-                        <td>${money(o.delivery || 0)}</td>
-                        <td>${money(o.handling || 0)}</td>
-                        <td><strong>${money(o.total)}</strong></td>
-                        <td>
-                            <select class="select" style="padding:6px;font-size:12px;width:130px;" onchange="updateOrderStatus('${o.id}', this.value)">
-                                <option value="Pending" ${o.status === "Pending" ? "selected" : ""}>⏳ Pending</option>
-                                <option value="Preparing" ${o.status === "Preparing" ? "selected" : ""}>📦 Packing</option>
-                                <option value="Shipped" ${o.status === "Shipped" ? "selected" : ""}>🚚 Out for Delivery</option>
-                                <option value="Delivered" ${o.status === "Delivered" ? "selected" : ""}>✅ Delivered</option>
-                                <option value="Cancelled" ${o.status === "Cancelled" ? "selected" : ""}>❌ Cancelled</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn small whatsapp" onclick="sendCustomStatusWhatsApp('${o.id}')">
-                                💬 Send
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn small" onclick="invoice('${o.id}')">Invoice</button>
-                        </td>
-                    </tr>
-                `).join("")}
-            </tbody>
-        </table>
-    `;
+function selectMainCategory(cat){
+    selectedCategory = cat;
+    renderCategoryChips();
+    renderSidebar();
+    renderProducts();
 }
 
-function renderOrders(){
-    renderOrdersTable(orders.slice().reverse());
+function handleSearch(q){
+    searchQuery = q.toLowerCase();
+    renderProducts();
 }
 
-function searchOrders(query){
-    const filtered = orders.filter(o => JSON.stringify(o).toLowerCase().includes(query.toLowerCase()));
-    renderOrdersTable(filtered.slice().reverse());
-}
+function renderProducts(){
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = "";
 
-function updateOrderStatus(orderId, newStatus){
-    const order = orders.find(o => o.id === orderId);
-    if(!order) return;
+    const filtered = products.filter(p => {
+        const matchCat = (selectedCategory === "All" || (p.category && p.category.toLowerCase() === selectedCategory.toLowerCase()));
+        const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery) || (p.category && p.category.toLowerCase().includes(searchQuery));
+        return matchCat && matchSearch;
+    });
 
-    order.status = newStatus;
+    document.getElementById("feedTitle").innerText = selectedCategory === "All" ? "All Grocery Essentials" : selectedCategory;
+    document.getElementById("feedCount").innerText = `${filtered.length} products available`;
 
-    if(order.customer?.phone || order.customer?.name !== "Walk-in"){
-        const c = customers.find(x => (order.customer.phone && x.phone === order.customer.phone) || x.name.toLowerCase() === order.customer.name.toLowerCase());
-        if(c){
-            c.lastStatus = newStatus;
-            c.lastUpdated = new Date().toLocaleString();
-        }
-    }
-
-    save();
-    renderOrders();
-    dashboard();
-    toast(`Order #${order.id} updated to ${newStatus}`);
-
-    if(confirm(`Order status updated to "${newStatus}". Send WhatsApp message to customer?`)){
-        sendCustomStatusWhatsApp(orderId);
-    }
-}
-
-function sendCustomStatusWhatsApp(orderId){
-    const order = orders.find(o => o.id === orderId);
-    if(!order) return;
-
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const status = order.status || "Updated";
-
-    let msg = `*🛒 DNG MART - ORDER STATUS UPDATE*\n`;
-    msg += `_Ghar ka Saman Ghar Tak_\n`;
-    msg += `--------------------------------\n`;
-    msg += `Hello *${order.customer?.name || "Customer"}* Ji! 🙏\n\n`;
-
-    if(status === "Preparing"){
-        msg += `Your grocery order *#${order.id}* is currently *BEING PACKED* with fresh staples and packed securely. 📦\n`;
-    } else if(status === "Shipped"){
-        msg += `Your grocery order *#${order.id}* is *OUT FOR DELIVERY* and will reach your address shortly! 🚚💨\n`;
-    } else if(status === "Delivered"){
-        msg += `Your grocery order *#${order.id}* has been *DELIVERED SUCCESSFULLY*! ✅\nThank you for shopping with DNG Mart.\n`;
-    } else {
-        msg += `Your Order *#${order.id}* status is: *${status}*.\n`;
-    }
-
-    msg += `--------------------------------\n`;
-    msg += `*Order Total:* ${money(order.total)}\n`;
-    msg += `For support, visit www.dngmart.in`;
-
-    const encoded = encodeURIComponent(msg);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
-    window.open(url, '_blank');
-}
-
-function exportOrders(){
-    const rows = [
-        ["id", "customer", "phone", "subtotal", "gst", "handling", "delivery", "total", "paid", "due", "status", "date"],
-        ...orders.map(o => [
-            o.id,
-            o.customer?.name || "",
-            o.customer?.phone || "",
-            o.subtotal || o.total,
-            o.gst || 0,
-            o.handling || 0,
-            o.delivery || 0,
-            o.total,
-            o.paid || o.total,
-            o.due || 0,
-            o.status || "Pending",
-            o.date || ""
-        ])
-    ];
-    downloadCSVFile("dng-mart-orders.csv", rows);
-}
-
-/* =========================================
-   PRODUCTS: ADD & EDIT
-========================================= */
-function renderProducts(search=""){
-    let list = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
-    document.getElementById("productGrid").innerHTML = list.map(p => `
-        <div class="product-card">
-            <div>
-                <div class="product-image">
-                    ${p.image ? `<img src="${p.image}">` : "🛒"}
-                </div>
-                <div class="product-body">
-                    <h3>${p.name}</h3>
-                    <p>${p.category}</p>
-                    <br>
-                    <div style="display:flex;align-items:baseline;gap:8px;">
-                        <strong style="font-size:16px;color:var(--primary);">${money(p.price)}</strong>
-                        ${p.mrp > p.price ? `<small style="color:var(--muted);text-decoration:line-through;">${money(p.mrp)}</small>` : ''}
-                        ${p.discountPercent > 0 ? `<span class="badge green">${p.discountPercent}% OFF</span>` : ''}
-                    </div>
-                    <p style="font-size:11px;color:var(--muted);margin-top:4px;">Cost: ${money(p.purchasePrice || 0)} | Stock: <b>${p.stock} units</b></p>
-                </div>
-            </div>
-            <div style="padding:14px;padding-top:0;">
-                <div class="product-actions">
-                    <button class="btn small" style="flex:1" onclick="openEditModal('${p.id}')">✏️ Edit</button>
-                    <button class="btn small" style="flex:1" onclick="deleteProduct('${p.id}')">Delete</button>
-                </div>
-            </div>
-        </div>
-    `).join("");
-}
-
-function saveProduct(){
-    const name = document.getElementById("productName").value.trim();
-    const category = document.getElementById("productCategory").value;
-    const purchasePrice = Number(document.getElementById("productPurchasePrice").value) || 0;
-    const mrp = Number(document.getElementById("productMRP").value) || 0;
-    const discountPercent = Number(document.getElementById("productDiscount").value) || 0;
-    let price = Number(document.getElementById("productPrice").value);
-    const stock = Number(document.getElementById("productStock").value) || 0;
-
-    if(!price && mrp){
-        price = Math.max(0, mrp - (mrp * discountPercent / 100));
-    }
-
-    if(!name || isNaN(price)){
-        toast("Enter a valid product name and price");
+    if(filtered.length === 0){
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#888;">No grocery items found in this section.</div>`;
         return;
     }
 
-    products.push({
-        id: "g" + Date.now(),
-        name,
-        category,
-        purchasePrice,
-        mrp: mrp || price,
-        discountPercent,
-        price,
-        stock,
-        description: "",
-        image: imageData
+    filtered.forEach(p => {
+        const inCartItem = cart.find(x => x.id === p.id);
+        const qty = inCartItem ? inCartItem.qty : 0;
+        const isOutOfStock = Number(p.stock) <= 0;
+        const discountBadge = p.discountPercent > 0 ? `${p.discountPercent}% OFF` : (p.mrp > p.price ? `${Math.round(((p.mrp-p.price)/p.mrp)*100)}% OFF` : null);
+
+        const card = document.createElement("div");
+        card.className = "bk-card";
+
+        let defaultArt = "🛒";
+        if(p.category && p.category.includes("Oil")) defaultArt = "🪔";
+        if(p.category && p.category.includes("Atta")) defaultArt = "🌾";
+        if(p.category && p.category.includes("Daily")) defaultArt = "🥛";
+
+        card.innerHTML = `
+            <div>
+                ${discountBadge ? `<span class="bk-card-badge">${discountBadge}</span>` : ''}
+                <div class="bk-card-img">
+                    ${p.image ? `<img src="${p.image}" alt="${p.name}">` : defaultArt}
+                </div>
+                <div class="bk-card-time">⏱ 10 MINS</div>
+                <div class="bk-card-name" title="${p.name}">${p.name}</div>
+                <div class="bk-card-unit">${p.description || p.category} • ${p.stock > 0 ? `${p.stock} in stock` : '<b style="color:red">Out of stock</b>'}</div>
+            </div>
+
+            <div class="bk-card-footer">
+                <div class="bk-price-block">
+                    <span class="bk-current-price">${money(p.price)}</span>
+                    ${p.mrp && p.mrp > p.price ? `<span class="bk-mrp">${money(p.mrp)}</span>` : ''}
+                </div>
+
+                <div>
+                    ${isOutOfStock ? `
+                        <button class="bk-add-btn" style="border-color:#ccc;color:#999;cursor:not-allowed;" disabled>OUT</button>
+                    ` : (qty === 0 ? `
+                        <button class="bk-add-btn" onclick="updateItemQty('${p.id}', 1)">ADD</button>
+                    ` : `
+                        <div class="bk-qty-controller">
+                            <button onclick="updateItemQty('${p.id}', -1)">−</button>
+                            <span>${qty}</span>
+                            <button onclick="updateItemQty('${p.id}', 1)">+</button>
+                        </div>
+                    `)}
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
     });
-
-    save();
-    imageData = "";
-    document.getElementById("productName").value = "";
-    document.getElementById("productPurchasePrice").value = "";
-    document.getElementById("productMRP").value = "";
-    document.getElementById("productDiscount").value = "0";
-    document.getElementById("productPrice").value = "";
-    document.getElementById("productStock").value = "";
-    document.getElementById("imagePreview").innerHTML = "";
-
-    renderProducts();
-    renderInventory();
-    setupBilling();
-    dashboard();
-    toast("Grocery product added to catalog!");
 }
 
-function openEditModal(id){
+function updateItemQty(id, change){
     const p = products.find(x => x.id === id);
     if(!p) return;
 
-    document.getElementById("editProductId").value = p.id;
-    document.getElementById("editProductName").value = p.name;
-    document.getElementById("editProductCategory").value = p.category;
-    document.getElementById("editProductPurchasePrice").value = p.purchasePrice || 0;
-    document.getElementById("editProductMRP").value = p.mrp || p.price;
-    document.getElementById("editProductDiscount").value = p.discountPercent || 0;
-    document.getElementById("editProductPrice").value = p.price;
-    document.getElementById("editProductStock").value = p.stock;
+    const existing = cart.find(x => x.id === id);
 
-    editImageData = p.image || "";
-    document.getElementById("editImagePreview").innerHTML = editImageData ? `<img src="${editImageData}">` : "";
-    document.getElementById("editProductModal").classList.add("active");
-}
-
-function closeEditModal(){
-    document.getElementById("editProductModal").classList.remove("active");
-    editImageData = "";
-}
-
-function handleEditImage(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        editImageData = e.target.result;
-        document.getElementById("editImagePreview").innerHTML = `<img src="${editImageData}">`;
-    };
-    reader.readAsDataURL(file);
-}
-
-function saveProductEdit(){
-    const id = document.getElementById("editProductId").value;
-    const name = document.getElementById("editProductName").value.trim();
-    const category = document.getElementById("editProductCategory").value;
-    const purchasePrice = Number(document.getElementById("editProductPurchasePrice").value) || 0;
-    const mrp = Number(document.getElementById("editProductMRP").value) || 0;
-    const discountPercent = Number(document.getElementById("editProductDiscount").value) || 0;
-    const price = Number(document.getElementById("editProductPrice").value) || 0;
-    const stock = Number(document.getElementById("editProductStock").value) || 0;
-
-    if(!name || !price){
-        toast("Product name and selling price required");
-        return;
-    }
-
-    const p = products.find(x => x.id === id);
-    if(p){
-        p.name = name;
-        p.category = category;
-        p.purchasePrice = purchasePrice;
-        p.mrp = mrp || price;
-        p.discountPercent = discountPercent;
-        p.price = price;
-        p.stock = stock;
-        p.image = editImageData;
-
-        save();
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-        closeEditModal();
-        toast("Product updated successfully!");
-    }
-}
-
-function deleteProduct(id){
-    if(!confirm("Remove this grocery item from catalog and inventory?")) return;
-    products = products.filter(p => p.id !== id);
-    save();
-    renderProducts();
-    renderInventory();
-    setupBilling();
-    dashboard();
-    toast("Product deleted");
-}
-
-/* =========================================
-   INVENTORY & MARGINS
-========================================= */
-function renderInventory(search = ""){
-    const list = products.filter(p => 
-        p.name.toLowerCase().includes(search.toLowerCase()) || 
-        p.category.toLowerCase().includes(search.toLowerCase()) ||
-        p.id.toLowerCase().includes(search.toLowerCase())
-    );
-
-    document.getElementById("inventoryTable").innerHTML = list.map(p => {
-        const margin = p.price - (p.purchasePrice || 0);
-        const marginPercent = p.purchasePrice ? ((margin / p.purchasePrice) * 100).toFixed(1) : 100;
-
-        return `
-            <tr>
-                <td><strong>${p.name}</strong><br><small style="color:var(--muted)">SKU: ${p.id}</small></td>
-                <td><span class="badge">${p.category}</span></td>
-                <td>${money(p.purchasePrice || 0)}</td>
-                <td>${money(p.mrp || p.price)}</td>
-                <td><span class="badge green">${p.discountPercent || 0}% OFF</span></td>
-                <td>
-                    <strong style="color:var(--primary);font-size:14px;">${money(p.price)}</strong>
-                    <br><small style="color:${margin >= 0 ? 'var(--green)' : 'var(--red)'}">Margin: +${money(margin)} (${marginPercent}%)</small>
-                </td>
-                <td>
-                    <b style="font-size:14px;color:${p.stock < 10 ? 'var(--orange)' : 'var(--green)'};">${p.stock}</b> units
-                </td>
-                <td>
-                    <button class="btn small" onclick="adjustStock('${p.id}',-1)">−</button>
-                    <button class="btn small" onclick="adjustStock('${p.id}',1)">+</button>
-                    <button class="btn small" onclick="adjustStock('${p.id}',10)">+10</button>
-                </td>
-                <td>
-                    <button class="btn small" onclick="openEditModal('${p.id}')">✏️ Edit</button>
-                </td>
-            </tr>
-        `;
-    }).join("") || "<tr><td colspan='9' style='text-align:center;color:var(--muted);'>No inventory matches found.</td></tr>";
-}
-
-function adjustStock(id, value){
-    const p = products.find(x => x.id === id);
-    if(p){
-        p.stock = Math.max(0, Number(p.stock) + value);
-        save();
-        renderInventory();
-        renderProducts();
-        setupBilling();
-        dashboard();
-    }
-}
-
-/* =========================================
-   POS BILLING
-========================================= */
-function setupBilling(){
-    const select = document.getElementById("billProduct");
-    select.innerHTML = products.map(p => `
-        <option value="${p.id}">${p.name} — ${money(p.price)} (${p.stock} in stock)</option>
-    `).join("");
-    bill = [];
-    document.getElementById("billHandling").value = "0";
-    document.getElementById("billDelivery").value = "0";
-    document.getElementById("billPaid").value = "";
-    renderBill();
-}
-
-function addBillItem(){
-    const id = document.getElementById("billProduct").value;
-    const qty = Number(document.getElementById("billQty").value);
-    const p = products.find(x => x.id === id);
-
-    if(!p){
-        toast("Select a valid product");
-        return;
-    }
-    if(qty > p.stock){
-        toast("Insufficient stock units");
-        return;
-    }
-
-    const existing = bill.find(b => b.id === p.id);
     if(existing){
-        if(existing.qty + qty > p.stock){
-            toast("Cannot exceed available stock");
+        if(change > 0 && existing.qty + change > Number(p.stock)){
+            toast(`Only ${p.stock} units left in stock`);
             return;
         }
-        existing.qty += qty;
-    } else {
-        bill.push({ id: p.id, name: p.name, price: p.price, qty });
+        existing.qty += change;
+        if(existing.qty <= 0){
+            cart = cart.filter(x => x.id !== id);
+        }
+    } else if(change > 0){
+        if(Number(p.stock) <= 0){
+            toast("Item is currently out of stock");
+            return;
+        }
+        cart.push({ id: p.id, qty: 1 });
     }
 
-    renderBill();
+    syncDatabase();
+    updateCartUI();
+    renderProducts();
+    renderCartDrawerItems();
 }
 
-function calculateBillTotals(){
-    const subtotal = bill.reduce((a, x) => a + x.price * x.qty, 0);
-    const gstRate = Number(document.getElementById("billGSTRate").value) || 0;
-    const gst = (subtotal * gstRate) / 100;
-    const handling = Number(document.getElementById("billHandling").value) || 0;
-    const delivery = Number(document.getElementById("billDelivery").value) || 0;
-    const total = subtotal + gst + handling + delivery;
-    
-    const paidInput = document.getElementById("billPaid").value;
-    const paid = paidInput === "" ? total : Number(paidInput);
-    const due = total - paid;
+function updateCartUI(){
+    const totalCount = cart.reduce((s, i) => s + i.qty, 0);
+    const subtotal = cart.reduce((s, i) => {
+        const p = products.find(x => x.id === i.id);
+        return s + (p ? Number(p.price) * i.qty : 0);
+    }, 0);
 
-    return { subtotal, gstRate, gst, handling, delivery, total, paid, due };
+    document.getElementById("navCartCount").innerText = `${totalCount} item${totalCount === 1 ? '' : 's'}`;
+    document.getElementById("navCartTotal").innerText = money(subtotal);
+    document.getElementById("cartDrawerCount").innerText = totalCount;
+    document.getElementById("drawerTotalPayable").innerText = money(subtotal);
 }
 
-function renderBill(){
-    const { subtotal, gstRate, gst, handling, delivery, total, paid, due } = calculateBillTotals();
+function openCartDrawer(){
+    renderCartDrawerItems();
+    document.getElementById("cartDrawer").classList.add("active");
+}
 
-    document.getElementById("billItems").innerHTML = bill.map((x, i) => `
-        <div class="bill-line">
-            <span>${x.name} × ${x.qty}</span>
-            <strong>${money(x.price * x.qty)}</strong>
-            <button class="btn small" onclick="bill.splice(${i},1);renderBill();">×</button>
-        </div>
-    `).join("") || "<p style='color:var(--muted);margin-top:10px;'>No items in current POS bill.</p>";
+function closeCartDrawer(){
+    document.getElementById("cartDrawer").classList.remove("active");
+}
 
-    document.getElementById("billSummary").innerHTML = `
-        <div class="summary-row">
-            <span>Subtotal:</span>
-            <span>${money(subtotal)}</span>
-        </div>
-        <div class="summary-row">
-            <span>GST (${gstRate}%):</span>
-            <span>${money(gst)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Bag Fee:</span>
-            <span>${money(handling)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Delivery:</span>
-            <span>${money(delivery)}</span>
-        </div>
-        <div class="summary-row total-row">
-            <span>Total:</span>
-            <span>${money(total)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Paid:</span>
-            <span>${money(paid)}</span>
-        </div>
-        <div class="summary-row due-row" style="color:${due > 0 ? 'var(--red)' : 'var(--green)'}">
-            <span>${due >= 0 ? 'Balance Due:' : 'Return Change:'}</span>
-            <span>${money(Math.abs(due))}</span>
+function renderCartDrawerItems(){
+    const body = document.getElementById("cartDrawerBody");
+    body.innerHTML = "";
+
+    if(cart.length === 0){
+        body.innerHTML = `
+            <div style="text-align:center;padding:50px 20px;">
+                <div style="font-size:60px;margin-bottom:10px;">🛍️</div>
+                <h3 style="font-size:16px;margin-bottom:6px;">Your cart is empty</h3>
+                <p style="font-size:12px;color:var(--text-muted);">Add daily groceries and essentials for 10-minute delivery</p>
+            </div>
+        `;
+        return;
+    }
+
+    let itemsHtml = `<div class="bk-cart-box"><h4 style="font-size:13px;margin-bottom:10px;">Items in Cart</h4>`;
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        const p = products.find(x => x.id === item.id);
+        if(!p) return;
+        const line = Number(p.price) * item.qty;
+        subtotal += line;
+
+        itemsHtml += `
+            <div class="bk-cart-item">
+                <div class="bk-cart-item-info">
+                    <strong>${p.name}</strong>
+                    <small>${money(p.price)} each</small>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="bk-qty-controller">
+                        <button onclick="updateItemQty('${p.id}', -1)">−</button>
+                        <span>${item.qty}</span>
+                        <button onclick="updateItemQty('${p.id}', 1)">+</button>
+                    </div>
+                    <span style="font-weight:700;font-size:13px;min-width:45px;text-align:right;">${money(line)}</span>
+                </div>
+            </div>
+        `;
+    });
+    itemsHtml += `</div>`;
+
+    const billHtml = `
+        <div class="bk-cart-box">
+            <h4 style="font-size:13px;margin-bottom:10px;">Bill Summary</h4>
+            <div class="bk-bill-row"><span>Items Subtotal</span><span>${money(subtotal)}</span></div>
+            <div class="bk-bill-row bold"><span>Total</span><span>${money(subtotal)}</span></div>
         </div>
     `;
+
+    body.innerHTML = itemsHtml + billHtml;
 }
 
-function generateOrderObject(){
-    if(!bill.length) return null;
-    const { subtotal, gstRate, gst, handling, delivery, total, paid, due } = calculateBillTotals();
-    const customerName = document.getElementById("billCustomer").value.trim() || "Walk-in";
-    const customerPhone = document.getElementById("billPhone").value.trim();
+function calculateOrderTotals(){
+    const subtotal = cart.reduce((s, item) => {
+        const p = products.find(x => x.id === item.id);
+        return s + (p ? Number(p.price) * item.qty : 0);
+    }, 0);
 
-    return {
+    onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+
+    const deliveryFee = Number(onlineSettings.delivery ?? 30);
+    const handlingFee = Number(onlineSettings.handling ?? 10);
+    const gstRate = Number(onlineSettings.gst ?? 5);
+    const gstAmount = Math.round((subtotal * gstRate) / 100);
+
+    let discountAmount = 0;
+    if(appliedCoupon){
+        if(appliedCoupon.type === "percent"){
+            discountAmount = Math.round((subtotal * Number(appliedCoupon.value)) / 100);
+        } else {
+            discountAmount = Math.min(subtotal, Number(appliedCoupon.value));
+        }
+    }
+
+    const grandTotal = Math.max(0, subtotal + deliveryFee + handlingFee + gstAmount - discountAmount);
+
+    return { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal };
+}
+
+function updateCheckoutTotals(){
+    const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
+
+    document.getElementById("billSubtotal").innerText = money(subtotal);
+    document.getElementById("billDelivery").innerText = money(deliveryFee);
+    document.getElementById("billHandling").innerText = money(handlingFee);
+    document.getElementById("billGSTRate").innerText = gstRate;
+    document.getElementById("billGST").innerText = money(gstAmount);
+
+    const discRow = document.getElementById("billDiscountRow");
+    if(discountAmount > 0){
+        discRow.style.display = "flex";
+        document.getElementById("billDiscount").innerText = `-${money(discountAmount)}`;
+    } else {
+        discRow.style.display = "none";
+    }
+
+    document.getElementById("billGrandTotal").innerText = money(grandTotal);
+    document.getElementById("btnFinalPayAmount").innerText = money(grandTotal);
+}
+
+function applyPromoCode(){
+    const code = (document.getElementById("couponInput").value || "").trim().toUpperCase();
+    const statusDiv = document.getElementById("couponStatus");
+
+    if(!code){
+        statusDiv.innerHTML = `<span style="color:red;">Please enter a promo coupon code.</span>`;
+        return;
+    }
+
+    referrals = loadData("dng_referrals", []);
+    const found = referrals.find(r => r.code.toUpperCase() === code && (r.status || "active") === "active");
+
+    if(!found){
+        statusDiv.innerHTML = `<span style="color:red;">Invalid or inactive promo coupon.</span>`;
+        appliedCoupon = null;
+        updateCheckoutTotals();
+        return;
+    }
+
+    const subtotal = cart.reduce((s, item) => {
+        const p = products.find(x => x.id === item.id);
+        return s + (p ? Number(p.price) * item.qty : 0);
+    }, 0);
+
+    const minOrder = Number(found.minOrder || 0);
+    if(subtotal < minOrder){
+        statusDiv.innerHTML = `<span style="color:red;">Min order of ${money(minOrder)} required for this coupon.</span>`;
+        appliedCoupon = null;
+        updateCheckoutTotals();
+        return;
+    }
+
+    appliedCoupon = found;
+    const discountText = found.type === "percent" ? `${found.value}% OFF` : `${money(found.value)} OFF`;
+    statusDiv.innerHTML = `<span style="color:var(--blinkit-green);font-weight:bold;">✓ Coupon applied: ${discountText}</span>`;
+    updateCheckoutTotals();
+    toast(`Coupon ${code} applied successfully!`);
+}
+
+function openCheckoutModal(){
+    if(cart.length === 0){
+        toast("Please add items to cart first");
+        return;
+    }
+
+    appliedCoupon = null;
+    document.getElementById("couponInput").value = "";
+    document.getElementById("couponStatus").innerHTML = "";
+
+    updateCheckoutTotals();
+    closeCartDrawer();
+    document.getElementById("checkoutModal").classList.add("active");
+}
+
+function closeCheckoutModal(){
+    document.getElementById("checkoutModal").classList.remove("active");
+}
+
+function placeDngOrder(viaWhatsApp = false){
+    const name = document.getElementById("checkoutName").value.trim();
+    const phone = document.getElementById("checkoutPhone").value.trim();
+    const address = document.getElementById("checkoutAddress").value.trim();
+    const payment = document.getElementById("checkoutPayment").value;
+
+    if(!name || !phone || !address){
+        toast("Please provide recipient Name, Phone & Address");
+        return;
+    }
+
+    products = loadData("dng_products", DEFAULT_PRODUCTS);
+    const orderItems = [];
+
+    for(let item of cart){
+        const p = products.find(x => x.id === item.id);
+        if(!p) continue;
+
+        if(p.stock < item.qty){
+            toast(`Stock changed for ${p.name}. Only ${p.stock} available.`);
+            return;
+        }
+
+        p.stock = Math.max(0, Number(p.stock) - item.qty);
+        orderItems.push({
+            id: p.id,
+            name: p.name,
+            qty: item.qty,
+            price: Number(p.price),
+            subtotal: Number(p.price) * item.qty
+        });
+    }
+
+    const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
+
+    const order = {
         id: "DNG" + Date.now(),
-        customer: { name: customerName, phone: customerPhone },
-        items: [...bill],
-        subtotal,
-        gstRate,
-        gst,
-        handling,
-        delivery,
-        total,
-        paid,
-        due,
+        customer: { name, phone, address, coordinates: userCoordinates || "Patna, Bihar" },
+        items: orderItems,
+        subtotal: subtotal,
+        gstRate: gstRate,
+        gst: gstAmount,
+        handling: handlingFee,
+        delivery: deliveryFee,
+        discount: discountAmount,
+        couponCode: appliedCoupon ? appliedCoupon.code : "",
+        total: grandTotal,
+        paid: payment === "Cash on Delivery" ? 0 : grandTotal,
+        due: payment === "Cash on Delivery" ? grandTotal : 0,
+        paymentMethod: payment,
         status: "Preparing",
         date: new Date().toLocaleString()
     };
-}
 
-function completeBill(){
-    const order = generateOrderObject();
-    if(!order){
-        toast("Add items to POS bill first");
-        return;
-    }
-
-    order.items.forEach(x => {
-        const p = products.find(p => p.id === x.id);
-        if(p) p.stock = Math.max(0, p.stock - x.qty);
-    });
-
+    orders = loadData("dng_orders", []);
     orders.push(order);
 
-    if(order.customer.phone || order.customer.name !== "Walk-in"){
-        const c = customers.find(x => (order.customer.phone && x.phone === order.customer.phone) || x.name.toLowerCase() === order.customer.name.toLowerCase());
-        if(c){
-            c.orders = (c.orders || 0) + 1;
-            c.lastStatus = "Preparing";
-        } else {
-            customers.push({ id: Date.now(), name: order.customer.name, phone: order.customer.phone, orders: 1, lastStatus: "Preparing", followup: false });
+    if(appliedCoupon){
+        referrals = loadData("dng_referrals", []);
+        const refObj = referrals.find(r => r.code === appliedCoupon.code);
+        if(refObj){
+            refObj.successful = Number(refObj.successful || 0) + 1;
+            const rewardAmount = Number(refObj.rewardPerReferral || 50);
+            refObj.reward = Number(refObj.reward || 0) + rewardAmount;
+
+            let wallet = loadData("dng_wallet", { balance:0, transactions:[] });
+            wallet.balance += rewardAmount;
+            wallet.transactions.unshift({
+                name: `${refObj.name} (${refObj.code}) Referral Reward`,
+                amount: rewardAmount,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem("dng_wallet", JSON.stringify(wallet));
         }
     }
 
-    save();
-    invoice(order.id);
-    bill = [];
-    setupBilling();
-    dashboard();
+    customers = loadData("dng_customers", []);
+    const existingCust = customers.find(c => (phone && c.phone === phone) || c.name.toLowerCase() === name.toLowerCase());
+    if(existingCust){
+        existingCust.orders = (existingCust.orders || 0) + 1;
+        existingCust.lastStatus = "Preparing";
+    } else {
+        customers.push({ id: Date.now(), name, phone, orders: 1, lastStatus: "Preparing", followup: false });
+    }
+
+    cart = [];
+    syncDatabase();
+    updateCartUI();
     renderProducts();
-    renderInventory();
-    toast("Bill generated and saved!");
+    closeCheckoutModal();
+
+    if(viaWhatsApp){
+        sendOrderToWhatsApp(order);
+    } else {
+        toast(`Order #${order.id} placed! Packing now.`);
+        alert(`Order placed successfully!\nOrder ID: #${order.id}\nThank you for shopping at DNG Mart.`);
+    }
 }
 
-/* =========================================
-   WHATSAPP & INVOICE
-========================================= */
-function buildWhatsAppMessage(order){
-    let msg = `*🛒 DNG MART - INVOICE #${order.id}*\n`;
+function sendOrderToWhatsApp(order){
+    let msg = `*🛒 NEW ORDER - DNG MART*\n`;
     msg += `_Ghar ka Saman Ghar Tak_\n`;
     msg += `--------------------------------\n`;
-    msg += `*Customer:* ${order.customer?.name || "Walk-in"}\n`;
-    msg += `*Date:* ${order.date}\n`;
+    msg += `*Order ID:* #${order.id}\n`;
+    msg += `*Customer:* ${order.customer.name}\n`;
+    msg += `*Phone:* ${order.customer.phone}\n`;
+    msg += `*Address:* ${order.customer.address}\n`;
+    if(order.customer.coordinates) msg += `*GPS Pin:* ${order.customer.coordinates}\n`;
     msg += `--------------------------------\n`;
-    msg += `*ITEMS:*\n`;
-    
-    order.items.forEach((item, index) => {
-        msg += `${index + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}\n`;
+    msg += `*ORDER ITEMS:*\n`;
+
+    order.items.forEach((item, idx) => {
+        msg += `${idx + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}\n`;
     });
 
     msg += `--------------------------------\n`;
-    msg += `*Subtotal:* ${money(order.subtotal || order.total)}\n`;
-    if(order.gst) msg += `*GST (${order.gstRate || 0}%):* ${money(order.gst)}\n`;
+    msg += `*Subtotal:* ${money(order.subtotal)}\n`;
+    if(order.delivery) msg += `*Delivery Fee:* ${money(order.delivery)}\n`;
     if(order.handling) msg += `*Bag/Handling:* ${money(order.handling)}\n`;
-    if(order.delivery) msg += `*Delivery:* ${money(order.delivery)}\n`;
+    if(order.gst) msg += `*GST (${order.gstRate}%):* ${money(order.gst)}\n`;
+    if(order.discount) msg += `*Coupon Discount (${order.couponCode}):* -${money(order.discount)}\n`;
     msg += `*Total Amount:* ${money(order.total)}\n`;
-    msg += `*Paid Amount:* ${money(order.paid || order.total)}\n`;
-    if(order.due > 0) msg += `*Balance Due:* ${money(order.due)}\n`;
+    msg += `*Payment Mode:* ${order.paymentMethod}\n`;
     msg += `--------------------------------\n`;
-    msg += `Thank you for shopping at DNG Mart! 🙏\nwww.dngmart.in`;
+    msg += `_⚡ Fast 10 Minute Express Delivery_`;
 
-    return encodeURIComponent(msg);
+    const encoded = encodeURIComponent(msg);
+    const cleanPhone = order.customer.phone.replace(/[^0-9]/g, '');
+    const url = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
 }
 
-function sendBillWhatsApp(){
-    const order = generateOrderObject();
-    if(!order){
-        toast("Add items to bill before sharing on WhatsApp");
+function detectLocation(){
+    if(!navigator.geolocation){
+        toast("Geolocation not supported");
         return;
     }
-    const phone = order.customer.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const text = buildWhatsAppMessage(order);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${text}` : `https://wa.me/?text=${text}`;
-    window.open(url, '_blank');
-}
+    document.getElementById("etaLocation").innerText = "Detecting GPS...";
 
-function sendOrderWhatsApp(id){
-    const order = orders.find(o => o.id === id);
-    if(!order) return;
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const text = buildWhatsAppMessage(order);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${text}` : `https://wa.me/?text=${text}`;
-    window.open(url, '_blank');
-}
-
-function invoice(id){
-    const order = orders.find(o => o.id === id);
-    if(!order) return;
-
-    const waText = buildWhatsAppMessage(order);
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const waUrl = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${waText}` : `https://wa.me/?text=${waText}`;
-
-    const w = window.open("", "_blank");
-    w.document.write(`
-        <html>
-        <head>
-            <title>Invoice #${order.id} | DNG Mart</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body{font-family:Segoe UI,Arial,sans-serif;padding:20px;max-width:650px;margin:auto;color:#0f172a;}
-                h1{color:#16a34a;margin-bottom:4px;}
-                .tagline{color:#64748b;margin-bottom:20px;font-size:13px;}
-                .header-box{display:flex;justify-content:space-between;border-bottom:2px solid #16a34a;padding-bottom:12px;}
-                .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
-                .sub-box{margin-top:14px;border-top:1px dashed #cbd5e1;padding-top:10px;}
-                .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:#475569;}
-                .total{font-size:18px;font-weight:bold;color:#0f172a;margin-top:10px;display:flex;justify-content:space-between;border-top:2px solid #0f172a;padding-top:8px;}
-                .actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
-                button, a{background:#16a34a;color:white;border:0;padding:10px 16px;border-radius:6px;cursor:pointer;text-decoration:none;font-weight:bold;display:inline-block;font-size:13px;}
-                a.wa{background:#25D366;}
-                @media print { .actions{display:none;} }
-            </style>
-        </head>
-        <body>
-            <div class="header-box">
-                <div>
-                    <h1>DNG Mart</h1>
-                    <div class="tagline">घर का सामान घर तक • www.dngmart.in</div>
-                </div>
-                <div style="text-align:right">
-                    <strong>Invoice #${order.id}</strong><br>
-                    <small>${order.date || ''}</small>
-                </div>
-            </div>
-            <p style="margin:16px 0;font-size:13px;">
-                <strong>Customer:</strong> ${order.customer?.name || "Walk-in"}<br>
-                <strong>Phone:</strong> ${order.customer?.phone || "-"}
-            </p>
-            ${order.items.map(i => `
-                <div class="line">
-                    <span>${i.name} × ${i.qty}</span>
-                    <strong>${money(i.price * i.qty)}</strong>
-                </div>
-            `).join("")}
-
-            <div class="sub-box">
-                <div class="row">
-                    <span>Items Subtotal:</span>
-                    <span>${money(order.subtotal || order.total)}</span>
-                </div>
-                ${order.gst ? `
-                <div class="row">
-                    <span>GST (${order.gstRate || 0}%):</span>
-                    <span>${money(order.gst)}</span>
-                </div>` : ''}
-                ${order.handling ? `
-                <div class="row">
-                    <span>Bag / Handling Fee:</span>
-                    <span>${money(order.handling)}</span>
-                </div>` : ''}
-                ${order.delivery ? `
-                <div class="row">
-                    <span>Delivery Charges:</span>
-                    <span>${money(order.delivery)}</span>
-                </div>` : ''}
-                <div class="total">
-                    <span>Final Amount:</span>
-                    <span>${money(order.total)}</span>
-                </div>
-                <div class="row" style="margin-top:6px;">
-                    <span>Amount Paid:</span>
-                    <span>${money(order.paid || order.total)}</span>
-                </div>
-                ${order.due > 0 ? `
-                <div class="row" style="color:#dc2626;font-weight:bold;">
-                    <span>Balance Due:</span>
-                    <span>${money(order.due)}</span>
-                </div>` : ''}
-            </div>
-
-            <div class="actions">
-                <button onclick="window.print()">🖨️ Print Invoice</button>
-                <a class="wa" href="${waUrl}" target="_blank">💬 Share via WhatsApp</a>
-            </div>
-        </body>
-        </html>
-    `);
-}
-
-/* =========================================
-   CRM
-========================================= */
-function renderCRM(search=""){
-    document.getElementById("crmTotal").innerText = customers.length;
-    document.getElementById("repeatCustomers").innerText = customers.filter(c => Number(c.orders || 0) > 1).length;
-    document.getElementById("followUps").innerText = customers.filter(c => c.followup).length;
-
-    let list = customers.filter(c => JSON.stringify(c).toLowerCase().includes(search.toLowerCase()));
-
-    document.getElementById("crmTable").innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Customer Name</th>
-                    <th>Phone</th>
-                    <th>Total Orders</th>
-                    <th>Last Status</th>
-                    <th>Follow-up</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${list.map((c, i) => `
-                    <tr>
-                        <td><strong>${c.name}</strong></td>
-                        <td>${c.phone || "-"}</td>
-                        <td>${c.orders || 0}</td>
-                        <td><span class="badge blue">${c.lastStatus || "Active"}</span></td>
-                        <td>
-                            <button class="btn small" onclick="toggleFollowup(${i})">
-                                ${c.followup ? '✓ Follow-up Set' : '+ Add Follow-up'}
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn small" onclick="deleteCustomer(${i})">Delete</button>
-                        </td>
-                    </tr>
-                `).join("")}
-            </tbody>
-        </table>
-    `;
-}
-
-function addCustomer(){
-    const name = prompt("Customer Full Name:");
-    if(!name) return;
-    const phone = prompt("Mobile Number (10 digits):");
-
-    customers.push({
-        id: Date.now(),
-        name,
-        phone: phone || "",
-        orders: 0,
-        lastStatus: "New",
-        followup: false
-    });
-
-    save();
-    renderCRM();
-    dashboard();
-    toast("Customer added to CRM");
-}
-
-function toggleFollowup(index){
-    customers[index].followup = !customers[index].followup;
-    save();
-    renderCRM();
-    toast("Follow-up status changed");
-}
-
-function deleteCustomer(index){
-    if(!confirm("Remove customer record?")) return;
-    customers.splice(index, 1);
-    save();
-    renderCRM();
-    dashboard();
-    toast("Customer removed");
-}
-
-function exportCRM(){
-    const rows = [
-        ["id", "name", "phone", "orders", "last_status", "followup"],
-        ...customers.map(c => [c.id || "", c.name, c.phone || "", c.orders || 0, c.lastStatus || "Active", c.followup ? "true" : "false"])
-    ];
-    downloadCSVFile("dng-mart-crm.csv", rows);
-}
-
-/* =========================================
-   COUPONS & AFFILIATES
-========================================= */
-function renderReferrals(){
-    const query = (document.getElementById("refSearch")?.value || "").toLowerCase();
-    const status = document.getElementById("refStatus")?.value || "all";
-
-    const list = referrals.filter(r => 
-        (status === "all" || (r.status || "active") === status) &&
-        JSON.stringify(r).toLowerCase().includes(query)
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude.toFixed(4);
+            const lng = pos.coords.longitude.toFixed(4);
+            userCoordinates = `${lat}, ${lng}`;
+            document.getElementById("etaLocation").innerText = `Patna (${lat}, ${lng})`;
+            toast("Delivery location pinned successfully!");
+        },
+        () => {
+            document.getElementById("etaLocation").innerText = "Patna, Bihar";
+        }
     );
-
-    document.getElementById("refUsers").innerText = referrals.length;
-    document.getElementById("successReferrals").innerText = referrals.reduce((a, r) => a + Number(r.successful || 0), 0);
-    document.getElementById("activeCouponsCount").innerText = referrals.filter(r => (r.status || "active") === "active").length;
-
-    document.getElementById("referralTable").innerHTML = list.map(r => {
-        const index = referrals.indexOf(r);
-        const discountDisplay = r.type === "percent" ? `${r.value || 10}% OFF` : money(r.value || r.rewardPerReferral || 50) + " OFF";
-
-        return `
-            <tr>
-                <td><strong>${r.name}</strong></td>
-                <td><span class="ref-code">${r.code}</span></td>
-                <td><b style="color:var(--primary);">${discountDisplay}</b></td>
-                <td>${money(r.minOrder || 299)}</td>
-                <td>${r.successful || 0}</td>
-                <td><span class="badge ${r.status === "active" ? "green" : "orange"}">${r.status || "active"}</span></td>
-                <td>
-                    <button class="btn small" onclick="toggleReferral(${index})">${r.status === "active" ? "Pause" : "Activate"}</button>
-                    <button class="btn small" onclick="creditReferral(${index})">Credit</button>
-                </td>
-            </tr>
-        `;
-    }).join("") || "<tr><td colspan='7' style='text-align:center;color:var(--muted);'>No coupons created yet.</td></tr>";
 }
 
-function openCustomCouponModal(){
-    document.getElementById("couponUser").value = "";
-    document.getElementById("couponCode").value = "DNG" + Math.random().toString(36).substring(2, 6).toUpperCase();
-    document.getElementById("couponValue").value = "50";
-    document.getElementById("couponMinOrder").value = "299";
-    document.getElementById("couponOwnerReward").value = "50";
-    document.getElementById("customCouponModal").classList.add("active");
-}
-
-function closeCustomCouponModal(){
-    document.getElementById("customCouponModal").classList.remove("active");
-}
-
-function saveCustomCoupon(){
-    const name = document.getElementById("couponUser").value.trim();
-    const code = document.getElementById("couponCode").value.trim().toUpperCase();
-    const type = document.getElementById("couponType").value;
-    const value = Number(document.getElementById("couponValue").value) || 0;
-    const minOrder = Number(document.getElementById("couponMinOrder").value) || 0;
-    const ownerReward = Number(document.getElementById("couponOwnerReward").value) || 0;
-
-    if(!name || !code || !value){
-        toast("Enter Campaign Name, Coupon Code and Value");
-        return;
-    }
-
-    if(referrals.some(r => r.code === code)){
-        toast("Coupon code already exists! Choose another.");
-        return;
-    }
-
-    referrals.push({
-        id: Date.now(),
-        name,
-        code,
-        type,
-        value,
-        minOrder,
-        rewardPerReferral: ownerReward,
-        successful: 0,
-        reward: 0,
-        status: "active"
-    });
-
-    save();
-    renderReferrals();
-    closeCustomCouponModal();
-    toast(`Coupon ${code} created successfully!`);
-}
-
-function toggleReferral(index){
-    referrals[index].status = referrals[index].status === "active" ? "paused" : "active";
-    save();
-    renderReferrals();
-}
-
-function creditReferral(index){
-    const referral = referrals[index];
-    const amount = Number(referral.rewardPerReferral) || 50;
-
-    referral.successful = Number(referral.successful || 0) + 1;
-    referral.reward = Number(referral.reward || 0) + amount;
-
-    wallet.balance += amount;
-    wallet.transactions.unshift({
-        name: referral.name + " (" + referral.code + ") Reward",
-        amount,
-        date: new Date().toLocaleString()
-    });
-
-    save();
-    renderReferrals();
-    renderWallet();
-    toast("Referral reward credited to wallet");
-}
-
-/* =========================================
-   WALLET
-========================================= */
-function renderWallet(){
-    document.getElementById("walletBalance").innerText = money(wallet.balance);
-    document.getElementById("walletTransactions").innerHTML = wallet.transactions.map(t => `
-        <div class="list-row">
-            <div>
-                <strong>${t.name}</strong><br>
-                <small style="color:var(--muted)">${t.date}</small>
-            </div>
-            <strong class="green">+${money(t.amount)}</strong>
-        </div>
-    `).join("") || "<p style='color:var(--muted)'>No wallet transactions logged.</p>";
-}
-
-function creditWallet(){
-    const name = document.getElementById("walletName").value.trim();
-    const amount = Number(document.getElementById("walletAmount").value);
-
-    if(!name || !amount || isNaN(amount)){
-        toast("Enter customer name and valid credit amount");
-        return;
-    }
-
-    wallet.balance += amount;
-    wallet.transactions.unshift({
-        name,
-        amount,
-        date: new Date().toLocaleString()
-    });
-
-    document.getElementById("walletName").value = "";
-    document.getElementById("walletAmount").value = "";
-
-    save();
-    renderWallet();
-    toast("Wallet balance credited");
-}
-
-/* =========================================
-   IMAGE UPLOAD
-========================================= */
-const drop = document.getElementById("dropZone");
-const imageInput = document.getElementById("productImage");
-
-drop.onclick = () => imageInput.click();
-drop.ondragover = e => { e.preventDefault(); drop.classList.add("drag"); };
-drop.ondragleave = () => drop.classList.remove("drag");
-drop.ondrop = e => {
-    e.preventDefault();
-    drop.classList.remove("drag");
-    handleImage(e.dataTransfer.files[0]);
-};
-imageInput.onchange = e => handleImage(e.target.files[0]);
-
-function handleImage(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        imageData = e.target.result;
-        document.getElementById("imagePreview").innerHTML = `<img src="${imageData}">`;
-    };
-    reader.readAsDataURL(file);
-}
-
-/* =========================================
-   THEME
-========================================= */
-function toggleTheme(){
-    document.body.classList.toggle("dark");
-    localStorage.setItem("dng_theme", document.body.classList.contains("dark") ? "dark" : "light");
-}
-
-if(localStorage.getItem("dng_theme") === "dark"){
-    document.body.classList.add("dark");
-}
-
-/* =========================================
-   INITIAL LOAD
-========================================= */
-dashboard();
+renderCategoryChips();
+renderSidebar();
 renderProducts();
-renderInventory();
-renderCRM();
-renderReferrals();
-renderWallet();
-setupBilling();
-loadOnlineFeeSettings();
+updateCartUI();
 </script>
 
 </body>
