@@ -56,6 +56,90 @@ button{
     cursor:pointer;
 }
 
+/* LOGIN SCREEN */
+.login-screen{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:99999;
+}
+
+.login-card{
+    background:var(--card);
+    width:100%;
+    max-width:420px;
+    border-radius:14px;
+    padding:32px 28px;
+    box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);
+    border:1px solid var(--border);
+}
+
+.login-logo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:22px;
+    text-align:center;
+}
+
+.login-logo .icon{
+    width:54px;
+    height:54px;
+    background:var(--primary);
+    color:white;
+    font-size:24px;
+    font-weight:900;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:10px;
+}
+
+.login-logo h2{
+    font-size:20px;
+    color:var(--text);
+}
+
+.login-logo p{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+}
+
+.auth-checkbox-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:12px 0 16px 0;
+    font-size:12px;
+    color:var(--muted);
+}
+
+.auth-checkbox-row label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+}
+
+.ip-banner{
+    background:var(--bg);
+    border:1px dashed var(--border);
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
 .app{
     display:flex;
     min-height:100vh;
@@ -446,6 +530,13 @@ th{
     background:#25D366;
     color:white;
 }
+.btn.whatsapp:hover{ background:#1ebd57; }
+
+.btn.danger{
+    background:var(--red);
+    color:white;
+}
+.btn.danger:hover{ background:#b91c1c; }
 
 .btn.small{
     padding:5px 9px;
@@ -498,6 +589,14 @@ th{
 
 .input:focus, .select:focus, textarea:focus{
     border-color:var(--primary);
+}
+
+.admin-card-box{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px;
+    margin-bottom:14px;
+    background:var(--bg);
 }
 
 /* TOOLBAR */
@@ -682,7 +781,7 @@ th{
     padding:12px 18px;
     border-radius:8px;
     display:none;
-    z-index:9999;
+    z-index:999999;
     box-shadow:0 10px 20px rgba(0,0,0,0.2);
     font-size:13px;
 }
@@ -796,7 +895,54 @@ th{
 
 <body>
 
-<div class="app">
+<!-- AUTHENTICATION LOGIN OVERLAY -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="icon">DNG</div>
+            <h2>Admin Portal</h2>
+            <p>Enter credentials to access the management panel</p>
+        </div>
+
+        <div class="ip-banner" id="loginIpBanner">
+            <span>🌐 Network IP: <b id="loginIpText">Detecting...</b></span>
+            <span class="badge blue" id="loginIpStatus">Checking</span>
+        </div>
+
+        <div class="field">
+            <label>Admin Username</label>
+            <input class="input" id="loginUser" placeholder="Enter admin username" autocomplete="username">
+        </div>
+
+        <div class="field" style="margin-bottom:6px;">
+            <label>Password</label>
+            <input class="input" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') attemptLogin()">
+        </div>
+
+        <div class="auth-checkbox-row">
+            <label>
+                <input type="checkbox" id="showLoginPass" onchange="togglePasswordVisibility('loginPass', this.checked)">
+                <span>Show Password</span>
+            </label>
+            <label>
+                <input type="checkbox" id="rememberMe" checked>
+                <span>Remember Me</span>
+            </label>
+        </div>
+
+        <button class="btn primary" style="width:100%;padding:12px;" onclick="attemptLogin()">
+            🔒 Secure Login
+        </button>
+
+        <div style="text-align:center;margin-top:16px;">
+            <button class="btn small" style="background:transparent;color:var(--muted);text-decoration:underline;" onclick="sendLoginWhatsAppReset()">
+                Forgot Password? Reset via WhatsApp
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="app" id="appRoot" style="display:none;">
 
 <!-- SIDEBAR OVERLAY FOR MOBILE -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -851,6 +997,11 @@ th{
             <span class="nav-icon">💰</span>
             <span>Wallet</span>
         </button>
+
+        <button class="nav" onclick="showPage('settings',this)">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings & Security</span>
+        </button>
     </div>
 
     <a class="store-link" href="/">
@@ -872,12 +1023,13 @@ th{
     <div class="top-actions">
         <button class="icon-button" onclick="testSoundAlert()" title="Test Order Notification Chime">🔔</button>
         <button class="icon-button" onclick="toggleTheme()" title="Toggle Dark/Light Mode">◐</button>
-        <div class="profile">
-            <div class="avatar">DM</div>
+        <div class="profile" style="cursor:pointer" onclick="showPage('settings')">
+            <div class="avatar" id="topNavAvatar">AD</div>
             <div>
-                <strong style="font-size:13px">DNG Admin</strong>
+                <strong id="topNavUser" style="font-size:13px">admin</strong>
             </div>
         </div>
+        <button class="btn small danger" onclick="logoutAdmin()" title="Logout Session" style="margin-left:4px;">Logout</button>
     </div>
 </header>
 
@@ -1358,6 +1510,146 @@ th{
     </div>
 </section>
 
+<!-- SETTINGS & SECURITY (3 ADMIN SLOTS + SHOW PASS + IP WHITELIST) -->
+<section id="settings" class="page">
+    <div class="grid-2">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Admin Accounts (Up to 3 Admins)</h2>
+                <span class="badge green">Multi-User Access</span>
+            </div>
+            
+            <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+                Configure up to 3 separate administrator logins. Any of these authorized accounts can open the admin panel.
+            </p>
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--muted);">
+                    <input type="checkbox" onchange="toggleAllSettingsPasswords(this.checked)">
+                    <span>Show All Admin Passwords</span>
+                </label>
+            </div>
+
+            <!-- ADMIN 1 (PRIMARY) -->
+            <div class="admin-card-box">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <strong style="font-size:13px;">Admin 1 (Primary Master)</strong>
+                    <span class="badge green">Required</span>
+                </div>
+                <div class="form-grid">
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Username</label>
+                        <input class="input" id="adminUser0" placeholder="admin">
+                    </div>
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Password</label>
+                        <input class="input setting-pass-field" id="adminPass0" type="password" placeholder="admin12345">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN 2 -->
+            <div class="admin-card-box">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <strong style="font-size:13px;">Admin 2 (Manager)</strong>
+                    <span class="badge blue">Optional</span>
+                </div>
+                <div class="form-grid">
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Username</label>
+                        <input class="input" id="adminUser1" placeholder="manager">
+                    </div>
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Password</label>
+                        <input class="input setting-pass-field" id="adminPass1" type="password" placeholder="manager12345">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN 3 -->
+            <div class="admin-card-box">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <strong style="font-size:13px;">Admin 3 (Staff / Counter)</strong>
+                    <span class="badge blue">Optional</span>
+                </div>
+                <div class="form-grid">
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Username</label>
+                        <input class="input" id="adminUser2" placeholder="staff">
+                    </div>
+                    <div class="field" style="margin-bottom:0;">
+                        <label>Password</label>
+                        <input class="input setting-pass-field" id="adminPass2" type="password" placeholder="staff12345">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn primary" style="width:100%;margin-top:6px;" onclick="saveAllAdminAccounts()">
+                💾 Save 3 Admin Credentials
+            </button>
+        </div>
+
+        <div>
+            <!-- TRUSTED IP & AUTO-LOGIN -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Trusted IP Auto-Login</h2>
+                    <span class="badge green" id="settingsIpBadge">Active</span>
+                </div>
+                <p style="color:var(--muted);font-size:13px;margin-bottom:12px;line-height:1.5;">
+                    When enabled, once you log in successfully on a network, that IP is authorized and you will not be asked for a password repeatedly on the same IP.
+                </p>
+
+                <div class="field">
+                    <label>Current Detected Public IP</label>
+                    <input class="input" id="settingsCurrentIp" readonly style="opacity:0.8;background:rgba(0,0,0,0.03);font-weight:bold;">
+                </div>
+
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <button class="btn primary small" style="flex:1;" onclick="trustCurrentIpManually()">+ Trust Current IP</button>
+                    <button class="btn danger small" style="flex:1;" onclick="clearTrustedIps()">Clear All IPs</button>
+                </div>
+
+                <label style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px;display:block;">Authorized Trusted IPs:</label>
+                <div id="trustedIpsList" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;max-height:110px;overflow-y:auto;font-size:12px;">
+                    No trusted IPs saved yet.
+                </div>
+            </div>
+
+            <!-- WHATSAPP RECOVERY -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>WhatsApp Password Recovery</h2>
+                </div>
+                <p style="color:var(--muted);font-size:13px;margin-bottom:14px;line-height:1.5;">
+                    Generate and dispatch credential tokens directly to WhatsApp support for identity confirmation.
+                </p>
+
+                <div class="field">
+                    <label>Admin Support WhatsApp Number</label>
+                    <input class="input" id="settingsAdminPhone" value="919123187724" placeholder="e.g. 919123187724">
+                </div>
+
+                <button class="btn whatsapp" style="width:100%;" onclick="sendWhatsAppResetLink()">
+                    💬 Send Reset Link via WhatsApp
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Session Actions</h2>
+                </div>
+                <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
+                    Terminate active session and require manual credential verification.
+                </p>
+                <button class="btn danger" style="width:100%" onclick="logoutAdmin()">
+                    🚪 Logout Admin Panel
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
 </div>
 </main>
 </div>
@@ -1380,9 +1672,9 @@ th{
         <span>🛒</span>
         <span>Items</span>
     </button>
-    <button class="mob-nav-item" onclick="showPage('inventory', this)">
-        <span>📦</span>
-        <span>Stock</span>
+    <button class="mob-nav-item" onclick="showPage('settings', this)">
+        <span>⚙️</span>
+        <span>Settings</span>
     </button>
 </nav>
 
@@ -1500,6 +1792,274 @@ th{
 <div id="toast"></div>
 
 <script>
+/* =========================================
+   SECURITY, IP RECOGNITION & 3 ADMIN ACCOUNTS
+========================================= */
+const DEFAULT_AUTH = {
+    admins: [
+        { username: "admin", password: "admin12345" },
+        { username: "", password: "" },
+        { username: "", password: "" }
+    ],
+    adminPhone: "919123187724",
+    trustedIps: []
+};
+
+let currentClientIp = "Checking...";
+
+function loadAuth(){
+    const data = load("dng_admin_auth", DEFAULT_AUTH);
+    if(!data.admins){
+        data.admins = [
+            { username: data.username || "admin", password: data.password || "admin12345" },
+            { username: "", password: "" },
+            { username: "", password: "" }
+        ];
+    }
+    while(data.admins.length < 3){
+        data.admins.push({ username: "", password: "" });
+    }
+    if(!data.trustedIps) data.trustedIps = [];
+    return data;
+}
+
+function saveAuth(authData){
+    localStorage.setItem("dng_admin_auth", JSON.stringify(authData));
+}
+
+function togglePasswordVisibility(fieldId, isVisible){
+    const el = document.getElementById(fieldId);
+    if(el) el.type = isVisible ? "text" : "password";
+}
+
+function toggleAllSettingsPasswords(isVisible){
+    document.querySelectorAll(".setting-pass-field").forEach(el => {
+        el.type = isVisible ? "text" : "password";
+    });
+}
+
+async function detectPublicIp(){
+    try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const json = await res.json();
+        currentClientIp = json.ip || "127.0.0.1";
+    } catch(e) {
+        currentClientIp = "Local / Offline";
+    }
+    
+    document.getElementById("loginIpText").innerText = currentClientIp;
+    if(document.getElementById("settingsCurrentIp")){
+        document.getElementById("settingsCurrentIp").value = currentClientIp;
+    }
+    
+    verifyIpAutoLogin();
+}
+
+function verifyIpAutoLogin(){
+    const auth = loadAuth();
+    const isIpTrusted = auth.trustedIps && auth.trustedIps.includes(currentClientIp);
+    const badge = document.getElementById("loginIpStatus");
+
+    if(isIpTrusted){
+        badge.innerText = "Trusted IP";
+        badge.className = "badge green";
+        // Auto-login bypass for recognized network
+        sessionStorage.setItem("dng_admin_logged_in", "true");
+        localStorage.setItem("dng_active_admin", auth.admins[0]?.username || "admin");
+        checkSession();
+        toast(`✨ Recognized trusted network (${currentClientIp}). Auto-logged in!`);
+    } else {
+        badge.innerText = "Password Required";
+        badge.className = "badge orange";
+        checkSession();
+    }
+}
+
+function checkSession(){
+    const isAuth = sessionStorage.getItem("dng_admin_logged_in") === "true" || localStorage.getItem("dng_remember_admin") === "true";
+    const loginScreen = document.getElementById("loginScreen");
+    const appRoot = document.getElementById("appRoot");
+
+    if(isAuth){
+        loginScreen.style.display = "none";
+        appRoot.style.display = "flex";
+        updateUserHeader();
+    } else {
+        loginScreen.style.display = "flex";
+        appRoot.style.display = "none";
+    }
+}
+
+function attemptLogin(){
+    const u = document.getElementById("loginUser").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    const rememberMe = document.getElementById("rememberMe").checked;
+    const auth = loadAuth();
+
+    const matchedAdmin = auth.admins.find(a => a.username && a.username === u && a.password === p);
+
+    if(matchedAdmin){
+        sessionStorage.setItem("dng_admin_logged_in", "true");
+        localStorage.setItem("dng_active_admin", matchedAdmin.username);
+
+        if(rememberMe){
+            localStorage.setItem("dng_remember_admin", "true");
+        } else {
+            localStorage.removeItem("dng_remember_admin");
+        }
+
+        // Add current IP to trusted list so login is not prompted again at this IP
+        if(currentClientIp && currentClientIp !== "Checking..." && currentClientIp !== "Local / Offline"){
+            if(!auth.trustedIps.includes(currentClientIp)){
+                auth.trustedIps.push(currentClientIp);
+                saveAuth(auth);
+            }
+        }
+
+        toast(`Login successful! Welcome ${matchedAdmin.username}`);
+        document.getElementById("loginUser").value = "";
+        document.getElementById("loginPass").value = "";
+        checkSession();
+    } else {
+        toast("❌ Invalid username or password!");
+    }
+}
+
+function logoutAdmin(){
+    if(!confirm("Are you sure you want to log out?")) return;
+    sessionStorage.removeItem("dng_admin_logged_in");
+    localStorage.removeItem("dng_remember_admin");
+    localStorage.removeItem("dng_active_admin");
+    checkSession();
+    toast("Logged out successfully");
+}
+
+function updateUserHeader(){
+    const activeAdmin = localStorage.getItem("dng_active_admin") || "admin";
+    document.getElementById("topNavUser").innerText = activeAdmin;
+    document.getElementById("topNavAvatar").innerText = activeAdmin.substring(0, 2).toUpperCase();
+}
+
+function populateSettingsAuth(){
+    const auth = loadAuth();
+    for(let i = 0; i < 3; i++){
+        document.getElementById(`adminUser${i}`).value = auth.admins[i]?.username || "";
+        document.getElementById(`adminPass${i}`).value = auth.admins[i]?.password || "";
+    }
+    document.getElementById("settingsAdminPhone").value = auth.adminPhone || "919123187724";
+    renderTrustedIpsList();
+}
+
+function saveAllAdminAccounts(){
+    const auth = loadAuth();
+    const u0 = document.getElementById("adminUser0").value.trim();
+    const p0 = document.getElementById("adminPass0").value.trim();
+
+    if(!u0 || !p0){
+        toast("Admin 1 (Primary Master) cannot be empty!");
+        return;
+    }
+
+    auth.admins = [
+        { username: u0, password: p0 },
+        { username: document.getElementById("adminUser1").value.trim(), password: document.getElementById("adminPass1").value.trim() },
+        { username: document.getElementById("adminUser2").value.trim(), password: document.getElementById("adminPass2").value.trim() }
+    ];
+
+    saveAuth(auth);
+    updateUserHeader();
+    toast("All 3 Admin credentials updated successfully!");
+}
+
+function renderTrustedIpsList(){
+    const auth = loadAuth();
+    const container = document.getElementById("trustedIpsList");
+    if(!auth.trustedIps || !auth.trustedIps.length){
+        container.innerHTML = "<span style='color:var(--muted)'>No trusted IPs registered yet.</span>";
+        return;
+    }
+    container.innerHTML = auth.trustedIps.map((ip, idx) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">
+            <span>🌐 <b>${ip}</b> ${ip === currentClientIp ? '<small class="green">(Current)</small>' : ''}</span>
+            <button class="btn small danger" style="padding:2px 6px;font-size:10px;" onclick="removeTrustedIp(${idx})">✕</button>
+        </div>
+    `).join("");
+}
+
+function trustCurrentIpManually(){
+    if(!currentClientIp || currentClientIp === "Checking..." || currentClientIp === "Local / Offline"){
+        toast("Unable to detect a valid public IP yet");
+        return;
+    }
+    const auth = loadAuth();
+    if(!auth.trustedIps.includes(currentClientIp)){
+        auth.trustedIps.push(currentClientIp);
+        saveAuth(auth);
+        renderTrustedIpsList();
+        toast(`IP ${currentClientIp} added to trusted list!`);
+    } else {
+        toast("Current IP is already trusted!");
+    }
+}
+
+function removeTrustedIp(index){
+    const auth = loadAuth();
+    auth.trustedIps.splice(index, 1);
+    saveAuth(auth);
+    renderTrustedIpsList();
+    toast("Trusted IP removed");
+}
+
+function clearTrustedIps(){
+    if(!confirm("Clear all trusted network IPs? You will have to enter your password on every login.")) return;
+    const auth = loadAuth();
+    auth.trustedIps = [];
+    saveAuth(auth);
+    renderTrustedIpsList();
+    toast("All trusted IPs removed");
+}
+
+function sendWhatsAppResetLink(){
+    const auth = loadAuth();
+    const phoneInput = document.getElementById("settingsAdminPhone").value.replace(/[^0-9]/g, "") || auth.adminPhone;
+    const token = "RST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    let msg = `*🔐 DNG MART - ADMIN PASSWORD RESET REQUEST*\n`;
+    msg += `------------------------------------\n`;
+    msg += `A request was made to manage credentials on DNG Mart.\n\n`;
+    msg += `*Primary Admin:* ${auth.admins[0]?.username || "admin"}\n`;
+    msg += `*Security Token:* ${token}\n`;
+    msg += `*IP Address:* ${currentClientIp}\n`;
+    msg += `*Time:* ${new Date().toLocaleString()}\n\n`;
+    msg += `Reply to confirm or set new credentials.\n`;
+    msg += `------------------------------------\n`;
+    msg += `_DNG Mart Secure System_`;
+
+    const encoded = encodeURIComponent(msg);
+    const url = `https://wa.me/${phoneInput}?text=${encoded}`;
+    window.open(url, "_blank");
+    toast("WhatsApp reset link opened!");
+}
+
+function sendLoginWhatsAppReset(){
+    const auth = loadAuth();
+    const token = "RST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    let msg = `*🔐 DNG MART - FORGOT PASSWORD RECOVERY*\n`;
+    msg += `------------------------------------\n`;
+    msg += `Admin Credential Recovery:\n\n`;
+    msg += `*Primary Username:* ${auth.admins[0]?.username || "admin"}\n`;
+    msg += `*Recovery Token:* ${token}\n`;
+    msg += `*Default Password:* admin12345\n`;
+    msg += `*Network IP:* ${currentClientIp}\n\n`;
+    msg += `Please send this token to verify identity and recover access.\n`;
+    msg += `------------------------------------`;
+
+    const encoded = encodeURIComponent(msg);
+    const url = `https://wa.me/${auth.adminPhone || "919123187724"}?text=${encoded}`;
+    window.open(url, "_blank");
+}
+
 /* =========================================
    DATABASE INITIALIZATION (DNG MART)
 ========================================= */
@@ -1669,6 +2229,10 @@ window.addEventListener("storage", (e) => {
         referrals = load("dng_referrals", []);
         renderReferrals();
     }
+    if(e.key === "dng_admin_auth"){
+        updateUserHeader();
+        populateSettingsAuth();
+    }
 });
 
 /* =========================================
@@ -1826,7 +2390,9 @@ function showPage(page, button){
     if(activeMob) activeMob.classList.add("active");
 
     document.getElementById("pageTitle").innerText =
-        page === "crm" ? "Customer CRM" : page.charAt(0).toUpperCase() + page.slice(1);
+        page === "crm" ? "Customer CRM" :
+        page === "settings" ? "Settings & Security" :
+        page.charAt(0).toUpperCase() + page.slice(1);
 
     closeSidebar();
     refreshPage(page);
@@ -1841,6 +2407,7 @@ function refreshPage(page){
     if(page === "referrals") renderReferrals();
     if(page === "wallet") renderWallet();
     if(page === "billing") setupBilling();
+    if(page === "settings") populateSettingsAuth();
 }
 
 /* =========================================
@@ -2818,8 +3385,9 @@ if(localStorage.getItem("dng_theme") === "dark"){
 }
 
 /* =========================================
-   INITIAL LOAD
+   INITIAL LOAD & AUTH GATEWAY
 ========================================= */
+detectPublicIp();
 dashboard();
 renderProducts();
 renderInventory();
