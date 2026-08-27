@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNG MART - Ghar ka Saman Ghar Tak</title>
+
+<style>
+:root{
+    --blinkit-yellow: #f7d417;
+    --blinkit-green: #0c831f;
+    --blinkit-green-dark: #075e15;
+    --blinkit-green-light: #e8f7ee;
+    --blinkit-bg: #f4f6fb;
+    --card-bg: #ffffff;
+    --text-main: #1c1c1c;
+    --text-muted: #666666;
+    --border-color: #ebebeb;
+    --badge-discount: #256fef;
+    --whatsapp: #25D366;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body{
+    background: var(--blinkit-bg);
+    color: var(--text-main);
+    line-height: 1.4;
+    overflow-x: hidden;
+}
+
+/* HEADER */
+.bk-header{
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.bk-main-nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.bk-logo-block{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    flex-shrink: 0;
+}
+
+.bk-logo-badge{
+    background: var(--blinkit-yellow);
+    color: #000;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bk-logo-badge span{
+    color: var(--blinkit-green);
+}
+
+.bk-eta-pill{
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+.bk-eta-pill:hover{ background: #f8f8f8; }
+.bk-eta-time{ font-size: 15px; font-weight: 800; color: #000; display: flex; align-items: center; gap: 4px;}
+.bk-eta-loc{ font-size: 12px; color: var(--text-muted); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+
+.bk-search-bar{
+    flex: 1;
+    max-width: 650px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 1px solid #e2e5e9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+.bk-search-bar:focus-within{
+    border-color: var(--blinkit-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(12, 131, 31, 0.12);
+}
+.bk-search-icon{
+    padding: 0 14px;
+    font-size: 16px;
+    color: #777;
+}
+.bk-search-input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 14px 12px 0;
+    font-size: 14px;
+    outline: none;
+    color: var(--text-main);
+}
+
+.bk-nav-actions{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.bk-cart-pill{
+    background: var(--blinkit-green);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(12, 131, 31, 0.25);
+}
+.bk-cart-pill:hover{ background: var(--blinkit-green-dark); }
+.bk-cart-pill:active{ transform: scale(0.98); }
+
+/* CATEGORY STRIP */
+.bk-category-strip{
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.bk-category-strip::-webkit-scrollbar{ display: none; }
+.bk-cat-list{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    white-space: nowrap;
+}
+.bk-cat-chip{
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.bk-cat-chip:hover{
+    border-color: var(--blinkit-green);
+    background: var(--blinkit-green-light);
+    color: var(--blinkit-green-dark);
+}
+.bk-cat-chip.active{
+    background: var(--blinkit-green-light);
+    border-color: var(--blinkit-green);
+    color: var(--blinkit-green-dark);
+}
+
+/* HERO SLIDER */
+.bk-banner-container{
+    max-width: 1400px;
+    margin: 16px auto;
+    padding: 0 24px;
+    position: relative;
+}
+.bk-banner-slider-wrap{
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 220px;
+    box-shadow: var(--shadow-subtle);
+}
+.bk-banner-slider{
+    display: flex;
+    width: 400%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bk-slide{
+    width: 25%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    position: relative;
+}
+.bk-slide-1{ background: linear-gradient(110deg, #fceb92 0%, #ffd000 100%); }
+.bk-slide-2{ background: linear-gradient(110deg, #d3f3db 0%, #68cf89 100%); }
+.bk-slide-3{ background: linear-gradient(110deg, #fddbe7 0%, #fa7ba7 100%); }
+.bk-slide-4{ background: linear-gradient(110deg, #dbeafe 0%, #60a5fa 100%); }
+
+.bk-slide-info h2{ font-size: 28px; font-weight: 900; color: #111; margin-bottom: 6px; }
+.bk-slide-info p{ font-size: 14px; font-weight: 600; color: #2a2a2a; margin-bottom: 12px; }
+.bk-slide-btn{
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.bk-slide-art{ font-size: 85px; }
+
+/* APP LAYOUT */
+.bk-app-layout{
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 20px auto 40px;
+    padding: 0 24px;
+}
+
+.bk-sidebar{
+    width: 260px;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    height: fit-content;
+    position: sticky;
+    top: 130px;
+}
+.bk-sidebar h3{
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-left: 8px;
+}
+.bk-subcat-list{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.bk-subcat-item{
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s;
+    color: var(--text-main);
+}
+.bk-subcat-item:hover{ background: #f4f6fb; }
+.bk-subcat-item.active{
+    background: var(--blinkit-green-light);
+    color: var(--blinkit-green-dark);
+    font-weight: 700;
+}
+.bk-subcat-count{
+    font-size: 11px;
+    background: #e5e7eb;
+    color: #4b5563;
+    padding: 2px 6px;
+    border-radius: 12px;
+}
+.bk-subcat-item.active .bk-subcat-count{
+    background: var(--blinkit-green);
+    color: #fff;
+}
+
+.bk-main-feed{ flex: 1; }
+
+.bk-feed-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.bk-feed-title{ font-size: 20px; font-weight: 800; }
+.bk-feed-count{ font-size: 13px; color: var(--text-muted); }
+
+.bk-product-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.bk-card{
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.bk-card:hover{
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+}
+
+.bk-card-badge{
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--badge-discount);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.bk-card-time{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #f1f3f6;
+    color: #444;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.bk-card-img{
+    height: 120px;
+    background: #fbfbfb;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 54px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.bk-card-img img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.bk-card-name{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 34px;
+    margin-bottom: 4px;
+}
+.bk-card-unit{
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.bk-card-footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+}
+
+.bk-price-block{ display: flex; flex-direction: column; }
+.bk-current-price{ font-size: 14px; font-weight: 800; color: #000; }
+.bk-mrp{ font-size: 11px; color: var(--text-muted); text-decoration: line-through; }
+
+.bk-add-btn{
+    background: #ffffff;
+    border: 1px solid var(--blinkit-green);
+    color: var(--blinkit-green);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+}
+.bk-add-btn:hover{
+    background: var(--blinkit-green);
+    color: #ffffff;
+}
+
+.bk-qty-controller{
+    display: flex;
+    align-items: center;
+    background: var(--blinkit-green);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.bk-qty-controller button{
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    width: 26px;
+    height: 28px;
+    cursor: pointer;
+}
+.bk-qty-controller span{
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+/* CART & CHECKOUT MODALS */
+.bk-drawer{
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: flex-end;
+    z-index: 2000;
+}
+.bk-drawer.active{ display: flex; }
+
+.bk-drawer-content{
+    width: 100%;
+    max-width: 440px;
+    background: var(--blinkit-bg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: slideInRight 0.25s cubic-bezier(0, 0, 0.2, 1);
+}
+@keyframes slideInRight{
+    from{ transform: translateX(100%); }
+    to{ transform: translateX(0); }
+}
+
+.bk-drawer-header{
+    background: #fff;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.bk-drawer-header h2{ font-size: 16px; font-weight: 800; }
+.bk-drawer-close{ font-size: 24px; cursor: pointer; border: none; background: transparent; }
+
+.bk-drawer-body{
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bk-cart-box{
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    box-shadow: var(--shadow-subtle);
+}
+
+.bk-cart-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f2;
+}
+.bk-cart-item:last-child{ border-bottom: none; }
+.bk-cart-item-info strong{ font-size: 13px; display: block; }
+.bk-cart-item-info small{ color: var(--text-muted); font-size: 11px; }
+
+.bk-bill-row{
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    margin-bottom: 6px;
+    color: #444;
+}
+.bk-bill-row.bold{
+    font-size: 14px;
+    font-weight: 800;
+    color: #000;
+    border-top: 1px dashed #ddd;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.bk-drawer-footer{
+    background: #fff;
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.bk-checkout-btn{
+    width: 100%;
+    background: var(--blinkit-green);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bk-checkout-btn:hover{ background: var(--blinkit-green-dark); }
+
+#toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e1e1e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+@media(max-width: 900px){
+    .bk-sidebar{ display: none; }
+    .bk-app-layout{ padding: 0 16px; }
+}
+@media(max-width: 600px){
+    .bk-main-nav{ padding: 10px 14px; gap: 8px; }
+    .bk-eta-pill{ display: none; }
+    .bk-banner-slider-wrap{ height: 160px; }
+    .bk-slide-info h2{ font-size: 18px; }
+    .bk-slide-art{ display: none; }
+    .bk-product-grid{ grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="bk-header">
+    <div class="bk-main-nav">
+        <!-- Logo -->
+        <a href="#" class="bk-logo-block">
+            <div class="bk-logo-badge">
+                DNG<span>MART</span>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:var(--blinkit-green-dark);letter-spacing:-0.2px;">
+                Ghar ka Saman Ghar Tak
+            </div>
+        </a>
+
+        <!-- 10 MIN GPS Pin -->
+        <div class="bk-eta-pill" onclick="detectLocation()">
+            <div class="bk-eta-time">⚡ Delivery in 10 Mins</div>
+            <div class="bk-eta-loc" id="etaLocation">Patna, Bihar</div>
+        </div>
+
+        <!-- Search -->
+        <div class="bk-search-bar">
+            <span class="bk-search-icon">🔍</span>
+            <input class="bk-search-input" id="bkSearchInput" placeholder='Search "oil", "atta", "dal", "chips", "dhoop"...' oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- Cart Action Only -->
+        <div class="bk-nav-actions">
+            <button class="bk-cart-pill" onclick="openCartDrawer()">
+                <span>🛒</span>
+                <span id="navCartCount">0 items</span>
+                <span>•</span>
+                <span id="navCartTotal">₹0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Chips Strip -->
+    <div class="bk-category-strip">
+        <div class="bk-cat-list" id="mainCatList"></div>
+    </div>
+</header>
+
+<!-- HERO SLIDER -->
+<div class="bk-banner-container">
+    <div class="bk-banner-slider-wrap">
+        <div class="bk-banner-slider" id="heroSlider">
+            <div class="bk-slide bk-slide-1">
+                <div class="bk-slide-info">
+                    <h2>Fresh Atta, Rice & Dals</h2>
+                    <p>100% Sharbati wheat, basmati & unpolished dals delivered in 10 minutes</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Atta & Dal')">Order Staples</button>
+                </div>
+                <div class="bk-slide-art">🌾</div>
+            </div>
+            <div class="bk-slide-2 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Pure Desi Ghee & Mustard Oils</h2>
+                    <p>Cold pressed kachi ghani mustard oil & cow ghee at wholesale rates</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Oil & Ghee')">Explore Oils</button>
+                </div>
+                <div class="bk-slide-art">🪔</div>
+            </div>
+            <div class="bk-slide-3 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Munchies, Tea & Refreshments</h2>
+                    <p>Tea leaves, namkeen, biscuits & beverages at your doorstep</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Snacks & Beverages')">Grab Snacks</button>
+                </div>
+                <div class="bk-slide-art">☕</div>
+            </div>
+            <div class="bk-slide-4 bk-slide">
+                <div class="bk-slide-info">
+                    <h2>Household & Daily Cleaning</h2>
+                    <p>Detergents, surface cleaners & everyday mart essentials</p>
+                    <button class="bk-slide-btn" onclick="selectMainCategory('Cleaning & Household')">Shop Essentials</button>
+                </div>
+                <div class="bk-slide-art">🧼</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="bk-app-layout">
+    <aside class="bk-sidebar">
+        <h3 id="sidebarHeading">Categories</h3>
+        <div class="bk-subcat-list" id="sidebarSubcats"></div>
+    </aside>
+
+    <main class="bk-main-feed">
+        <div class="bk-feed-header">
+            <div>
+                <h1 class="bk-feed-title" id="feedTitle">All Grocery Essentials</h1>
+                <span class="bk-feed-count" id="feedCount">Showing items</span>
+            </div>
+        </div>
+        <div class="bk-product-grid" id="productGrid"></div>
+    </main>
+</div>
+
+<!-- CART DRAWER -->
+<div class="bk-drawer" id="cartDrawer">
+    <div class="bk-drawer-content">
+        <div class="bk-drawer-header">
+            <h2>My Cart (<span id="cartDrawerCount">0</span>)</h2>
+            <button class="bk-drawer-close" onclick="closeCartDrawer()">×</button>
+        </div>
+
+        <div class="bk-drawer-body" id="cartDrawerBody"></div>
+
+        <div class="bk-drawer-footer">
+            <button class="bk-checkout-btn" onclick="openCheckoutModal()">
+                <div>
+                    <div style="font-size:11px;text-align:left;opacity:0.8;">TOTAL PAYABLE</div>
+                    <div id="drawerTotalPayable" style="font-size:16px;">₹0</div>
+                </div>
+                <div>Proceed to Pay ➔</div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="bk-drawer" id="checkoutModal">
+    <div class="bk-drawer-content" style="max-width:460px;">
+        <div class="bk-drawer-header">
+            <h2>Complete Your Order</h2>
+            <button class="bk-drawer-close" onclick="closeCheckoutModal()">×</button>
+        </div>
+
+        <div class="bk-drawer-body">
+            <div class="bk-cart-box">
+                <label style="font-size:12px;font-weight:700;">Full Name *</label>
+                <input id="checkoutName" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="Recipient Name">
+
+                <label style="font-size:12px;font-weight:700;">WhatsApp Mobile *</label>
+                <input id="checkoutPhone" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="10-digit mobile number">
+
+                <label style="font-size:12px;font-weight:700;">Complete Delivery Address *</label>
+                <textarea id="checkoutAddress" rows="2" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="House/Flat No, Landmark, Area in Patna"></textarea>
+
+                <label style="font-size:12px;font-weight:700;">Payment Mode</label>
+                <select id="checkoutPayment" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;">
+                    <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                    <option value="UPI / Online QR">UPI / QR on Delivery</option>
+                </select>
+            </div>
+
+            <!-- Promo Code -->
+            <div class="bk-cart-box">
+                <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Have a Promo / Referral Code?</label>
+                <div style="display:flex;gap:6px;">
+                    <input id="couponInput" placeholder="Enter coupon code" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;text-transform:uppercase;font-size:13px;">
+                    <button type="button" class="bk-add-btn" style="padding:8px 14px;" onclick="applyPromoCode()">Apply</button>
+                </div>
+                <div id="couponStatus" style="font-size:11px;margin-top:5px;"></div>
+            </div>
+
+            <!-- Live Admin-Synced Breakdown -->
+            <div class="bk-cart-box">
+                <h4 style="font-size:13px;margin-bottom:10px;">Bill Breakdown</h4>
+                <div class="bk-bill-row"><span>Items Subtotal</span><span id="billSubtotal">₹0</span></div>
+                <div class="bk-bill-row"><span>Delivery Fee</span><span id="billDelivery">₹0</span></div>
+                <div class="bk-bill-row"><span>Packaging / Bag Fee</span><span id="billHandling">₹0</span></div>
+                <div class="bk-bill-row"><span>GST Tax (<span id="billGSTRate">0</span>%)</span><span id="billGST">₹0</span></div>
+                <div class="bk-bill-row" id="billDiscountRow" style="display:none;color:var(--blinkit-green);font-weight:bold;">
+                    <span>Coupon Discount</span>
+                    <span id="billDiscount">-₹0</span>
+                </div>
+                <div class="bk-bill-row bold"><span>Final Payable Total</span><span id="billGrandTotal">₹0</span></div>
+            </div>
+        </div>
+
+        <div class="bk-drawer-footer">
+            <button class="bk-checkout-btn" style="background:var(--whatsapp);" onclick="placeDngOrder(true)">
+                <span>💬 Order via WhatsApp</span>
+                <span id="btnFinalPayAmount">₹0</span>
+            </button>
+            <button class="bk-checkout-btn" style="margin-top:8px;" onclick="placeDngOrder(false)">
+                <span>⚡ Place Instant Order</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DEFAULT_PRODUCTS = [
+    { id:"g1", name:"Chakki Fresh Sharbati Atta (10kg)", category:"Atta & Dal", purchasePrice:320, mrp:450, discountPercent:15.55, price:380, stock:35, description:"100% pure whole wheat flour", image:"" },
+    { id:"g2", name:"Royal Basmati Rice Mogra (5kg)", category:"Atta & Dal", purchasePrice:240, mrp:360, discountPercent:16.94, price:299, stock:25, description:"Aromatic long grain basmati rice", image:"" },
+    { id:"g3", name:"Kachi Ghani Pure Mustard Oil (1 Litre)", category:"Oil & Ghee", purchasePrice:120, mrp:175, discountPercent:14.85, price:149, stock:50, description:"Cold pressed pure sarson tel", image:"" },
+    { id:"g4", name:"Pure Desi Cow Ghee (1 Litre Jar)", category:"Oil & Ghee", purchasePrice:480, mrp:650, discountPercent:15.53, price:549, stock:20, description:"Traditional aromatic cow ghee", image:"" },
+    { id:"g5", name:"Premium Unpolished Toor Dal (1kg)", category:"Atta & Dal", purchasePrice:115, mrp:165, discountPercent:15.75, price:139, stock:40, description:"Protein-rich unpolished arhar dal", image:"" },
+    { id:"g6", name:"Tata Tea Premium Leaf (1kg Pouch)", category:"Daily Essentials", purchasePrice:340, mrp:460, discountPercent:15.43, price:389, stock:30, description:"Rich taste and aroma tea", image:"" }
+];
+
+function loadData(key, fallback){
+    try {
+        const val = localStorage.getItem(key);
+        return val ? JSON.parse(val) : fallback;
+    } catch(e) {
+        return fallback;
+    }
+}
+
+let products = loadData("dng_products", DEFAULT_PRODUCTS);
+let orders = loadData("dng_orders", []);
+let customers = loadData("dng_customers", []);
+let referrals = loadData("dng_referrals", []);
+let onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+let cart = loadData("dng_cart", []);
+
+let selectedCategory = "All";
+let searchQuery = "";
+let userCoordinates = null;
+let appliedCoupon = null;
+
+function syncDatabase(){
+    localStorage.setItem("dng_products", JSON.stringify(products));
+    localStorage.setItem("dng_orders", JSON.stringify(orders));
+    localStorage.setItem("dng_customers", JSON.stringify(customers));
+    localStorage.setItem("dng_referrals", JSON.stringify(referrals));
+    localStorage.setItem("dng_cart", JSON.stringify(cart));
+}
+
+function money(v){
+    return "₹" + Number(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function toast(msg){
+    const t = document.getElementById("toast");
+    t.innerText = msg;
+    t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 2500);
+}
+
+window.addEventListener("storage", (e) => {
+    if(e.key === "dng_products"){
+        products = loadData("dng_products", DEFAULT_PRODUCTS);
+        renderCategoryChips();
+        renderSidebar();
+        renderProducts();
+        renderCartDrawerItems();
+    }
+    if(e.key === "dng_orders"){
+        orders = loadData("dng_orders", []);
+    }
+    if(e.key === "dng_customers"){
+        customers = loadData("dng_customers", []);
+    }
+    if(e.key === "dng_referrals"){
+        referrals = loadData("dng_referrals", []);
+    }
+    if(e.key === "dng_online_settings"){
+        onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+        if(document.getElementById("checkoutModal").classList.contains("active")){
+            updateCheckoutTotals();
+        }
+    }
+});
+
+let slideIdx = 0;
+setInterval(() => {
+    slideIdx = (slideIdx + 1) % 4;
+    const slider = document.getElementById("heroSlider");
+    if(slider) slider.style.transform = `translateX(-${slideIdx * 25}%)`;
+}, 4000);
+
+function getUniqueCategories(){
+    const cats = new Set(["All", "Atta & Dal", "Oil & Ghee", "Daily Essentials", "Snacks & Beverages", "Cleaning & Household"]);
+    products.forEach(p => { if(p.category) cats.add(p.category); });
+    return Array.from(cats);
+}
+
+function renderCategoryChips(){
+    const list = document.getElementById("mainCatList");
+    list.innerHTML = "";
+
+    getUniqueCategories().forEach(cat => {
+        const chip = document.createElement("div");
+        chip.className = `bk-cat-chip ${cat === selectedCategory ? 'active' : ''}`;
+        
+        let icon = "🛒";
+        if(cat.includes("Atta")) icon = "🌾";
+        if(cat.includes("Oil")) icon = "🪔";
+        if(cat.includes("Daily")) icon = "🥛";
+        if(cat.includes("Snacks")) icon = "🍟";
+        if(cat.includes("Cleaning")) icon = "🧼";
+
+        chip.innerHTML = `<span>${icon}</span> <span>${cat}</span>`;
+        chip.onclick = () => selectMainCategory(cat);
+        list.appendChild(chip);
+    });
+}
+
+function renderSidebar(){
+    const subList = document.getElementById("sidebarSubcats");
+    subList.innerHTML = "";
+
+    getUniqueCategories().forEach(cat => {
+        const item = document.createElement("div");
+        item.className = `bk-subcat-item ${cat === selectedCategory ? 'active' : ''}`;
+        
+        const count = products.filter(p => cat === "All" || p.category === cat).length;
+
+        item.innerHTML = `
+            <span>${cat}</span>
+            <span class="bk-subcat-count">${count}</span>
+        `;
+        item.onclick = () => selectMainCategory(cat);
+        subList.appendChild(item);
+    });
+}
+
+function selectMainCategory(cat){
+    selectedCategory = cat;
+    renderCategoryChips();
+    renderSidebar();
+    renderProducts();
+}
+
+function handleSearch(q){
+    searchQuery = q.toLowerCase();
+    renderProducts();
+}
+
+function renderProducts(){
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = "";
+
+    const filtered = products.filter(p => {
+        const matchCat = (selectedCategory === "All" || (p.category && p.category.toLowerCase() === selectedCategory.toLowerCase()));
+        const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery) || (p.category && p.category.toLowerCase().includes(searchQuery));
+        return matchCat && matchSearch;
+    });
+
+    document.getElementById("feedTitle").innerText = selectedCategory === "All" ? "All Grocery Essentials" : selectedCategory;
+    document.getElementById("feedCount").innerText = `${filtered.length} products available`;
+
+    if(filtered.length === 0){
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#888;">No grocery items found in this section.</div>`;
+        return;
+    }
+
+    filtered.forEach(p => {
+        const inCartItem = cart.find(x => x.id === p.id);
+        const qty = inCartItem ? inCartItem.qty : 0;
+        const isOutOfStock = Number(p.stock) <= 0;
+        const discountBadge = p.discountPercent > 0 ? `${p.discountPercent}% OFF` : (p.mrp > p.price ? `${Math.round(((p.mrp-p.price)/p.mrp)*100)}% OFF` : null);
+
+        const card = document.createElement("div");
+        card.className = "bk-card";
+
+        let defaultArt = "🛒";
+        if(p.category && p.category.includes("Oil")) defaultArt = "🪔";
+        if(p.category && p.category.includes("Atta")) defaultArt = "🌾";
+        if(p.category && p.category.includes("Daily")) defaultArt = "🥛";
+
+        card.innerHTML = `
+            <div>
+                ${discountBadge ? `<span class="bk-card-badge">${discountBadge}</span>` : ''}
+                <div class="bk-card-img">
+                    ${p.image ? `<img src="${p.image}" alt="${p.name}">` : defaultArt}
+                </div>
+                <div class="bk-card-time">⏱ 10 MINS</div>
+                <div class="bk-card-name" title="${p.name}">${p.name}</div>
+                <div class="bk-card-unit">${p.description || p.category} • ${p.stock > 0 ? `${p.stock} in stock` : '<b style="color:red">Out of stock</b>'}</div>
+            </div>
+
+            <div class="bk-card-footer">
+                <div class="bk-price-block">
+                    <span class="bk-current-price">${money(p.price)}</span>
+                    ${p.mrp && p.mrp > p.price ? `<span class="bk-mrp">${money(p.mrp)}</span>` : ''}
+                </div>
+
+                <div>
+                    ${isOutOfStock ? `
+                        <button class="bk-add-btn" style="border-color:#ccc;color:#999;cursor:not-allowed;" disabled>OUT</button>
+                    ` : (qty === 0 ? `
+                        <button class="bk-add-btn" onclick="updateItemQty('${p.id}', 1)">ADD</button>
+                    ` : `
+                        <div class="bk-qty-controller">
+                            <button onclick="updateItemQty('${p.id}', -1)">−</button>
+                            <span>${qty}</span>
+                            <button onclick="updateItemQty('${p.id}', 1)">+</button>
+                        </div>
+                    `)}
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function updateItemQty(id, change){
+    const p = products.find(x => x.id === id);
+    if(!p) return;
+
+    const existing = cart.find(x => x.id === id);
+
+    if(existing){
+        if(change > 0 && existing.qty + change > Number(p.stock)){
+            toast(`Only ${p.stock} units left in stock`);
+            return;
+        }
+        existing.qty += change;
+        if(existing.qty <= 0){
+            cart = cart.filter(x => x.id !== id);
+        }
+    } else if(change > 0){
+        if(Number(p.stock) <= 0){
+            toast("Item is currently out of stock");
+            return;
+        }
+        cart.push({ id: p.id, qty: 1 });
+    }
+
+    syncDatabase();
+    updateCartUI();
+    renderProducts();
+    renderCartDrawerItems();
+}
+
+function updateCartUI(){
+    const totalCount = cart.reduce((s, i) => s + i.qty, 0);
+    const subtotal = cart.reduce((s, i) => {
+        const p = products.find(x => x.id === i.id);
+        return s + (p ? Number(p.price) * i.qty : 0);
+    }, 0);
+
+    document.getElementById("navCartCount").innerText = `${totalCount} item${totalCount === 1 ? '' : 's'}`;
+    document.getElementById("navCartTotal").innerText = money(subtotal);
+    document.getElementById("cartDrawerCount").innerText = totalCount;
+    document.getElementById("drawerTotalPayable").innerText = money(subtotal);
+}
+
+function openCartDrawer(){
+    renderCartDrawerItems();
+    document.getElementById("cartDrawer").classList.add("active");
+}
+
+function closeCartDrawer(){
+    document.getElementById("cartDrawer").classList.remove("active");
+}
+
+function renderCartDrawerItems(){
+    const body = document.getElementById("cartDrawerBody");
+    body.innerHTML = "";
+
+    if(cart.length === 0){
+        body.innerHTML = `
+            <div style="text-align:center;padding:50px 20px;">
+                <div style="font-size:60px;margin-bottom:10px;">🛍️</div>
+                <h3 style="font-size:16px;margin-bottom:6px;">Your cart is empty</h3>
+                <p style="font-size:12px;color:var(--text-muted);">Add daily groceries and essentials for 10-minute delivery</p>
+            </div>
+        `;
+        return;
+    }
+
+    let itemsHtml = `<div class="bk-cart-box"><h4 style="font-size:13px;margin-bottom:10px;">Items in Cart</h4>`;
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        const p = products.find(x => x.id === item.id);
+        if(!p) return;
+        const line = Number(p.price) * item.qty;
+        subtotal += line;
+
+        itemsHtml += `
+            <div class="bk-cart-item">
+                <div class="bk-cart-item-info">
+                    <strong>${p.name}</strong>
+                    <small>${money(p.price)} each</small>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="bk-qty-controller">
+                        <button onclick="updateItemQty('${p.id}', -1)">−</button>
+                        <span>${item.qty}</span>
+                        <button onclick="updateItemQty('${p.id}', 1)">+</button>
+                    </div>
+                    <span style="font-weight:700;font-size:13px;min-width:45px;text-align:right;">${money(line)}</span>
+                </div>
+            </div>
+        `;
+    });
+    itemsHtml += `</div>`;
+
+    const billHtml = `
+        <div class="bk-cart-box">
+            <h4 style="font-size:13px;margin-bottom:10px;">Bill Summary</h4>
+            <div class="bk-bill-row"><span>Items Subtotal</span><span>${money(subtotal)}</span></div>
+            <div class="bk-bill-row bold"><span>Total</span><span>${money(subtotal)}</span></div>
+        </div>
+    `;
+
+    body.innerHTML = itemsHtml + billHtml;
+}
+
+function calculateOrderTotals(){
+    const subtotal = cart.reduce((s, item) => {
+        const p = products.find(x => x.id === item.id);
+        return s + (p ? Number(p.price) * item.qty : 0);
+    }, 0);
+
+    onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+
+    const deliveryFee = Number(onlineSettings.delivery ?? 30);
+    const handlingFee = Number(onlineSettings.handling ?? 10);
+    const gstRate = Number(onlineSettings.gst ?? 5);
+    const gstAmount = Math.round((subtotal * gstRate) / 100);
+
+    let discountAmount = 0;
+    if(appliedCoupon){
+        if(appliedCoupon.type === "percent"){
+            discountAmount = Math.round((subtotal * Number(appliedCoupon.value)) / 100);
+        } else {
+            discountAmount = Math.min(subtotal, Number(appliedCoupon.value));
+        }
+    }
+
+    const grandTotal = Math.max(0, subtotal + deliveryFee + handlingFee + gstAmount - discountAmount);
+
+    return { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal };
+}
+
+function updateCheckoutTotals(){
+    const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
+
+    document.getElementById("billSubtotal").innerText = money(subtotal);
+    document.getElementById("billDelivery").innerText = money(deliveryFee);
+    document.getElementById("billHandling").innerText = money(handlingFee);
+    document.getElementById("billGSTRate").innerText = gstRate;
+    document.getElementById("billGST").innerText = money(gstAmount);
+
+    const discRow = document.getElementById("billDiscountRow");
+    if(discountAmount > 0){
+        discRow.style.display = "flex";
+        document.getElementById("billDiscount").innerText = `-${money(discountAmount)}`;
+    } else {
+        discRow.style.display = "none";
+    }
+
+    document.getElementById("billGrandTotal").innerText = money(grandTotal);
+    document.getElementById("btnFinalPayAmount").innerText = money(grandTotal);
+}
+
+function applyPromoCode(){
+    const code = (document.getElementById("couponInput").value || "").trim().toUpperCase();
+    const statusDiv = document.getElementById("couponStatus");
+
+    if(!code){
+        statusDiv.innerHTML = `<span style="color:red;">Please enter a promo coupon code.</span>`;
+        return;
+    }
+
+    referrals = loadData("dng_referrals", []);
+    const found = referrals.find(r => r.code.toUpperCase() === code && (r.status || "active") === "active");
+
+    if(!found){
+        statusDiv.innerHTML = `<span style="color:red;">Invalid or inactive promo coupon.</span>`;
+        appliedCoupon = null;
+        updateCheckoutTotals();
+        return;
+    }
+
+    const subtotal = cart.reduce((s, item) => {
+        const p = products.find(x => x.id === item.id);
+        return s + (p ? Number(p.price) * item.qty : 0);
+    }, 0);
+
+    const minOrder = Number(found.minOrder || 0);
+    if(subtotal < minOrder){
+        statusDiv.innerHTML = `<span style="color:red;">Min order of ${money(minOrder)} required for this coupon.</span>`;
+        appliedCoupon = null;
+        updateCheckoutTotals();
+        return;
+    }
+
+    appliedCoupon = found;
+    const discountText = found.type === "percent" ? `${found.value}% OFF` : `${money(found.value)} OFF`;
+    statusDiv.innerHTML = `<span style="color:var(--blinkit-green);font-weight:bold;">✓ Coupon applied: ${discountText}</span>`;
+    updateCheckoutTotals();
+    toast(`Coupon ${code} applied successfully!`);
+}
+
+function openCheckoutModal(){
+    if(cart.length === 0){
+        toast("Please add items to cart first");
+        return;
+    }
+
+    appliedCoupon = null;
+    document.getElementById("couponInput").value = "";
+    document.getElementById("couponStatus").innerHTML = "";
+
+    updateCheckoutTotals();
+    closeCartDrawer();
+    document.getElementById("checkoutModal").classList.add("active");
+}
+
+function closeCheckoutModal(){
+    document.getElementById("checkoutModal").classList.remove("active");
+}
+
+function placeDngOrder(viaWhatsApp = false){
+    const name = document.getElementById("checkoutName").value.trim();
+    const phone = document.getElementById("checkoutPhone").value.trim();
+    const address = document.getElementById("checkoutAddress").value.trim();
+    const payment = document.getElementById("checkoutPayment").value;
+
+    if(!name || !phone || !address){
+        toast("Please provide recipient Name, Phone & Address");
+        return;
+    }
+
+    products = loadData("dng_products", DEFAULT_PRODUCTS);
+    const orderItems = [];
+
+    for(let item of cart){
+        const p = products.find(x => x.id === item.id);
+        if(!p) continue;
+
+        if(p.stock < item.qty){
+            toast(`Stock changed for ${p.name}. Only ${p.stock} available.`);
+            return;
+        }
+
+        p.stock = Math.max(0, Number(p.stock) - item.qty);
+        orderItems.push({
+            id: p.id,
+            name: p.name,
+            qty: item.qty,
+            price: Number(p.price),
+            subtotal: Number(p.price) * item.qty
+        });
+    }
+
+    const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
+
+    const order = {
+        id: "DNG" + Date.now(),
+        customer: { name, phone, address, coordinates: userCoordinates || "Patna, Bihar" },
+        items: orderItems,
+        subtotal: subtotal,
+        gstRate: gstRate,
+        gst: gstAmount,
+        handling: handlingFee,
+        delivery: deliveryFee,
+        discount: discountAmount,
+        couponCode: appliedCoupon ? appliedCoupon.code : "",
+        total: grandTotal,
+        paid: payment === "Cash on Delivery" ? 0 : grandTotal,
+        due: payment === "Cash on Delivery" ? grandTotal : 0,
+        paymentMethod: payment,
+        status: "Preparing",
+        date: new Date().toLocaleString()
+    };
+
+    orders = loadData("dng_orders", []);
+    orders.push(order);
+
+    if(appliedCoupon){
+        referrals = loadData("dng_referrals", []);
+        const refObj = referrals.find(r => r.code === appliedCoupon.code);
+        if(refObj){
+            refObj.successful = Number(refObj.successful || 0) + 1;
+            const rewardAmount = Number(refObj.rewardPerReferral || 50);
+            refObj.reward = Number(refObj.reward || 0) + rewardAmount;
+
+            let wallet = loadData("dng_wallet", { balance:0, transactions:[] });
+            wallet.balance += rewardAmount;
+            wallet.transactions.unshift({
+                name: `${refObj.name} (${refObj.code}) Referral Reward`,
+                amount: rewardAmount,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem("dng_wallet", JSON.stringify(wallet));
+        }
+    }
+
+    customers = loadData("dng_customers", []);
+    const existingCust = customers.find(c => (phone && c.phone === phone) || c.name.toLowerCase() === name.toLowerCase());
+    if(existingCust){
+        existingCust.orders = (existingCust.orders || 0) + 1;
+        existingCust.lastStatus = "Preparing";
+    } else {
+        customers.push({ id: Date.now(), name, phone, orders: 1, lastStatus: "Preparing", followup: false });
+    }
+
+    cart = [];
+    syncDatabase();
+    updateCartUI();
+    renderProducts();
+    closeCheckoutModal();
+
+    if(viaWhatsApp){
+        sendOrderToWhatsApp(order);
+    } else {
+        toast(`Order #${order.id} placed! Packing now.`);
+        alert(`Order placed successfully!\nOrder ID: #${order.id}\nThank you for shopping at DNG Mart.`);
+    }
+}
+
+function sendOrderToWhatsApp(order){
+    let msg = `*🛒 NEW ORDER - DNG MART*\n`;
+    msg += `_Ghar ka Saman Ghar Tak_\n`;
+    msg += `--------------------------------\n`;
+    msg += `*Order ID:* #${order.id}\n`;
+    msg += `*Customer:* ${order.customer.name}\n`;
+    msg += `*Phone:* ${order.customer.phone}\n`;
+    msg += `*Address:* ${order.customer.address}\n`;
+    if(order.customer.coordinates) msg += `*GPS Pin:* ${order.customer.coordinates}\n`;
+    msg += `--------------------------------\n`;
+    msg += `*ORDER ITEMS:*\n`;
+
+    order.items.forEach((item, idx) => {
+        msg += `${idx + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}\n`;
+    });
+
+    msg += `--------------------------------\n`;
+    msg += `*Subtotal:* ${money(order.subtotal)}\n`;
+    if(order.delivery) msg += `*Delivery Fee:* ${money(order.delivery)}\n`;
+    if(order.handling) msg += `*Bag/Handling:* ${money(order.handling)}\n`;
+    if(order.gst) msg += `*GST (${order.gstRate}%):* ${money(order.gst)}\n`;
+    if(order.discount) msg += `*Coupon Discount (${order.couponCode}):* -${money(order.discount)}\n`;
+    msg += `*Total Amount:* ${money(order.total)}\n`;
+    msg += `*Payment Mode:* ${order.paymentMethod}\n`;
+    msg += `--------------------------------\n`;
+    msg += `_⚡ Fast 10 Minute Express Delivery_`;
+
+    const encoded = encodeURIComponent(msg);
+    const cleanPhone = order.customer.phone.replace(/[^0-9]/g, '');
+    const url = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
+}
+
+function detectLocation(){
+    if(!navigator.geolocation){
+        toast("Geolocation not supported");
+        return;
+    }
+    document.getElementById("etaLocation").innerText = "Detecting GPS...";
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude.toFixed(4);
+            const lng = pos.coords.longitude.toFixed(4);
+            userCoordinates = `${lat}, ${lng}`;
+            document.getElementById("etaLocation").innerText = `Patna (${lat}, ${lng})`;
+            toast("Delivery location pinned successfully!");
+        },
+        () => {
+            document.getElementById("etaLocation").innerText = "Patna, Bihar";
+        }
+    );
+}
+
+renderCategoryChips();
+renderSidebar();
+renderProducts();
+updateCartUI();
+</script>
+
+</body>
+</html>
