@@ -56,7 +56,7 @@ body{
     padding: 12px 24px;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 20px;
+    gap: 16px;
 }
 
 .bk-logo-block{
@@ -80,10 +80,7 @@ body{
     align-items: center;
     gap: 4px;
 }
-
-.bk-logo-badge span{
-    color: var(--blinkit-green);
-}
+.bk-logo-badge span{ color: var(--blinkit-green); }
 
 .bk-eta-pill{
     display: flex;
@@ -94,12 +91,12 @@ body{
     transition: background 0.2s;
 }
 .bk-eta-pill:hover{ background: #f8f8f8; }
-.bk-eta-time{ font-size: 15px; font-weight: 800; color: #000; display: flex; align-items: center; gap: 4px;}
-.bk-eta-loc{ font-size: 12px; color: var(--text-muted); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.bk-eta-time{ font-size: 14px; font-weight: 800; color: #000; display: flex; align-items: center; gap: 4px;}
+.bk-eta-loc{ font-size: 11px; color: var(--text-muted); max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
 .bk-search-bar{
     flex: 1;
-    max-width: 650px;
+    max-width: 550px;
     position: relative;
     display: flex;
     align-items: center;
@@ -116,14 +113,14 @@ body{
 }
 .bk-search-icon{
     padding: 0 14px;
-    font-size: 16px;
+    font-size: 15px;
     color: #777;
 }
 .bk-search-input{
     flex: 1;
     border: none;
     background: transparent;
-    padding: 12px 14px 12px 0;
+    padding: 10px 14px 10px 0;
     font-size: 14px;
     outline: none;
     color: var(--text-main);
@@ -132,8 +129,41 @@ body{
 .bk-nav-actions{
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
     flex-shrink: 0;
+}
+
+.bk-auth-btn{
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.bk-auth-btn:hover{
+    border-color: var(--blinkit-green);
+    color: var(--blinkit-green);
+}
+
+.bk-track-pill{
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: var(--blinkit-green-dark);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .bk-cart-pill{
@@ -141,8 +171,8 @@ body{
     color: #ffffff;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
+    gap: 8px;
+    padding: 9px 16px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 14px;
@@ -166,7 +196,7 @@ body{
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 24px;
+    padding: 8px 24px;
     max-width: 1400px;
     margin: 0 auto;
     white-space: nowrap;
@@ -184,14 +214,9 @@ body{
     gap: 6px;
     transition: all 0.2s ease;
 }
-.bk-cat-chip:hover{
+.bk-cat-chip:hover, .bk-cat-chip.active{
     border-color: var(--blinkit-green);
     background: var(--blinkit-green-light);
-    color: var(--blinkit-green-dark);
-}
-.bk-cat-chip.active{
-    background: var(--blinkit-green-light);
-    border-color: var(--blinkit-green);
     color: var(--blinkit-green-dark);
 }
 
@@ -206,7 +231,7 @@ body{
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    height: 220px;
+    height: 200px;
     box-shadow: var(--shadow-subtle);
 }
 .bk-banner-slider{
@@ -229,19 +254,19 @@ body{
 .bk-slide-3{ background: linear-gradient(110deg, #fddbe7 0%, #fa7ba7 100%); }
 .bk-slide-4{ background: linear-gradient(110deg, #dbeafe 0%, #60a5fa 100%); }
 
-.bk-slide-info h2{ font-size: 28px; font-weight: 900; color: #111; margin-bottom: 6px; }
-.bk-slide-info p{ font-size: 14px; font-weight: 600; color: #2a2a2a; margin-bottom: 12px; }
+.bk-slide-info h2{ font-size: 26px; font-weight: 900; color: #111; margin-bottom: 4px; }
+.bk-slide-info p{ font-size: 13px; font-weight: 600; color: #2a2a2a; margin-bottom: 12px; }
 .bk-slide-btn{
     background: #000;
     color: #fff;
     border: none;
-    padding: 8px 18px;
+    padding: 7px 16px;
     border-radius: var(--radius-md);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
 }
-.bk-slide-art{ font-size: 85px; }
+.bk-slide-art{ font-size: 80px; }
 
 /* APP LAYOUT */
 .bk-app-layout{
@@ -253,7 +278,7 @@ body{
 }
 
 .bk-sidebar{
-    width: 260px;
+    width: 250px;
     flex-shrink: 0;
     background: #fff;
     border: 1px solid var(--border-color);
@@ -264,7 +289,7 @@ body{
     top: 130px;
 }
 .bk-sidebar h3{
-    font-size: 14px;
+    font-size: 13px;
     text-transform: uppercase;
     color: var(--text-muted);
     letter-spacing: 0.5px;
@@ -277,7 +302,7 @@ body{
     gap: 4px;
 }
 .bk-subcat-item{
-    padding: 10px 12px;
+    padding: 9px 12px;
     border-radius: var(--radius-sm);
     font-size: 13.5px;
     font-weight: 600;
@@ -376,11 +401,7 @@ body{
     margin-bottom: 8px;
     overflow: hidden;
 }
-.bk-card-img img{
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+.bk-card-img img{ width: 100%; height: 100%; object-fit: contain; }
 
 .bk-card-name{
     font-size: 13px;
@@ -452,7 +473,7 @@ body{
     padding: 0 4px;
 }
 
-/* CART & CHECKOUT MODALS */
+/* MODALS & DRAWERS */
 .bk-drawer{
     position: fixed;
     inset: 0;
@@ -554,6 +575,26 @@ body{
 }
 .bk-checkout-btn:hover{ background: var(--blinkit-green-dark); }
 
+/* POPUP NOTIFICATION & TOAST */
+#notificationPop{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-left: 5px solid var(--blinkit-green);
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 99999;
+    display: none;
+    max-width: 340px;
+    animation: bounceIn 0.3s ease;
+}
+@keyframes bounceIn{
+    from{ transform: translateY(-20px); opacity: 0; }
+    to{ transform: translateY(0); opacity: 1; }
+}
+
 #toast{
     position: fixed;
     bottom: 24px;
@@ -570,6 +611,53 @@ body{
     box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
+/* TRACK ORDER TIMELINE */
+.track-step{
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 20px;
+}
+.track-step:last-child{ padding-bottom: 0; }
+.track-step::before{
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 24px;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+}
+.track-step:last-child::before{ display: none; }
+.track-step.done::before{ background: var(--blinkit-green); }
+.track-dot{
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #64748b;
+    z-index: 2;
+}
+.track-step.done .track-dot{
+    background: var(--blinkit-green);
+    color: #fff;
+}
+.track-step.active .track-dot{
+    background: var(--blinkit-yellow);
+    color: #000;
+    box-shadow: 0 0 0 4px rgba(247, 212, 23, 0.3);
+}
+
+/* INPUTS */
+.input-label{ font-size: 12px; font-weight: 700; margin-bottom: 4px; display: block; }
+.text-input{ width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; font-size: 13.5px; outline: none; }
+.text-input:focus{ border-color: var(--blinkit-green); }
+
 @media(max-width: 900px){
     .bk-sidebar{ display: none; }
     .bk-app-layout{ padding: 0 16px; }
@@ -577,7 +665,7 @@ body{
 @media(max-width: 600px){
     .bk-main-nav{ padding: 10px 14px; gap: 8px; }
     .bk-eta-pill{ display: none; }
-    .bk-banner-slider-wrap{ height: 160px; }
+    .bk-banner-slider-wrap{ height: 150px; }
     .bk-slide-info h2{ font-size: 18px; }
     .bk-slide-art{ display: none; }
     .bk-product-grid{ grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -587,6 +675,15 @@ body{
 
 <body>
 
+<!-- POPUP NOTIFICATION -->
+<div id="notificationPop">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <strong style="color:var(--blinkit-green-dark); font-size:14px;" id="notifTitle">Order Update</strong>
+        <span style="cursor:pointer; font-size:14px; font-weight:bold; margin-left:8px;" onclick="closeNotif()">×</span>
+    </div>
+    <div style="font-size:12.5px; color:#444; margin-top:4px;" id="notifBody">Your order status changed.</div>
+</div>
+
 <!-- HEADER -->
 <header class="bk-header">
     <div class="bk-main-nav">
@@ -595,15 +692,15 @@ body{
             <div class="bk-logo-badge">
                 DNG<span>MART</span>
             </div>
-            <div style="font-size:12px;font-weight:700;color:var(--blinkit-green-dark);letter-spacing:-0.2px;">
+            <div style="font-size:11px;font-weight:700;color:var(--blinkit-green-dark);letter-spacing:-0.2px;">
                 Ghar ka Saman Ghar Tak
             </div>
         </a>
 
-        <!-- 10 MIN GPS Pin -->
-        <div class="bk-eta-pill" onclick="detectLocation()">
+        <!-- GPS Pin with Auto-address detection -->
+        <div class="bk-eta-pill" onclick="detectLocation(true)">
             <div class="bk-eta-time">⚡ Delivery in 10 Mins</div>
-            <div class="bk-eta-loc" id="etaLocation">Patna, Bihar</div>
+            <div class="bk-eta-loc" id="etaLocation">Patna, Bihar (Detect GPS)</div>
         </div>
 
         <!-- Search -->
@@ -612,8 +709,19 @@ body{
             <input class="bk-search-input" id="bkSearchInput" placeholder='Search "oil", "atta", "dal", "chips", "dhoop"...' oninput="handleSearch(this.value)">
         </div>
 
-        <!-- Cart Action Only -->
+        <!-- Actions -->
         <div class="bk-nav-actions">
+            <!-- Track Order Button -->
+            <button class="bk-track-pill" onclick="openTrackModal()">
+                <span>🚚</span> Track Order
+            </button>
+
+            <!-- Customer Auth Button -->
+            <button class="bk-auth-btn" id="authNavBtn" onclick="openAuthModal()">
+                <span>👤</span> <span id="authNavText">Login / Signup</span>
+            </button>
+
+            <!-- Cart Pill -->
             <button class="bk-cart-pill" onclick="openCartDrawer()">
                 <span>🛒</span>
                 <span id="navCartCount">0 items</span>
@@ -698,13 +806,99 @@ body{
         <div class="bk-drawer-body" id="cartDrawerBody"></div>
 
         <div class="bk-drawer-footer">
-            <button class="bk-checkout-btn" onclick="openCheckoutModal()">
+            <button class="bk-checkout-btn" onclick="proceedToCheckoutGate()">
                 <div>
                     <div style="font-size:11px;text-align:left;opacity:0.8;">TOTAL PAYABLE</div>
                     <div id="drawerTotalPayable" style="font-size:16px;">₹0</div>
                 </div>
                 <div>Proceed to Pay ➔</div>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- AUTH MODAL (LOGIN / SIGNUP + GMAIL OTP) -->
+<div class="bk-drawer" id="authModal">
+    <div class="bk-drawer-content" style="max-width:440px;">
+        <div class="bk-drawer-header">
+            <h2 id="authModalTitle">Login to DNG Mart</h2>
+            <button class="bk-drawer-close" onclick="closeAuthModal()">×</button>
+        </div>
+
+        <div class="bk-drawer-body">
+            <!-- LOGIN VIEW -->
+            <div id="authLoginView" class="bk-cart-box">
+                <span class="input-label">Gmail / Email ID *</span>
+                <input class="text-input" id="loginEmail" placeholder="yourname@gmail.com">
+
+                <span class="input-label">Password *</span>
+                <input class="text-input" id="loginPassword" type="password" placeholder="••••••••">
+
+                <button class="bk-checkout-btn" style="justify-content:center;margin-top:10px;" onclick="handleCustomerLogin()">
+                    Login
+                </button>
+
+                <div style="text-align:center;font-size:13px;margin-top:14px;color:#666;">
+                    Don't have an account? <a href="javascript:void(0)" onclick="toggleAuthView('signup')" style="color:var(--blinkit-green);font-weight:bold;">Sign Up with Gmail OTP</a>
+                </div>
+            </div>
+
+            <!-- SIGNUP STEP 1 VIEW -->
+            <div id="authSignupView" class="bk-cart-box" style="display:none;">
+                <span class="input-label">Full Name *</span>
+                <input class="text-input" id="regName" placeholder="Your Name">
+
+                <span class="input-label">Phone Number *</span>
+                <input class="text-input" id="regPhone" placeholder="10-digit mobile number">
+
+                <span class="input-label">Gmail ID *</span>
+                <input class="text-input" id="regEmail" placeholder="username@gmail.com">
+
+                <span class="input-label">Create Password *</span>
+                <input class="text-input" id="regPassword" type="password" placeholder="Create strong password">
+
+                <button class="bk-checkout-btn" style="justify-content:center;margin-top:10px;" onclick="sendGmailOTP()">
+                    Send Gmail OTP Code
+                </button>
+
+                <div style="text-align:center;font-size:13px;margin-top:14px;color:#666;">
+                    Already have an account? <a href="javascript:void(0)" onclick="toggleAuthView('login')" style="color:var(--blinkit-green);font-weight:bold;">Login here</a>
+                </div>
+            </div>
+
+            <!-- SIGNUP STEP 2: OTP VERIFICATION -->
+            <div id="authOtpView" class="bk-cart-box" style="display:none;">
+                <div style="text-align:center;margin-bottom:12px;">
+                    <div style="font-size:32px;">📩</div>
+                    <strong style="font-size:15px;display:block;">Verify Gmail OTP</strong>
+                    <small style="color:#666;">We sent a 6-digit verification code to <b id="otpTargetEmail"></b></small>
+                </div>
+
+                <div id="otpSimulationBanner" style="background:#fef3c7;border:1px dashed #d97706;padding:8px 10px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:12px;text-align:center;">
+                    Demo Email Gateway: Your OTP is <b id="demoOtpDisplay" style="font-size:14px;letter-spacing:2px;"></b>
+                </div>
+
+                <span class="input-label">Enter 6-Digit OTP *</span>
+                <input class="text-input" id="enteredOtp" placeholder="123456" maxlength="6" style="text-align:center;font-size:18px;letter-spacing:4px;font-weight:bold;">
+
+                <button class="bk-checkout-btn" style="justify-content:center;margin-top:8px;" onclick="verifyOtpAndRegister()">
+                    Verify & Complete Signup
+                </button>
+            </div>
+
+            <!-- LOGGED IN VIEW -->
+            <div id="authProfileView" class="bk-cart-box" style="display:none;text-align:center;">
+                <div style="font-size:45px;margin-bottom:8px;">🧑‍💼</div>
+                <h3 id="profName">Customer Name</h3>
+                <p id="profEmail" style="color:#666;font-size:13px;margin-bottom:12px;"></p>
+                <div style="background:#f8f9fa;padding:10px;border-radius:8px;font-size:13px;text-align:left;margin-bottom:14px;">
+                    <div><b>Phone:</b> <span id="profPhone">-</span></div>
+                    <div><b>Saved Address:</b> <span id="profAddress">None</span></div>
+                </div>
+                <button class="bk-add-btn" style="width:100%;padding:10px;color:red;border-color:red;" onclick="logoutCustomer()">
+                    Log Out
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -718,18 +912,23 @@ body{
         </div>
 
         <div class="bk-drawer-body">
+            <!-- Saved Geo-address Notice -->
+            <div id="geoRecognizedBanner" style="display:none;background:#ecfdf5;border:1px solid #10b981;border-radius:6px;padding:8px 12px;font-size:12px;color:#065f46;">
+                📍 <b>Recognized GPS Location:</b> Auto-filled your previously used delivery address!
+            </div>
+
             <div class="bk-cart-box">
-                <label style="font-size:12px;font-weight:700;">Full Name *</label>
-                <input id="checkoutName" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="Recipient Name">
+                <span class="input-label">Full Name *</span>
+                <input id="checkoutName" class="text-input" placeholder="Recipient Name">
 
-                <label style="font-size:12px;font-weight:700;">WhatsApp Mobile *</label>
-                <input id="checkoutPhone" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="10-digit mobile number">
+                <span class="input-label">WhatsApp Mobile *</span>
+                <input id="checkoutPhone" class="text-input" placeholder="10-digit mobile number">
 
-                <label style="font-size:12px;font-weight:700;">Complete Delivery Address *</label>
-                <textarea id="checkoutAddress" rows="2" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;" placeholder="House/Flat No, Landmark, Area in Patna"></textarea>
+                <span class="input-label">Complete Delivery Address *</span>
+                <textarea id="checkoutAddress" rows="2" class="text-input" style="height:auto;" placeholder="House/Flat No, Landmark, Area"></textarea>
 
-                <label style="font-size:12px;font-weight:700;">Payment Mode</label>
-                <select id="checkoutPayment" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin:4px 0 10px;">
+                <span class="input-label">Payment Mode</span>
+                <select id="checkoutPayment" class="text-input">
                     <option value="Cash on Delivery">Cash on Delivery (COD)</option>
                     <option value="UPI / Online QR">UPI / QR on Delivery</option>
                 </select>
@@ -737,7 +936,7 @@ body{
 
             <!-- Promo Code -->
             <div class="bk-cart-box">
-                <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Have a Promo / Referral Code?</label>
+                <span class="input-label">Have a Promo / Referral Code?</span>
                 <div style="display:flex;gap:6px;">
                     <input id="couponInput" placeholder="Enter coupon code" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;text-transform:uppercase;font-size:13px;">
                     <button type="button" class="bk-add-btn" style="padding:8px 14px;" onclick="applyPromoCode()">Apply</button>
@@ -745,7 +944,7 @@ body{
                 <div id="couponStatus" style="font-size:11px;margin-top:5px;"></div>
             </div>
 
-            <!-- Live Admin-Synced Breakdown -->
+            <!-- Live Bill Breakdown -->
             <div class="bk-cart-box">
                 <h4 style="font-size:13px;margin-bottom:10px;">Bill Breakdown</h4>
                 <div class="bk-bill-row"><span>Items Subtotal</span><span id="billSubtotal">₹0</span></div>
@@ -772,6 +971,40 @@ body{
     </div>
 </div>
 
+<!-- TRACK ORDER MODAL -->
+<div class="bk-drawer" id="trackModal">
+    <div class="bk-drawer-content" style="max-width:440px;">
+        <div class="bk-drawer-header">
+            <h2>Live Order Tracking</h2>
+            <button class="bk-drawer-close" onclick="closeTrackModal()">×</button>
+        </div>
+
+        <div class="bk-drawer-body">
+            <div class="bk-cart-box">
+                <span class="input-label">Select Active Order</span>
+                <select id="trackOrderSelect" class="text-input" onchange="renderSelectedOrderTracking()"></select>
+            </div>
+
+            <div class="bk-cart-box" id="trackTimelineBox">
+                <div id="trackTimelineContent">
+                    <p style="text-align:center;color:#888;font-size:13px;">No active orders found.</p>
+                </div>
+            </div>
+
+            <!-- Simulation Demo Controller for testing pop-ups -->
+            <div class="bk-cart-box" style="border: 1px dashed #bbb;">
+                <span class="input-label" style="color:#555;">⚡ Test Live Status Updates & Notifications:</span>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Packing')">➔ Packing</button>
+                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Shipped')">➔ Shipped</button>
+                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Out for Delivery')">➔ Out for Delivery</button>
+                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Delivered')">➔ Delivered</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -793,24 +1026,34 @@ function loadData(key, fallback){
     }
 }
 
+// App State
 let products = loadData("dng_products", DEFAULT_PRODUCTS);
 let orders = loadData("dng_orders", []);
 let customers = loadData("dng_customers", []);
+let registeredUsers = loadData("dng_reg_users", []);
+let currentUser = loadData("dng_logged_user", null);
 let referrals = loadData("dng_referrals", []);
 let onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
 let cart = loadData("dng_cart", []);
+let geoAddressBook = loadData("dng_geo_memory", []); // Stores [{lat, lng, name, phone, address}]
 
 let selectedCategory = "All";
 let searchQuery = "";
 let userCoordinates = null;
 let appliedCoupon = null;
 
+let generatedOtp = null;
+let pendingSignup = null;
+
 function syncDatabase(){
     localStorage.setItem("dng_products", JSON.stringify(products));
     localStorage.setItem("dng_orders", JSON.stringify(orders));
     localStorage.setItem("dng_customers", JSON.stringify(customers));
+    localStorage.setItem("dng_reg_users", JSON.stringify(registeredUsers));
+    localStorage.setItem("dng_logged_user", JSON.stringify(currentUser));
     localStorage.setItem("dng_referrals", JSON.stringify(referrals));
     localStorage.setItem("dng_cart", JSON.stringify(cart));
+    localStorage.setItem("dng_geo_memory", JSON.stringify(geoAddressBook));
 }
 
 function money(v){
@@ -824,38 +1067,350 @@ function toast(msg){
     setTimeout(() => t.style.display = "none", 2500);
 }
 
-window.addEventListener("storage", (e) => {
-    if(e.key === "dng_products"){
-        products = loadData("dng_products", DEFAULT_PRODUCTS);
-        renderCategoryChips();
-        renderSidebar();
-        renderProducts();
-        renderCartDrawerItems();
-    }
-    if(e.key === "dng_orders"){
-        orders = loadData("dng_orders", []);
-    }
-    if(e.key === "dng_customers"){
-        customers = loadData("dng_customers", []);
-    }
-    if(e.key === "dng_referrals"){
-        referrals = loadData("dng_referrals", []);
-    }
-    if(e.key === "dng_online_settings"){
-        onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
-        if(document.getElementById("checkoutModal").classList.contains("active")){
-            updateCheckoutTotals();
-        }
-    }
-});
+function notifyUser(title, message){
+    const pop = document.getElementById("notificationPop");
+    document.getElementById("notifTitle").innerText = title;
+    document.getElementById("notifBody").innerText = message;
+    pop.style.display = "block";
+    try {
+        const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+        audio.play().catch(()=>{});
+    } catch(e){}
+    setTimeout(closeNotif, 6000);
+}
 
-let slideIdx = 0;
-setInterval(() => {
-    slideIdx = (slideIdx + 1) % 4;
-    const slider = document.getElementById("heroSlider");
-    if(slider) slider.style.transform = `translateX(-${slideIdx * 25}%)`;
-}, 4000);
+function closeNotif(){
+    document.getElementById("notificationPop").style.display = "none";
+}
 
+/* =======================================================
+   AUTHENTICATION & GMAIL OTP LOGIC
+======================================================= */
+function updateAuthUI(){
+    const authBtn = document.getElementById("authNavText");
+    if(currentUser){
+        authBtn.innerText = currentUser.name.split(" ")[0];
+    } else {
+        authBtn.innerText = "Login / Signup";
+    }
+}
+
+function openAuthModal(){
+    if(currentUser){
+        document.getElementById("authLoginView").style.display = "none";
+        document.getElementById("authSignupView").style.display = "none";
+        document.getElementById("authOtpView").style.display = "none";
+        document.getElementById("authProfileView").style.display = "block";
+        document.getElementById("authModalTitle").innerText = "Customer Profile";
+
+        document.getElementById("profName").innerText = currentUser.name;
+        document.getElementById("profEmail").innerText = currentUser.email;
+        document.getElementById("profPhone").innerText = currentUser.phone || "Not linked";
+        document.getElementById("profAddress").innerText = currentUser.address || "No default address saved";
+    } else {
+        toggleAuthView("login");
+    }
+    document.getElementById("authModal").classList.add("active");
+}
+
+function closeAuthModal(){
+    document.getElementById("authModal").classList.remove("active");
+}
+
+function toggleAuthView(view){
+    document.getElementById("authProfileView").style.display = "none";
+    if(view === "signup"){
+        document.getElementById("authLoginView").style.display = "none";
+        document.getElementById("authSignupView").style.display = "block";
+        document.getElementById("authOtpView").style.display = "none";
+        document.getElementById("authModalTitle").innerText = "Create Account";
+    } else if(view === "login"){
+        document.getElementById("authLoginView").style.display = "block";
+        document.getElementById("authSignupView").style.display = "none";
+        document.getElementById("authOtpView").style.display = "none";
+        document.getElementById("authModalTitle").innerText = "Login to DNG Mart";
+    } else if(view === "otp"){
+        document.getElementById("authLoginView").style.display = "none";
+        document.getElementById("authSignupView").style.display = "none";
+        document.getElementById("authOtpView").style.display = "block";
+        document.getElementById("authModalTitle").innerText = "Gmail OTP Verification";
+    }
+}
+
+function handleCustomerLogin(){
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const pass = document.getElementById("loginPassword").value;
+
+    if(!email || !pass){
+        toast("Please enter your Gmail / Username and Password");
+        return;
+    }
+
+    registeredUsers = loadData("dng_reg_users", []);
+    const user = registeredUsers.find(u => (u.email.toLowerCase() === email || u.phone === email) && u.password === pass);
+
+    if(user){
+        currentUser = user;
+        syncDatabase();
+        updateAuthUI();
+        closeAuthModal();
+        toast(`Welcome back, ${user.name}!`);
+    } else {
+        toast("Invalid email/username or password.");
+    }
+}
+
+function sendGmailOTP(){
+    const name = document.getElementById("regName").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const password = document.getElementById("regPassword").value;
+
+    if(!name || !phone || !email || !password){
+        toast("Please fill in all registration fields.");
+        return;
+    }
+    if(!email.includes("@")){
+        toast("Please enter a valid Gmail / Email address.");
+        return;
+    }
+
+    registeredUsers = loadData("dng_reg_users", []);
+    if(registeredUsers.some(u => u.email.toLowerCase() === email)){
+        toast("An account with this email already exists. Please login.");
+        toggleAuthView("login");
+        return;
+    }
+
+    // Generate 6-digit OTP
+    generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    pendingSignup = { name, phone, email, password };
+
+    document.getElementById("otpTargetEmail").innerText = email;
+    document.getElementById("demoOtpDisplay").innerText = generatedOtp;
+    document.getElementById("enteredOtp").value = "";
+
+    toggleAuthView("otp");
+    notifyUser("Gmail Verification Code Sent", `A verification OTP [${generatedOtp}] was dispatched to ${email}.`);
+}
+
+function verifyOtpAndRegister(){
+    const entered = document.getElementById("enteredOtp").value.trim();
+
+    if(entered !== generatedOtp){
+        toast("Invalid OTP code. Please check and re-enter.");
+        return;
+    }
+
+    const newUser = {
+        id: "usr_" + Date.now(),
+        ...pendingSignup,
+        createdAt: new Date().toLocaleString()
+    };
+
+    registeredUsers.push(newUser);
+    currentUser = newUser;
+    syncDatabase();
+    updateAuthUI();
+    closeAuthModal();
+    toast(`Account verified & registered! Welcome, ${newUser.name}.`);
+}
+
+function logoutCustomer(){
+    currentUser = null;
+    syncDatabase();
+    updateAuthUI();
+    closeAuthModal();
+    toast("Logged out successfully.");
+}
+
+function proceedToCheckoutGate(){
+    if(cart.length === 0){
+        toast("Please add items to cart first");
+        return;
+    }
+    closeCartDrawer();
+
+    if(!currentUser){
+        toast("Please login or create an account to proceed.");
+        openAuthModal();
+    } else {
+        openCheckoutModal();
+    }
+}
+
+/* =======================================================
+   GEO-LOCATION & AUTO-ADDRESS MATCHING
+======================================================= */
+function detectLocation(notify = false){
+    if(!navigator.geolocation){
+        toast("Geolocation not supported by browser");
+        return;
+    }
+    document.getElementById("etaLocation").innerText = "Detecting GPS...";
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = Number(pos.coords.latitude.toFixed(4));
+            const lng = Number(pos.coords.longitude.toFixed(4));
+            userCoordinates = { lat, lng };
+            document.getElementById("etaLocation").innerText = `GPS (${lat}, ${lng})`;
+            if(notify) toast("Delivery coordinates locked!");
+
+            // Check if address already exists for these coordinates
+            autoFillSavedAddressForCoords(lat, lng);
+        },
+        () => {
+            document.getElementById("etaLocation").innerText = "Patna, Bihar (Default)";
+        },
+        { timeout: 8000 }
+    );
+}
+
+function getDistanceInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function autoFillSavedAddressForCoords(lat, lng){
+    geoAddressBook = loadData("dng_geo_memory", []);
+    // Check if within 250 meters of a past delivery coordinate
+    const matched = geoAddressBook.find(entry => getDistanceInKm(lat, lng, entry.lat, entry.lng) <= 0.25);
+
+    if(matched){
+        document.getElementById("checkoutName").value = matched.name || "";
+        document.getElementById("checkoutPhone").value = matched.phone || "";
+        document.getElementById("checkoutAddress").value = matched.address || "";
+        document.getElementById("geoRecognizedBanner").style.display = "block";
+    }
+}
+
+/* =======================================================
+   ORDER TRACKING & NOTIFICATIONS
+======================================================= */
+function openTrackModal(){
+    renderOrderTrackDropdown();
+    document.getElementById("trackModal").classList.add("active");
+}
+
+function closeTrackModal(){
+    document.getElementById("trackModal").classList.remove("active");
+}
+
+function renderOrderTrackDropdown(){
+    const sel = document.getElementById("trackOrderSelect");
+    sel.innerHTML = "";
+
+    orders = loadData("dng_orders", []);
+    let customerOrders = orders;
+    if(currentUser){
+        customerOrders = orders.filter(o => o.customer.email === currentUser.email || o.customer.phone === currentUser.phone);
+    }
+
+    if(customerOrders.length === 0){
+        sel.innerHTML = `<option value="">No recent orders</option>`;
+        document.getElementById("trackTimelineContent").innerHTML = `<p style="text-align:center;color:#888;font-size:13px;padding:20px;">No placed orders to track.</p>`;
+        return;
+    }
+
+    customerOrders.slice().reverse().forEach(o => {
+        const opt = document.createElement("option");
+        opt.value = o.id;
+        opt.innerText = `#${o.id} - ${money(o.total)} (${o.status})`;
+        sel.appendChild(opt);
+    });
+
+    renderSelectedOrderTracking();
+}
+
+function renderSelectedOrderTracking(){
+    const sel = document.getElementById("trackOrderSelect");
+    const orderId = sel.value;
+    const container = document.getElementById("trackTimelineContent");
+
+    if(!orderId){
+        container.innerHTML = `<p style="text-align:center;color:#888;font-size:13px;padding:20px;">Select an order above to track status.</p>`;
+        return;
+    }
+
+    orders = loadData("dng_orders", []);
+    const order = orders.find(o => o.id === orderId);
+    if(!order) return;
+
+    const stages = ["Placed", "Packing", "Shipped", "Out for Delivery", "Delivered"];
+    const currentIdx = stages.indexOf(order.status || "Placed");
+
+    let html = `
+        <div style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:14px;">
+            <strong style="font-size:14px;">Order #${order.id}</strong>
+            <div style="font-size:12px;color:#666;">Placed on: ${order.date}</div>
+            <div style="font-size:12px;color:var(--blinkit-green);font-weight:bold;">ETA: 10-15 Minutes</div>
+        </div>
+        <div class="track-timeline">
+    `;
+
+    stages.forEach((stage, idx) => {
+        let stateClass = "";
+        if(idx < currentIdx) stateClass = "done";
+        else if(idx === currentIdx) stateClass = "active";
+
+        html += `
+            <div class="track-step ${stateClass}">
+                <div class="track-dot">${idx < currentIdx ? '✓' : (idx + 1)}</div>
+                <div>
+                    <strong style="font-size:13px;">${stage}</strong>
+                    <p style="font-size:11.5px;color:#777;">${getStageDesc(stage)}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function getStageDesc(stage){
+    switch(stage){
+        case "Placed": return "Order confirmed and transmitted to dark store.";
+        case "Packing": return "Items picked & packed into delivery bag.";
+        case "Shipped": return "Delivery executive assigned & dispatched.";
+        case "Out for Delivery": return "Rider is within 500m of your location.";
+        case "Delivered": return "Order handed over. Thank you!";
+        default: return "";
+    }
+}
+
+function simulateStatusChange(newStatus){
+    const sel = document.getElementById("trackOrderSelect");
+    const orderId = sel.value;
+    if(!orderId){
+        toast("No active order selected to update.");
+        return;
+    }
+
+    orders = loadData("dng_orders", []);
+    const order = orders.find(o => o.id === orderId);
+    if(order){
+        order.status = newStatus;
+        syncDatabase();
+        renderOrderTrackDropdown();
+        sel.value = orderId;
+        renderSelectedOrderTracking();
+
+        // Dispatch Instant Popup Notification to website
+        notifyUser(`Order #${order.id} Updated!`, `Status is now: ${newStatus.toUpperCase()} - ${getStageDesc(newStatus)}`);
+    }
+}
+
+/* =======================================================
+   STORE, CART & CHECKOUT
+======================================================= */
 function getUniqueCategories(){
     const cats = new Set(["All", "Atta & Dal", "Oil & Ghee", "Daily Essentials", "Snacks & Beverages", "Cleaning & Household"]);
     products.forEach(p => { if(p.category) cats.add(p.category); });
@@ -1140,7 +1695,7 @@ function applyPromoCode(){
     const statusDiv = document.getElementById("couponStatus");
 
     if(!code){
-        statusDiv.innerHTML = `<span style="color:red;">Please enter a promo coupon code.</span>`;
+        statusDiv.innerHTML = `<span style="color:red;">Please enter a coupon code.</span>`;
         return;
     }
 
@@ -1175,17 +1730,23 @@ function applyPromoCode(){
 }
 
 function openCheckoutModal(){
-    if(cart.length === 0){
-        toast("Please add items to cart first");
-        return;
-    }
-
     appliedCoupon = null;
     document.getElementById("couponInput").value = "";
     document.getElementById("couponStatus").innerHTML = "";
 
+    // Prefill customer profile values
+    if(currentUser){
+        document.getElementById("checkoutName").value = currentUser.name || "";
+        document.getElementById("checkoutPhone").value = currentUser.phone || "";
+        if(currentUser.address) document.getElementById("checkoutAddress").value = currentUser.address;
+    }
+
+    // Auto-fill from GPS coordinate history if available
+    if(userCoordinates){
+        autoFillSavedAddressForCoords(userCoordinates.lat, userCoordinates.lng);
+    }
+
     updateCheckoutTotals();
-    closeCartDrawer();
     document.getElementById("checkoutModal").classList.add("active");
 }
 
@@ -1229,11 +1790,17 @@ function placeDngOrder(viaWhatsApp = false){
     const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
 
     const order = {
-        id: "DNG" + Date.now(),
-        customer: { name, phone, address, coordinates: userCoordinates || "Patna, Bihar" },
+        id: "DNG" + Date.now().toString().slice(-6),
+        customer: {
+            name,
+            phone,
+            address,
+            email: currentUser ? currentUser.email : "",
+            coordinates: userCoordinates ? `${userCoordinates.lat}, ${userCoordinates.lng}` : "Patna, Bihar"
+        },
         items: orderItems,
-        subtotal: subtotal,
-        gstRate: gstRate,
+        subtotal,
+        gstRate,
         gst: gstAmount,
         handling: handlingFee,
         delivery: deliveryFee,
@@ -1243,39 +1810,28 @@ function placeDngOrder(viaWhatsApp = false){
         paid: payment === "Cash on Delivery" ? 0 : grandTotal,
         due: payment === "Cash on Delivery" ? grandTotal : 0,
         paymentMethod: payment,
-        status: "Preparing",
+        status: "Placed",
         date: new Date().toLocaleString()
     };
 
     orders = loadData("dng_orders", []);
     orders.push(order);
 
-    if(appliedCoupon){
-        referrals = loadData("dng_referrals", []);
-        const refObj = referrals.find(r => r.code === appliedCoupon.code);
-        if(refObj){
-            refObj.successful = Number(refObj.successful || 0) + 1;
-            const rewardAmount = Number(refObj.rewardPerReferral || 50);
-            refObj.reward = Number(refObj.reward || 0) + rewardAmount;
-
-            let wallet = loadData("dng_wallet", { balance:0, transactions:[] });
-            wallet.balance += rewardAmount;
-            wallet.transactions.unshift({
-                name: `${refObj.name} (${refObj.code}) Referral Reward`,
-                amount: rewardAmount,
-                date: new Date().toLocaleString()
-            });
-            localStorage.setItem("dng_wallet", JSON.stringify(wallet));
+    // Save GPS coordinate <-> Address mapping to auto-recall next time
+    if(userCoordinates){
+        geoAddressBook = loadData("dng_geo_memory", []);
+        const existingIdx = geoAddressBook.findIndex(g => getDistanceInKm(userCoordinates.lat, userCoordinates.lng, g.lat, g.lng) <= 0.25);
+        const geoEntry = { lat: userCoordinates.lat, lng: userCoordinates.lng, name, phone, address };
+        if(existingIdx >= 0){
+            geoAddressBook[existingIdx] = geoEntry;
+        } else {
+            geoAddressBook.push(geoEntry);
         }
     }
 
-    customers = loadData("dng_customers", []);
-    const existingCust = customers.find(c => (phone && c.phone === phone) || c.name.toLowerCase() === name.toLowerCase());
-    if(existingCust){
-        existingCust.orders = (existingCust.orders || 0) + 1;
-        existingCust.lastStatus = "Preparing";
-    } else {
-        customers.push({ id: Date.now(), name, phone, orders: 1, lastStatus: "Preparing", followup: false });
+    if(currentUser){
+        currentUser.address = address;
+        currentUser.phone = phone;
     }
 
     cart = [];
@@ -1284,11 +1840,14 @@ function placeDngOrder(viaWhatsApp = false){
     renderProducts();
     closeCheckoutModal();
 
+    // Trigger Notification
+    notifyUser(`Order #${order.id} Placed!`, "Your order is confirmed & transmitted to our dark store.");
+
     if(viaWhatsApp){
         sendOrderToWhatsApp(order);
     } else {
-        toast(`Order #${order.id} placed! Packing now.`);
-        alert(`Order placed successfully!\nOrder ID: #${order.id}\nThank you for shopping at DNG Mart.`);
+        toast(`Order #${order.id} placed! Tracking live.`);
+        openTrackModal();
     }
 }
 
@@ -1325,31 +1884,21 @@ function sendOrderToWhatsApp(order){
     window.open(url, '_blank');
 }
 
-function detectLocation(){
-    if(!navigator.geolocation){
-        toast("Geolocation not supported");
-        return;
-    }
-    document.getElementById("etaLocation").innerText = "Detecting GPS...";
+// Banner Slide Auto-rotate
+let slideIdx = 0;
+setInterval(() => {
+    slideIdx = (slideIdx + 1) % 4;
+    const slider = document.getElementById("heroSlider");
+    if(slider) slider.style.transform = `translateX(-${slideIdx * 25}%)`;
+}, 4000);
 
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            const lat = pos.coords.latitude.toFixed(4);
-            const lng = pos.coords.longitude.toFixed(4);
-            userCoordinates = `${lat}, ${lng}`;
-            document.getElementById("etaLocation").innerText = `Patna (${lat}, ${lng})`;
-            toast("Delivery location pinned successfully!");
-        },
-        () => {
-            document.getElementById("etaLocation").innerText = "Patna, Bihar";
-        }
-    );
-}
-
+// Init
 renderCategoryChips();
 renderSidebar();
 renderProducts();
 updateCartUI();
+updateAuthUI();
+detectLocation(false);
 </script>
 
 </body>
