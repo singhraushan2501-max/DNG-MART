@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DNG MART - Ghar ka Saman Ghar Tak</title>
 
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
 <style>
 :root{
     --blinkit-yellow: #f7d417;
@@ -56,7 +59,7 @@ body{
     padding: 12px 24px;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 16px;
+    gap: 14px;
 }
 
 .bk-logo-block{
@@ -96,7 +99,7 @@ body{
 
 .bk-search-bar{
     flex: 1;
-    max-width: 550px;
+    max-width: 480px;
     position: relative;
     display: flex;
     align-items: center;
@@ -129,14 +132,14 @@ body{
 .bk-nav-actions{
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
 .bk-auth-btn{
     background: transparent;
     border: 1px solid var(--border-color);
-    padding: 8px 14px;
+    padding: 8px 12px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 13px;
@@ -166,13 +169,28 @@ body{
     gap: 5px;
 }
 
+.bk-admin-link{
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    padding: 8px 11px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 12.5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.bk-admin-link:hover{ background: #fef3c7; }
+
 .bk-cart-pill{
     background: var(--blinkit-green);
     color: #ffffff;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 16px;
+    padding: 9px 15px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 14px;
@@ -574,6 +592,7 @@ body{
     align-items: center;
 }
 .bk-checkout-btn:hover{ background: var(--blinkit-green-dark); }
+.bk-checkout-btn:disabled{ background: #a5d6a7; cursor: not-allowed; }
 
 /* POPUP NOTIFICATION & TOAST */
 #notificationPop{
@@ -711,10 +730,15 @@ body{
 
         <!-- Actions -->
         <div class="bk-nav-actions">
-            <!-- Track Order Button -->
+            <!-- Customer Track Order Button -->
             <button class="bk-track-pill" onclick="openTrackModal()">
                 <span>🚚</span> Track Order
             </button>
+
+            <!-- Store Admin Portal Link -->
+            <a class="bk-admin-link" href="admin.html" target="_blank">
+                <span>🔐</span> Admin
+            </a>
 
             <!-- Customer Auth Button -->
             <button class="bk-auth-btn" id="authNavBtn" onclick="openAuthModal()">
@@ -817,7 +841,7 @@ body{
     </div>
 </div>
 
-<!-- AUTH MODAL (LOGIN / SIGNUP + GMAIL OTP) -->
+<!-- AUTH MODAL (LOGIN / SIGNUP + REAL GMAIL OTP) -->
 <div class="bk-drawer" id="authModal">
     <div class="bk-drawer-content" style="max-width:440px;">
         <div class="bk-drawer-header">
@@ -857,8 +881,8 @@ body{
                 <span class="input-label">Create Password *</span>
                 <input class="text-input" id="regPassword" type="password" placeholder="Create strong password">
 
-                <button class="bk-checkout-btn" style="justify-content:center;margin-top:10px;" onclick="sendGmailOTP()">
-                    Send Gmail OTP Code
+                <button class="bk-checkout-btn" id="sendOtpBtn" style="justify-content:center;margin-top:10px;" onclick="sendGmailOTP()">
+                    Send Real Gmail OTP Code
                 </button>
 
                 <div style="text-align:center;font-size:13px;margin-top:14px;color:#666;">
@@ -870,12 +894,8 @@ body{
             <div id="authOtpView" class="bk-cart-box" style="display:none;">
                 <div style="text-align:center;margin-bottom:12px;">
                     <div style="font-size:32px;">📩</div>
-                    <strong style="font-size:15px;display:block;">Verify Gmail OTP</strong>
+                    <strong style="font-size:15px;display:block;">Check Your Gmail Inbox</strong>
                     <small style="color:#666;">We sent a 6-digit verification code to <b id="otpTargetEmail"></b></small>
-                </div>
-
-                <div id="otpSimulationBanner" style="background:#fef3c7;border:1px dashed #d97706;padding:8px 10px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:12px;text-align:center;">
-                    Demo Email Gateway: Your OTP is <b id="demoOtpDisplay" style="font-size:14px;letter-spacing:2px;"></b>
                 </div>
 
                 <span class="input-label">Enter 6-Digit OTP *</span>
@@ -884,9 +904,13 @@ body{
                 <button class="bk-checkout-btn" style="justify-content:center;margin-top:8px;" onclick="verifyOtpAndRegister()">
                     Verify & Complete Signup
                 </button>
+
+                <div style="text-align:center;font-size:12px;margin-top:10px;">
+                    Didn't receive email? <a href="javascript:void(0)" onclick="sendGmailOTP()" style="color:var(--blinkit-green);font-weight:bold;">Resend OTP</a> (Check spam folder)
+                </div>
             </div>
 
-            <!-- LOGGED IN VIEW -->
+            <!-- PROFILE VIEW -->
             <div id="authProfileView" class="bk-cart-box" style="display:none;text-align:center;">
                 <div style="font-size:45px;margin-bottom:8px;">🧑‍💼</div>
                 <h3 id="profName">Customer Name</h3>
@@ -971,7 +995,7 @@ body{
     </div>
 </div>
 
-<!-- TRACK ORDER MODAL -->
+<!-- CUSTOMER TRACK ORDER MODAL (READ-ONLY) -->
 <div class="bk-drawer" id="trackModal">
     <div class="bk-drawer-content" style="max-width:440px;">
         <div class="bk-drawer-header">
@@ -990,17 +1014,6 @@ body{
                     <p style="text-align:center;color:#888;font-size:13px;">No active orders found.</p>
                 </div>
             </div>
-
-            <!-- Simulation Demo Controller for testing pop-ups -->
-            <div class="bk-cart-box" style="border: 1px dashed #bbb;">
-                <span class="input-label" style="color:#555;">⚡ Test Live Status Updates & Notifications:</span>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Packing')">➔ Packing</button>
-                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Shipped')">➔ Shipped</button>
-                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Out for Delivery')">➔ Out for Delivery</button>
-                    <button class="bk-add-btn" style="font-size:11px;" onclick="simulateStatusChange('Delivered')">➔ Delivered</button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -1008,6 +1021,19 @@ body{
 <div id="toast"></div>
 
 <script>
+/* =======================================================
+   LIVE EMAILJS CREDENTIALS
+======================================================= */
+const EMAILJS_PUBLIC_KEY = "2PKYeTtp0dHFqhatI";
+const EMAILJS_SERVICE_ID = "service_vq6pmxa";
+const EMAILJS_TEMPLATE_ID = "template_zw1qzvn";
+
+(function() {
+    if (typeof emailjs !== "undefined") {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
+})();
+
 const DEFAULT_PRODUCTS = [
     { id:"g1", name:"Chakki Fresh Sharbati Atta (10kg)", category:"Atta & Dal", purchasePrice:320, mrp:450, discountPercent:15.55, price:380, stock:35, description:"100% pure whole wheat flour", image:"" },
     { id:"g2", name:"Royal Basmati Rice Mogra (5kg)", category:"Atta & Dal", purchasePrice:240, mrp:360, discountPercent:16.94, price:299, stock:25, description:"Aromatic long grain basmati rice", image:"" },
@@ -1035,7 +1061,7 @@ let currentUser = loadData("dng_logged_user", null);
 let referrals = loadData("dng_referrals", []);
 let onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
 let cart = loadData("dng_cart", []);
-let geoAddressBook = loadData("dng_geo_memory", []); // Stores [{lat, lng, name, phone, address}]
+let geoAddressBook = loadData("dng_geo_memory", []);
 
 let selectedCategory = "All";
 let searchQuery = "";
@@ -1064,7 +1090,7 @@ function toast(msg){
     const t = document.getElementById("toast");
     t.innerText = msg;
     t.style.display = "block";
-    setTimeout(() => t.style.display = "none", 2500);
+    setTimeout(() => t.style.display = "none", 3000);
 }
 
 function notifyUser(title, message){
@@ -1083,8 +1109,46 @@ function closeNotif(){
     document.getElementById("notificationPop").style.display = "none";
 }
 
+// REAL-TIME SYNC FROM ADMIN PANEL
+window.addEventListener("storage", (e) => {
+    if(e.key === "dng_products"){
+        products = loadData("dng_products", DEFAULT_PRODUCTS);
+        renderCategoryChips();
+        renderSidebar();
+        renderProducts();
+        updateCartUI();
+    }
+    if(e.key === "dng_orders"){
+        const previousOrders = orders;
+        orders = loadData("dng_orders", []);
+        
+        // If an order changed for the logged-in user, trigger live notification
+        if(currentUser){
+            orders.forEach(newO => {
+                const oldO = previousOrders.find(x => x.id === newO.id);
+                if(oldO && oldO.status !== newO.status && (newO.customer.email === currentUser.email || newO.customer.phone === currentUser.phone)){
+                    notifyUser(`Order #${newO.id} Updated!`, `Status changed to: ${newO.status.toUpperCase()} by Dark Store.`);
+                }
+            });
+        }
+        
+        if(document.getElementById("trackModal").classList.contains("active")){
+            renderOrderTrackDropdown();
+        }
+    }
+    if(e.key === "dng_online_settings"){
+        onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
+        if(document.getElementById("checkoutModal").classList.contains("active")){
+            updateCheckoutTotals();
+        }
+    }
+    if(e.key === "dng_referrals"){
+        referrals = loadData("dng_referrals", []);
+    }
+});
+
 /* =======================================================
-   AUTHENTICATION & GMAIL OTP LOGIC
+   AUTHENTICATION & REAL GMAIL OTP LOGIC
 ======================================================= */
 function updateAuthUI(){
     const authBtn = document.getElementById("authNavText");
@@ -1182,23 +1246,40 @@ function sendGmailOTP(){
         return;
     }
 
-    // Generate 6-digit OTP
+    // Generate real random 6-digit OTP
     generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     pendingSignup = { name, phone, email, password };
 
-    document.getElementById("otpTargetEmail").innerText = email;
-    document.getElementById("demoOtpDisplay").innerText = generatedOtp;
-    document.getElementById("enteredOtp").value = "";
+    const btn = document.getElementById("sendOtpBtn");
+    btn.innerText = "Dispatching OTP Email...";
+    btn.disabled = true;
 
-    toggleAuthView("otp");
-    notifyUser("Gmail Verification Code Sent", `A verification OTP [${generatedOtp}] was dispatched to ${email}.`);
+    // Send real email via EmailJS
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name: name,
+        to_email: email,
+        otp_code: generatedOtp
+    })
+    .then(function(response) {
+        btn.innerText = "Send Real Gmail OTP Code";
+        btn.disabled = false;
+        document.getElementById("otpTargetEmail").innerText = email;
+        document.getElementById("enteredOtp").value = "";
+        toggleAuthView("otp");
+        toast("OTP sent directly to your Gmail inbox!");
+    }, function(error) {
+        btn.innerText = "Send Real Gmail OTP Code";
+        btn.disabled = false;
+        console.error("EmailJS Error:", error);
+        toast("Failed to dispatch email. Check {{to_email}} in EmailJS template.");
+    });
 }
 
 function verifyOtpAndRegister(){
     const entered = document.getElementById("enteredOtp").value.trim();
 
     if(entered !== generatedOtp){
-        toast("Invalid OTP code. Please check and re-enter.");
+        toast("Invalid OTP code. Please check your Gmail and re-enter.");
         return;
     }
 
@@ -1213,7 +1294,7 @@ function verifyOtpAndRegister(){
     syncDatabase();
     updateAuthUI();
     closeAuthModal();
-    toast(`Account verified & registered! Welcome, ${newUser.name}.`);
+    toast(`Email verified! Account registered for ${newUser.name}.`);
 }
 
 function logoutCustomer(){
@@ -1257,7 +1338,6 @@ function detectLocation(notify = false){
             document.getElementById("etaLocation").innerText = `GPS (${lat}, ${lng})`;
             if(notify) toast("Delivery coordinates locked!");
 
-            // Check if address already exists for these coordinates
             autoFillSavedAddressForCoords(lat, lng);
         },
         () => {
@@ -1268,7 +1348,7 @@ function detectLocation(notify = false){
 }
 
 function getDistanceInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of earth in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -1280,7 +1360,6 @@ function getDistanceInKm(lat1, lon1, lat2, lon2) {
 
 function autoFillSavedAddressForCoords(lat, lng){
     geoAddressBook = loadData("dng_geo_memory", []);
-    // Check if within 250 meters of a past delivery coordinate
     const matched = geoAddressBook.find(entry => getDistanceInKm(lat, lng, entry.lat, entry.lng) <= 0.25);
 
     if(matched){
@@ -1292,7 +1371,7 @@ function autoFillSavedAddressForCoords(lat, lng){
 }
 
 /* =======================================================
-   ORDER TRACKING & NOTIFICATIONS
+   CUSTOMER ORDER TRACKING (READ-ONLY)
 ======================================================= */
 function openTrackModal(){
     renderOrderTrackDropdown();
@@ -1344,13 +1423,18 @@ function renderSelectedOrderTracking(){
     if(!order) return;
 
     const stages = ["Placed", "Packing", "Shipped", "Out for Delivery", "Delivered"];
-    const currentIdx = stages.indexOf(order.status || "Placed");
+    
+    // Normalize Preparing to Packing
+    let normalizedStatus = order.status || "Placed";
+    if(normalizedStatus === "Preparing") normalizedStatus = "Packing";
+    
+    const currentIdx = stages.indexOf(normalizedStatus);
 
     let html = `
         <div style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:14px;">
             <strong style="font-size:14px;">Order #${order.id}</strong>
             <div style="font-size:12px;color:#666;">Placed on: ${order.date}</div>
-            <div style="font-size:12px;color:var(--blinkit-green);font-weight:bold;">ETA: 10-15 Minutes</div>
+            <div style="font-size:12px;color:var(--blinkit-green);font-weight:bold;">Status: ${normalizedStatus.toUpperCase()}</div>
         </div>
         <div class="track-timeline">
     `;
@@ -1383,28 +1467,6 @@ function getStageDesc(stage){
         case "Out for Delivery": return "Rider is within 500m of your location.";
         case "Delivered": return "Order handed over. Thank you!";
         default: return "";
-    }
-}
-
-function simulateStatusChange(newStatus){
-    const sel = document.getElementById("trackOrderSelect");
-    const orderId = sel.value;
-    if(!orderId){
-        toast("No active order selected to update.");
-        return;
-    }
-
-    orders = loadData("dng_orders", []);
-    const order = orders.find(o => o.id === orderId);
-    if(order){
-        order.status = newStatus;
-        syncDatabase();
-        renderOrderTrackDropdown();
-        sel.value = orderId;
-        renderSelectedOrderTracking();
-
-        // Dispatch Instant Popup Notification to website
-        notifyUser(`Order #${order.id} Updated!`, `Status is now: ${newStatus.toUpperCase()} - ${getStageDesc(newStatus)}`);
     }
 }
 
