@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- DNG Mart: Supabase cross-device sync -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dng-cloud-config.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DNG MART - Ghar ka Saman Ghar Tak</title>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- EmailJS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -1005,7 +1005,18 @@ body{
 
 <script>
 /* =======================================================
-   LIVE EMAILJS CREDENTIALS
+   SUPABASE DATABASE CONFIGURATION
+======================================================= */
+const SUPABASE_URL = "YOUR_SUPABASE_URL";       // Replace with: https://xyz.supabase.co
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with your anon public key
+
+let supabaseClient = null;
+if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && typeof supabase !== "undefined") {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+/* =======================================================
+   EMAILJS CREDENTIALS
 ======================================================= */
 const EMAILJS_PUBLIC_KEY = "2PKYeTtp0dHFqhatI";
 const EMAILJS_SERVICE_ID = "service_vq6pmxa";
@@ -1054,79 +1065,7 @@ let appliedCoupon = null;
 let generatedOtp = null;
 let pendingSignup = null;
 
-// =========================================
-// CLOUD DATABASE + CROSS-DEVICE REAL-TIME SYNC
-// =========================================
-let dngCloud = null;
-let dngCloudReady = false;
-const DNG_CLOUD_KEYS = ["dng_products","dng_orders","dng_customers","dng_online_settings","dng_referrals"];
-
-function initDngCloud(){
-    try {
-        const cfg = window.DNG_CLOUD_CONFIG || {};
-        if(window.supabase && cfg.url && cfg.anonKey && !String(cfg.url).includes("YOUR_SUPABASE")){
-            dngCloud = window.supabase.createClient(cfg.url, cfg.anonKey);
-            dngCloudReady = true;
-            subscribeDngCloud();
-            hydrateDngCloud();
-        }
-    } catch(e){ console.warn("DNG cloud init failed", e); }
-}
-
-async function cloudGet(key, fallback){
-    if(!dngCloudReady) return fallback;
-    try {
-        const {data,error} = await dngCloud.from("dng_sync").select("data").eq("key",key).maybeSingle();
-        if(error || !data) return fallback;
-        return data.data ?? fallback;
-    } catch(e){ return fallback; }
-}
-
-async function cloudPut(key, value){
-    if(!dngCloudReady) return;
-    try {
-        await dngCloud.from("dng_sync").upsert({key, data:value, updated_at:new Date().toISOString()},{onConflict:"key"});
-    } catch(e){ console.warn("DNG cloud save failed", key, e); }
-}
-
-async function hydrateDngCloud(){
-    if(!dngCloudReady) return;
-    const p = await cloudGet("dng_products", null);
-    const o = await cloudGet("dng_orders", null);
-    const c = await cloudGet("dng_customers", null);
-    const s = await cloudGet("dng_online_settings", null);
-    const r = await cloudGet("dng_referrals", null);
-    if(p){ products=p; localStorage.setItem("dng_products",JSON.stringify(p)); }
-    if(o){ orders=o; localStorage.setItem("dng_orders",JSON.stringify(o)); }
-    if(c){ customers=c; localStorage.setItem("dng_customers",JSON.stringify(c)); }
-    if(s){ onlineSettings=s; localStorage.setItem("dng_online_settings",JSON.stringify(s)); }
-    if(r){ referrals=r; localStorage.setItem("dng_referrals",JSON.stringify(r)); }
-    renderCategoryChips(); renderSidebar(); renderProducts(); updateCartUI();
-    if(document.getElementById("trackModal")?.classList.contains("active")) renderOrderTrackDropdown();
-}
-
-function subscribeDngCloud(){
-    dngCloud.channel("dng-mart-sync")
-      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_orders"}, payload => {
-          const next = payload.new?.data;
-          if(!next) return;
-          const previous = orders || [];
-          orders = next;
-          localStorage.setItem("dng_orders", JSON.stringify(orders));
-          const changed = orders.some(n => { const old=previous.find(x=>x.id===n.id); return !old || old.status!==n.status; });
-          if(changed && document.hidden) notifyUser("New Order / Update", "A new order or status update was received.");
-          if(document.getElementById("trackModal")?.classList.contains("active")) renderOrderTrackDropdown();
-      })
-      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_products"}, payload => {
-          if(payload.new?.data){ products=payload.new.data; localStorage.setItem("dng_products",JSON.stringify(products)); renderCategoryChips(); renderSidebar(); renderProducts(); updateCartUI(); }
-      })
-      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_online_settings"}, payload => {
-          if(payload.new?.data){ onlineSettings=payload.new.data; localStorage.setItem("dng_online_settings",JSON.stringify(onlineSettings)); if(document.getElementById("checkoutModal")?.classList.contains("active")) updateCheckoutTotals(); }
-      })
-      .subscribe();
-}
-
-function syncDatabase(){
+function syncLocalStorage(){
     localStorage.setItem("dng_products", JSON.stringify(products));
     localStorage.setItem("dng_orders", JSON.stringify(orders));
     localStorage.setItem("dng_customers", JSON.stringify(customers));
@@ -1135,14 +1074,7 @@ function syncDatabase(){
     localStorage.setItem("dng_referrals", JSON.stringify(referrals));
     localStorage.setItem("dng_cart", JSON.stringify(cart));
     localStorage.setItem("dng_geo_memory", JSON.stringify(geoAddressBook));
-    // Persist shared business data to the central database for other devices.
-    cloudPut("dng_products", products);
-    cloudPut("dng_orders", orders);
-    cloudPut("dng_customers", customers);
-    cloudPut("dng_referrals", referrals);
-    cloudPut("dng_online_settings", onlineSettings);
 }
-
 
 function money(v){
     return "₹" + Number(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -1171,42 +1103,133 @@ function closeNotif(){
     document.getElementById("notificationPop").style.display = "none";
 }
 
-// REAL-TIME SYNC FROM ADMIN PANEL
-window.addEventListener("storage", (e) => {
-    if(e.key === "dng_products"){
-        products = loadData("dng_products", DEFAULT_PRODUCTS);
+/* =======================================================
+   SUPABASE CLOUD SYNC & REALTIME LISTENERS
+======================================================= */
+async function fetchSupabaseData(){
+    if(!supabaseClient) return;
+
+    // 1. Fetch Products
+    const { data: pData } = await supabaseClient.from('products').select('*');
+    if(pData && pData.length > 0){
+        products = pData.map(p => ({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            purchasePrice: Number(p.purchase_price || 0),
+            mrp: Number(p.mrp || 0),
+            discountPercent: Number(p.discount_percent || 0),
+            price: Number(p.price || 0),
+            stock: Number(p.stock || 0),
+            description: p.description || "",
+            image: p.image || ""
+        }));
         renderCategoryChips();
         renderSidebar();
         renderProducts();
-        updateCartUI();
     }
-    if(e.key === "dng_orders"){
-        const previousOrders = orders;
-        orders = loadData("dng_orders", []);
-        
-        if(currentUser){
-            orders.forEach(newO => {
-                const oldO = previousOrders.find(x => x.id === newO.id);
-                if(oldO && oldO.status !== newO.status && (newO.customer.email === currentUser.email || newO.customer.phone === currentUser.phone)){
-                    notifyUser(`Order #${newO.id} Updated!`, `Status changed to: ${newO.status.toUpperCase()} by Dark Store.`);
-                }
-            });
-        }
-        
-        if(document.getElementById("trackModal").classList.contains("active")){
-            renderOrderTrackDropdown();
-        }
+
+    // 2. Fetch Store Settings
+    const { data: sData } = await supabaseClient.from('online_settings').select('*').single();
+    if(sData){
+        onlineSettings = { delivery: sData.delivery, handling: sData.handling, gst: sData.gst };
+        localStorage.setItem("dng_online_settings", JSON.stringify(onlineSettings));
     }
-    if(e.key === "dng_online_settings"){
-        onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
-        if(document.getElementById("checkoutModal").classList.contains("active")){
-            updateCheckoutTotals();
-        }
+
+    // 3. Fetch Orders
+    const { data: oData } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+    if(oData){
+        orders = oData.map(o => ({
+            id: o.id,
+            customer: o.customer,
+            items: o.items,
+            subtotal: Number(o.subtotal),
+            gstRate: Number(o.gst_rate || 0),
+            gst: Number(o.gst || 0),
+            handling: Number(o.handling || 0),
+            delivery: Number(o.delivery || 0),
+            discount: Number(o.discount || 0),
+            couponCode: o.coupon_code || "",
+            total: Number(o.total),
+            paid: Number(o.paid || 0),
+            due: Number(o.due || 0),
+            paymentMethod: o.payment_method,
+            status: o.status,
+            date: o.date
+        }));
     }
-    if(e.key === "dng_referrals"){
-        referrals = loadData("dng_referrals", []);
+
+    // 4. Fetch Coupons
+    const { data: rData } = await supabaseClient.from('referrals').select('*');
+    if(rData){
+        referrals = rData;
     }
-});
+
+    syncLocalStorage();
+}
+
+function initSupabaseRealtime(){
+    if(!supabaseClient) return;
+
+    // Listen to live Order changes (Status updates made by Dark Store Dispatcher)
+    supabaseClient.channel('public:orders')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+            const updatedOrder = payload.new;
+            if(!updatedOrder) return;
+
+            // Check if this updated order belongs to the customer
+            if(currentUser && (updatedOrder.customer?.email === currentUser.email || updatedOrder.customer?.phone === currentUser.phone)){
+                notifyUser(`Order #${updatedOrder.id} Updated!`, `Status is now: ${updatedOrder.status.toUpperCase()} (${getStageDesc(updatedOrder.status)})`);
+            }
+
+            // Update in-memory state
+            const idx = orders.findIndex(o => o.id === updatedOrder.id);
+            if(idx >= 0){
+                orders[idx] = {
+                    ...orders[idx],
+                    status: updatedOrder.status,
+                    paid: updatedOrder.paid,
+                    due: updatedOrder.due
+                };
+            } else {
+                orders.unshift(updatedOrder);
+            }
+            syncLocalStorage();
+
+            if(document.getElementById("trackModal").classList.contains("active")){
+                renderOrderTrackDropdown();
+            }
+        })
+        .subscribe();
+
+    // Listen to live Product Stock & Price changes
+    supabaseClient.channel('public:products')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+            const p = payload.new;
+            if(!p) return;
+            const idx = products.findIndex(x => x.id === p.id);
+            const formatted = {
+                id: p.id,
+                name: p.name,
+                category: p.category,
+                purchasePrice: Number(p.purchase_price || 0),
+                mrp: Number(p.mrp || 0),
+                discountPercent: Number(p.discount_percent || 0),
+                price: Number(p.price || 0),
+                stock: Number(p.stock || 0),
+                description: p.description || "",
+                image: p.image || ""
+            };
+            if(idx >= 0) products[idx] = formatted;
+            else products.push(formatted);
+
+            syncLocalStorage();
+            renderCategoryChips();
+            renderSidebar();
+            renderProducts();
+        })
+        .subscribe();
+}
 
 /* =======================================================
    AUTHENTICATION & REAL GMAIL OTP LOGIC
@@ -1276,7 +1299,7 @@ function handleCustomerLogin(){
 
     if(user){
         currentUser = user;
-        syncDatabase();
+        syncLocalStorage();
         updateAuthUI();
         closeAuthModal();
         toast(`Welcome back, ${user.name}!`);
@@ -1307,7 +1330,6 @@ function sendGmailOTP(){
         return;
     }
 
-    // Generate real random 6-digit OTP
     generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     pendingSignup = { name, phone, email, password };
 
@@ -1315,7 +1337,6 @@ function sendGmailOTP(){
     btn.innerText = "Dispatching OTP Email...";
     btn.disabled = true;
 
-    // Send real email via EmailJS
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_name: name,
         to_email: email,
@@ -1352,7 +1373,7 @@ function verifyOtpAndRegister(){
 
     registeredUsers.push(newUser);
     currentUser = newUser;
-    syncDatabase();
+    syncLocalStorage();
     updateAuthUI();
     closeAuthModal();
     toast(`Email verified! Account registered for ${newUser.name}.`);
@@ -1360,7 +1381,7 @@ function verifyOtpAndRegister(){
 
 function logoutCustomer(){
     currentUser = null;
-    syncDatabase();
+    syncLocalStorage();
     updateAuthUI();
     closeAuthModal();
     toast("Logged out successfully.");
@@ -1447,10 +1468,9 @@ function renderOrderTrackDropdown(){
     const sel = document.getElementById("trackOrderSelect");
     sel.innerHTML = "";
 
-    orders = loadData("dng_orders", []);
     let customerOrders = orders;
     if(currentUser){
-        customerOrders = orders.filter(o => o.customer.email === currentUser.email || o.customer.phone === currentUser.phone);
+        customerOrders = orders.filter(o => o.customer?.email === currentUser.email || o.customer?.phone === currentUser.phone);
     }
 
     if(customerOrders.length === 0){
@@ -1459,7 +1479,7 @@ function renderOrderTrackDropdown(){
         return;
     }
 
-    customerOrders.slice().reverse().forEach(o => {
+    customerOrders.forEach(o => {
         const opt = document.createElement("option");
         opt.value = o.id;
         opt.innerText = `#${o.id} - ${money(o.total)} (${o.status})`;
@@ -1479,13 +1499,11 @@ function renderSelectedOrderTracking(){
         return;
     }
 
-    orders = loadData("dng_orders", []);
     const order = orders.find(o => o.id === orderId);
     if(!order) return;
 
     const stages = ["Placed", "Packing", "Shipped", "Out for Delivery", "Delivered"];
     
-    // Normalize Preparing to Packing
     let normalizedStatus = order.status || "Placed";
     if(normalizedStatus === "Preparing") normalizedStatus = "Packing";
     
@@ -1683,7 +1701,7 @@ function updateItemQty(id, change){
         cart.push({ id: p.id, qty: 1 });
     }
 
-    syncDatabase();
+    syncLocalStorage();
     updateCartUI();
     renderProducts();
     renderCartDrawerItems();
@@ -1771,8 +1789,6 @@ function calculateOrderTotals(){
         return s + (p ? Number(p.price) * item.qty : 0);
     }, 0);
 
-    onlineSettings = loadData("dng_online_settings", { delivery:30, handling:10, gst:5 });
-
     const deliveryFee = Number(onlineSettings.delivery ?? 30);
     const handlingFee = Number(onlineSettings.handling ?? 10);
     const gstRate = Number(onlineSettings.gst ?? 5);
@@ -1822,7 +1838,6 @@ function applyPromoCode(){
         return;
     }
 
-    referrals = loadData("dng_referrals", []);
     const found = referrals.find(r => r.code.toUpperCase() === code && (r.status || "active") === "active");
 
     if(!found){
@@ -1837,7 +1852,7 @@ function applyPromoCode(){
         return s + (p ? Number(p.price) * item.qty : 0);
     }, 0);
 
-    const minOrder = Number(found.minOrder || 0);
+    const minOrder = Number(found.min_order || found.minOrder || 0);
     if(subtotal < minOrder){
         statusDiv.innerHTML = `<span style="color:red;">Min order of ${money(minOrder)} required for this coupon.</span>`;
         appliedCoupon = null;
@@ -1857,14 +1872,12 @@ function openCheckoutModal(){
     document.getElementById("couponInput").value = "";
     document.getElementById("couponStatus").innerHTML = "";
 
-    // Prefill customer profile values
     if(currentUser){
         document.getElementById("checkoutName").value = currentUser.name || "";
         document.getElementById("checkoutPhone").value = currentUser.phone || "";
         if(currentUser.address) document.getElementById("checkoutAddress").value = currentUser.address;
     }
 
-    // Auto-fill from GPS coordinate history if available
     if(userCoordinates){
         autoFillSavedAddressForCoords(userCoordinates.lat, userCoordinates.lng);
     }
@@ -1877,7 +1890,7 @@ function closeCheckoutModal(){
     document.getElementById("checkoutModal").classList.remove("active");
 }
 
-function placeDngOrder(viaWhatsApp = false){
+async function placeDngOrder(viaWhatsApp = false){
     const name = document.getElementById("checkoutName").value.trim();
     const phone = document.getElementById("checkoutPhone").value.trim();
     const address = document.getElementById("checkoutAddress").value.trim();
@@ -1888,7 +1901,6 @@ function placeDngOrder(viaWhatsApp = false){
         return;
     }
 
-    products = loadData("dng_products", DEFAULT_PRODUCTS);
     const orderItems = [];
 
     for(let item of cart){
@@ -1908,6 +1920,11 @@ function placeDngOrder(viaWhatsApp = false){
             price: Number(p.price),
             subtotal: Number(p.price) * item.qty
         });
+
+        // Decrement stock in Supabase Cloud
+        if(supabaseClient){
+            supabaseClient.from('products').update({ stock: p.stock }).eq('id', p.id).then();
+        }
     }
 
     const { subtotal, deliveryFee, handlingFee, gstRate, gstAmount, discountAmount, grandTotal } = calculateOrderTotals();
@@ -1937,10 +1954,40 @@ function placeDngOrder(viaWhatsApp = false){
         date: new Date().toLocaleString()
     };
 
-    orders = loadData("dng_orders", []);
-    orders.push(order);
+    orders.unshift(order);
 
-    // Save GPS coordinate <-> Address mapping to auto-recall next time
+    // Write to Supabase Cloud
+    if(supabaseClient){
+        await supabaseClient.from('orders').insert([{
+            id: order.id,
+            customer: order.customer,
+            items: order.items,
+            subtotal: order.subtotal,
+            gst_rate: order.gstRate,
+            gst: order.gst,
+            handling: order.handling,
+            delivery: order.delivery,
+            discount: order.discount,
+            coupon_code: order.couponCode,
+            total: order.total,
+            paid: order.paid,
+            due: order.due,
+            payment_method: order.paymentMethod,
+            status: order.status,
+            date: order.date
+        }]);
+
+        // Insert/Update CRM
+        await supabaseClient.from('customers').upsert([{
+            id: Date.now(),
+            name,
+            phone,
+            last_status: "Placed",
+            last_updated: new Date().toISOString()
+        }]);
+    }
+
+    // Save GPS coordinate history
     if(userCoordinates){
         geoAddressBook = loadData("dng_geo_memory", []);
         const existingIdx = geoAddressBook.findIndex(g => getDistanceInKm(userCoordinates.lat, userCoordinates.lng, g.lat, g.lng) <= 0.25);
@@ -1958,12 +2005,11 @@ function placeDngOrder(viaWhatsApp = false){
     }
 
     cart = [];
-    syncDatabase();
+    syncLocalStorage();
     updateCartUI();
     renderProducts();
     closeCheckoutModal();
 
-    // Trigger Notification
     notifyUser(`Order #${order.id} Placed!`, "Your order is confirmed & transmitted to our dark store.");
 
     if(viaWhatsApp){
@@ -2023,7 +2069,9 @@ updateCartUI();
 updateAuthUI();
 detectLocation(false);
 
-initDngCloud();
+// Initial Cloud Fetch & Realtime Listeners
+fetchSupabaseData();
+initSupabaseRealtime();
 </script>
 
 </body>
