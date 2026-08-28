@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- DNG Mart: Supabase cross-device sync -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dng-cloud-config.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DNG MART - Ghar ka Saman Ghar Tak</title>
@@ -1051,6 +1054,78 @@ let appliedCoupon = null;
 let generatedOtp = null;
 let pendingSignup = null;
 
+// =========================================
+// CLOUD DATABASE + CROSS-DEVICE REAL-TIME SYNC
+// =========================================
+let dngCloud = null;
+let dngCloudReady = false;
+const DNG_CLOUD_KEYS = ["dng_products","dng_orders","dng_customers","dng_online_settings","dng_referrals"];
+
+function initDngCloud(){
+    try {
+        const cfg = window.DNG_CLOUD_CONFIG || {};
+        if(window.supabase && cfg.url && cfg.anonKey && !String(cfg.url).includes("YOUR_SUPABASE")){
+            dngCloud = window.supabase.createClient(cfg.url, cfg.anonKey);
+            dngCloudReady = true;
+            subscribeDngCloud();
+            hydrateDngCloud();
+        }
+    } catch(e){ console.warn("DNG cloud init failed", e); }
+}
+
+async function cloudGet(key, fallback){
+    if(!dngCloudReady) return fallback;
+    try {
+        const {data,error} = await dngCloud.from("dng_sync").select("data").eq("key",key).maybeSingle();
+        if(error || !data) return fallback;
+        return data.data ?? fallback;
+    } catch(e){ return fallback; }
+}
+
+async function cloudPut(key, value){
+    if(!dngCloudReady) return;
+    try {
+        await dngCloud.from("dng_sync").upsert({key, data:value, updated_at:new Date().toISOString()},{onConflict:"key"});
+    } catch(e){ console.warn("DNG cloud save failed", key, e); }
+}
+
+async function hydrateDngCloud(){
+    if(!dngCloudReady) return;
+    const p = await cloudGet("dng_products", null);
+    const o = await cloudGet("dng_orders", null);
+    const c = await cloudGet("dng_customers", null);
+    const s = await cloudGet("dng_online_settings", null);
+    const r = await cloudGet("dng_referrals", null);
+    if(p){ products=p; localStorage.setItem("dng_products",JSON.stringify(p)); }
+    if(o){ orders=o; localStorage.setItem("dng_orders",JSON.stringify(o)); }
+    if(c){ customers=c; localStorage.setItem("dng_customers",JSON.stringify(c)); }
+    if(s){ onlineSettings=s; localStorage.setItem("dng_online_settings",JSON.stringify(s)); }
+    if(r){ referrals=r; localStorage.setItem("dng_referrals",JSON.stringify(r)); }
+    renderCategoryChips(); renderSidebar(); renderProducts(); updateCartUI();
+    if(document.getElementById("trackModal")?.classList.contains("active")) renderOrderTrackDropdown();
+}
+
+function subscribeDngCloud(){
+    dngCloud.channel("dng-mart-sync")
+      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_orders"}, payload => {
+          const next = payload.new?.data;
+          if(!next) return;
+          const previous = orders || [];
+          orders = next;
+          localStorage.setItem("dng_orders", JSON.stringify(orders));
+          const changed = orders.some(n => { const old=previous.find(x=>x.id===n.id); return !old || old.status!==n.status; });
+          if(changed && document.hidden) notifyUser("New Order / Update", "A new order or status update was received.");
+          if(document.getElementById("trackModal")?.classList.contains("active")) renderOrderTrackDropdown();
+      })
+      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_products"}, payload => {
+          if(payload.new?.data){ products=payload.new.data; localStorage.setItem("dng_products",JSON.stringify(products)); renderCategoryChips(); renderSidebar(); renderProducts(); updateCartUI(); }
+      })
+      .on("postgres_changes", {event:"*", schema:"public", table:"dng_sync", filter:"key=eq.dng_online_settings"}, payload => {
+          if(payload.new?.data){ onlineSettings=payload.new.data; localStorage.setItem("dng_online_settings",JSON.stringify(onlineSettings)); if(document.getElementById("checkoutModal")?.classList.contains("active")) updateCheckoutTotals(); }
+      })
+      .subscribe();
+}
+
 function syncDatabase(){
     localStorage.setItem("dng_products", JSON.stringify(products));
     localStorage.setItem("dng_orders", JSON.stringify(orders));
@@ -1060,7 +1135,14 @@ function syncDatabase(){
     localStorage.setItem("dng_referrals", JSON.stringify(referrals));
     localStorage.setItem("dng_cart", JSON.stringify(cart));
     localStorage.setItem("dng_geo_memory", JSON.stringify(geoAddressBook));
+    // Persist shared business data to the central database for other devices.
+    cloudPut("dng_products", products);
+    cloudPut("dng_orders", orders);
+    cloudPut("dng_customers", customers);
+    cloudPut("dng_referrals", referrals);
+    cloudPut("dng_online_settings", onlineSettings);
 }
+
 
 function money(v){
     return "₹" + Number(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -1940,6 +2022,8 @@ renderProducts();
 updateCartUI();
 updateAuthUI();
 detectLocation(false);
+
+initDngCloud();
 </script>
 
 </body>
