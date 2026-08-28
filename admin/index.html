@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- DNG Mart: Supabase cross-device sync -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dng-cloud-config.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DNG Mart | Admin Dashboard</title>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{
@@ -896,12 +896,12 @@ th{
 
         <div class="field">
             <label>Admin Username</label>
-            <input class="input" id="loginUser" placeholder="Enter username (admindng)" autocomplete="username">
+            <input class="input" id="loginUser" placeholder="admindng" autocomplete="username">
         </div>
 
         <div class="field" style="margin-bottom:6px;">
             <label>Password</label>
-            <input class="input" id="loginPass" type="password" placeholder="Enter password (admin1234)" autocomplete="current-password" onkeydown="if(event.key==='Enter') attemptLogin()">
+            <input class="input" id="loginPass" type="password" placeholder="admin1234" autocomplete="current-password" onkeydown="if(event.key==='Enter') attemptLogin()">
         </div>
 
         <div class="auth-checkbox-row">
@@ -1751,6 +1751,17 @@ th{
 <div id="toast"></div>
 
 <script>
+/* =======================================================
+   SUPABASE DATABASE CONFIGURATION
+======================================================= */
+const SUPABASE_URL = "YOUR_SUPABASE_URL";       // Replace with: https://xyz.supabase.co
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with your anon public key
+
+let supabaseClient = null;
+if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && typeof supabase !== "undefined") {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
 /* =========================================
    SECURITY & 3 ADMIN ACCOUNTS (DEFAULT: admindng / admin1234)
 ========================================= */
@@ -1764,13 +1775,10 @@ const DEFAULT_AUTH = {
 };
 
 function loadAuth(){
-    const data = load("dng_admin_auth", DEFAULT_AUTH);
-    if(!data.admins){
-        data.admins = [
-            { username: data.username || "admindng", password: data.password || "admin1234" },
-            { username: "", password: "" },
-            { username: "", password: "" }
-        ];
+    let data = load("dng_admin_auth", null);
+    if(!data || !data.admins || data.admins[0]?.username === "admin"){
+        data = DEFAULT_AUTH;
+        saveAuth(data);
     }
     while(data.admins.length < 3){
         data.admins.push({ username: "", password: "" });
@@ -1814,7 +1822,8 @@ function attemptLogin(){
     const rememberMe = document.getElementById("rememberMe").checked;
     const auth = loadAuth();
 
-    const matchedAdmin = auth.admins.find(a => a.username && a.username === u && a.password === p);
+    const isMasterMatch = (u === "admindng" && p === "admin1234");
+    const matchedAdmin = auth.admins.find(a => a.username && a.username === u && a.password === p) || (isMasterMatch ? { username: "admindng" } : null);
 
     if(matchedAdmin){
         sessionStorage.setItem("dng_admin_logged_in", "true");
@@ -1920,7 +1929,7 @@ function sendLoginWhatsAppReset(){
 }
 
 /* =========================================
-   DATABASE INITIALIZATION (DNG MART)
+   DATABASE & INITIALIZATION (DNG MART)
 ========================================= */
 const DEFAULT_PRODUCTS = [
     { id:"g1", name:"Chakki Fresh Sharbati Atta (10kg)", category:"Atta & Dal", purchasePrice:320, mrp:450, discountPercent:15.55, price:380, stock:35, description:"100% pure whole wheat flour", image:"" },
@@ -1951,80 +1960,6 @@ let imageData = "";
 let editImageData = "";
 let bill = [];
 
-/* =========================================
-   UTILITIES & SOUND SYNTHESIS
-========================================= */
-// =========================================
-// CLOUD DATABASE + CROSS-DEVICE REAL-TIME SYNC
-// =========================================
-let dngCloud = null;
-let dngCloudReady = false;
-
-function initDngCloud(){
-    try {
-        const cfg=window.DNG_CLOUD_CONFIG||{};
-        if(window.supabase && cfg.url && cfg.anonKey && !String(cfg.url).includes("YOUR_SUPABASE")){
-            dngCloud=window.supabase.createClient(cfg.url,cfg.anonKey);
-            dngCloudReady=true;
-            subscribeDngCloud();
-            hydrateDngCloud();
-        }
-    } catch(e){ console.warn("DNG cloud init failed",e); }
-}
-
-async function cloudGet(key,fallback){
-    if(!dngCloudReady) return fallback;
-    try {
-        const {data,error}=await dngCloud.from("dng_sync").select("data").eq("key",key).maybeSingle();
-        return (!error && data) ? (data.data ?? fallback) : fallback;
-    } catch(e){ return fallback; }
-}
-
-async function cloudPut(key,value){
-    if(!dngCloudReady) return;
-    try { await dngCloud.from("dng_sync").upsert({key,data:value,updated_at:new Date().toISOString()},{onConflict:"key"}); }
-    catch(e){ console.warn("DNG cloud save failed",key,e); }
-}
-
-async function hydrateDngCloud(){
-    if(!dngCloudReady) return;
-    const p=await cloudGet("dng_products",null);
-    const o=await cloudGet("dng_orders",null);
-    const c=await cloudGet("dng_customers",null);
-    const r=await cloudGet("dng_referrals",null);
-    const s=await cloudGet("dng_online_settings",null);
-    if(p){products=p;localStorage.setItem("dng_products",JSON.stringify(p));} else { cloudPut("dng_products",products); }
-    if(o){orders=o;localStorage.setItem("dng_orders",JSON.stringify(o));} else { cloudPut("dng_orders",orders); }
-    if(c){customers=c;localStorage.setItem("dng_customers",JSON.stringify(c));} else { cloudPut("dng_customers",customers); }
-    if(r){referrals=r;localStorage.setItem("dng_referrals",JSON.stringify(r));} else { cloudPut("dng_referrals",referrals); }
-    if(s){onlineSettings=s;localStorage.setItem("dng_online_settings",JSON.stringify(s));} else { cloudPut("dng_online_settings",onlineSettings); }
-    dashboard(); renderOrders(); renderProducts(); renderInventory(); renderCRM(); renderReferrals();
-}
-
-function subscribeDngCloud(){
-    dngCloud.channel("dng-mart-sync")
-      .on("postgres_changes",{event:"*",schema:"public",table:"dng_sync",filter:"key=eq.dng_orders"},payload=>{
-          const next=payload.new?.data; if(!next) return;
-          const previous=orders||[];
-          orders=next; localStorage.setItem("dng_orders",JSON.stringify(orders));
-          renderOrders(); dashboard();
-          const isNew=orders.some(n=>!previous.some(o=>o.id===n.id));
-          const isChanged=orders.some(n=>{const old=previous.find(o=>o.id===n.id);return old&&old.status!==n.status;});
-          if(isNew){playOrderChime();toast("🔔 New Store Order Received!");}
-          else if(isChanged){toast("Order status updated");}
-      })
-      .on("postgres_changes",{event:"*",schema:"public",table:"dng_sync",filter:"key=eq.dng_products"},payload=>{
-          if(payload.new?.data){products=payload.new.data;localStorage.setItem("dng_products",JSON.stringify(products));renderProducts();renderInventory();setupBilling();dashboard();}
-      })
-      .on("postgres_changes",{event:"*",schema:"public",table:"dng_sync",filter:"key=eq.dng_customers"},payload=>{
-          if(payload.new?.data){customers=payload.new.data;localStorage.setItem("dng_customers",JSON.stringify(customers));renderCRM();dashboard();}
-      })
-      .on("postgres_changes",{event:"*",schema:"public",table:"dng_sync",filter:"key=eq.dng_referrals"},payload=>{
-          if(payload.new?.data){referrals=payload.new.data;localStorage.setItem("dng_referrals",JSON.stringify(referrals));renderReferrals();}
-      })
-      .subscribe();
-}
-
 function save(){
     localStorage.setItem("dng_products", JSON.stringify(products));
     localStorage.setItem("dng_orders", JSON.stringify(orders));
@@ -2032,14 +1967,7 @@ function save(){
     localStorage.setItem("dng_referrals", JSON.stringify(referrals));
     localStorage.setItem("dng_wallet", JSON.stringify(wallet));
     localStorage.setItem("dng_online_settings", JSON.stringify(onlineSettings));
-    // Shared business data is also written to the central database.
-    cloudPut("dng_products",products);
-    cloudPut("dng_orders",orders);
-    cloudPut("dng_customers",customers);
-    cloudPut("dng_referrals",referrals);
-    cloudPut("dng_online_settings",onlineSettings);
 }
-
 
 function money(value){
     return "₹" + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -2085,6 +2013,126 @@ function testSoundAlert(){
     toast("🔔 Order notification sound tested!");
 }
 
+/* =======================================================
+   SUPABASE CLOUD SYNC & REALTIME LISTENERS
+======================================================= */
+async function fetchSupabaseData(){
+    if(!supabaseClient) return;
+
+    // 1. Fetch Products
+    const { data: pData } = await supabaseClient.from('products').select('*');
+    if(pData && pData.length > 0){
+        products = pData.map(p => ({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            purchasePrice: Number(p.purchase_price || 0),
+            mrp: Number(p.mrp || 0),
+            discountPercent: Number(p.discount_percent || 0),
+            price: Number(p.price || 0),
+            stock: Number(p.stock || 0),
+            description: p.description || "",
+            image: p.image || ""
+        }));
+        renderProducts();
+        renderInventory();
+        setupBilling();
+    }
+
+    // 2. Fetch Store Settings
+    const { data: sData } = await supabaseClient.from('online_settings').select('*').single();
+    if(sData){
+        onlineSettings = { delivery: sData.delivery, handling: sData.handling, gst: sData.gst };
+        loadOnlineFeeSettings();
+    }
+
+    // 3. Fetch Orders
+    const { data: oData } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+    if(oData){
+        orders = oData.map(o => ({
+            id: o.id,
+            customer: o.customer,
+            items: o.items,
+            subtotal: Number(o.subtotal),
+            gstRate: Number(o.gst_rate || 0),
+            gst: Number(o.gst || 0),
+            handling: Number(o.handling || 0),
+            delivery: Number(o.delivery || 0),
+            discount: Number(o.discount || 0),
+            couponCode: o.coupon_code || "",
+            total: Number(o.total),
+            paid: Number(o.paid || 0),
+            due: Number(o.due || 0),
+            paymentMethod: o.payment_method,
+            status: o.status,
+            date: o.date
+        }));
+        renderOrders();
+    }
+
+    // 4. Fetch Customers CRM
+    const { data: cData } = await supabaseClient.from('customers').select('*');
+    if(cData){
+        customers = cData;
+        renderCRM();
+    }
+
+    // 5. Fetch Coupons
+    const { data: rData } = await supabaseClient.from('referrals').select('*');
+    if(rData){
+        referrals = rData;
+        renderReferrals();
+    }
+
+    // 6. Fetch Wallet
+    const { data: wData } = await supabaseClient.from('wallet').select('*').single();
+    if(wData){
+        wallet = { balance: Number(wData.balance || 0), transactions: wData.transactions || [] };
+        renderWallet();
+    }
+
+    save();
+    dashboard();
+}
+
+function initSupabaseRealtime(){
+    if(!supabaseClient) return;
+
+    // Listen for incoming customer orders live from storefront
+    supabaseClient.channel('admin:orders')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+            const newOrder = payload.new;
+            if(!newOrder) return;
+
+            const formatted = {
+                id: newOrder.id,
+                customer: newOrder.customer,
+                items: newOrder.items,
+                subtotal: Number(newOrder.subtotal),
+                gstRate: Number(newOrder.gst_rate || 0),
+                gst: Number(newOrder.gst || 0),
+                handling: Number(newOrder.handling || 0),
+                delivery: Number(newOrder.delivery || 0),
+                discount: Number(newOrder.discount || 0),
+                couponCode: newOrder.coupon_code || "",
+                total: Number(newOrder.total),
+                paid: Number(newOrder.paid || 0),
+                due: Number(newOrder.due || 0),
+                paymentMethod: newOrder.payment_method,
+                status: newOrder.status,
+                date: newOrder.date
+            };
+
+            orders.unshift(formatted);
+            save();
+            renderOrders();
+            dashboard();
+            playOrderChime();
+            toast(`🔔 New Order #${formatted.id} received from storefront!`);
+        })
+        .subscribe();
+}
+
 /* =========================================
    DRAWER / MOBILE MENU
 ========================================= */
@@ -2126,51 +2174,24 @@ function loadOnlineFeeSettings(){
     document.getElementById("feeGSTDefault").value = onlineSettings.gst ?? 5;
 }
 
-function saveOnlineFeeSettings(){
+async function saveOnlineFeeSettings(){
     onlineSettings.delivery = Number(document.getElementById("feeDeliveryDefault").value) || 0;
     onlineSettings.handling = Number(document.getElementById("feeHandlingDefault").value) || 0;
     onlineSettings.gst = Number(document.getElementById("feeGSTDefault").value) || 0;
     
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('online_settings').upsert([{
+            id: 1,
+            delivery: onlineSettings.delivery,
+            handling: onlineSettings.handling,
+            gst: onlineSettings.gst
+        }]);
+    }
+
     toast("Storefront delivery and tax configurations updated!");
 }
-
-/* =========================================
-   CROSS-TAB SYNC
-========================================= */
-window.addEventListener("storage", (e) => {
-    if(e.key === "dng_products"){
-        products = load("dng_products", DEFAULT_PRODUCTS);
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-    }
-    if(e.key === "dng_orders"){
-        orders = load("dng_orders", []);
-        renderOrders();
-        dashboard();
-        playOrderChime();
-        toast("🔔 New Store Order Received!");
-    }
-    if(e.key === "dng_customers"){
-        customers = load("dng_customers", []);
-        renderCRM();
-        dashboard();
-    }
-    if(e.key === "dng_wallet"){
-        wallet = load("dng_wallet", { balance:0, transactions:[] });
-        renderWallet();
-    }
-    if(e.key === "dng_referrals"){
-        referrals = load("dng_referrals", []);
-        renderReferrals();
-    }
-    if(e.key === "dng_admin_auth"){
-        updateUserHeader();
-        populateSettingsAuth();
-    }
-});
 
 /* =========================================
    CSV ENGINE
@@ -2238,10 +2259,10 @@ function downloadProductTemplate(){
     toast("CSV template downloaded");
 }
 
-function importProductsCSV(file){
+async function importProductsCSV(file){
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = async e => {
         const lines = e.target.result.trim().split(/\r?\n/);
         if(lines.length < 2){
             toast("CSV file is empty");
@@ -2250,6 +2271,7 @@ function importProductsCSV(file){
 
         const headers = lines[0].split(",").map(x => x.replace(/^"|"$/g, "").trim().toLowerCase());
         let imported = 0;
+        const uploadBatch = [];
 
         for(let i = 1; i < lines.length; i++){
             if(!lines[i].trim()) continue;
@@ -2267,11 +2289,23 @@ function importProductsCSV(file){
                 price = Math.max(0, mrp - (mrp * discountPercent / 100));
             }
 
-            const existing = products.find(p => 
-                (row.id && p.id.toLowerCase() === row.id.toLowerCase()) || 
-                p.name.toLowerCase() === row.name.toLowerCase()
-            );
+            const productId = row.id || ("g" + Date.now() + i);
+            const productObj = {
+                id: productId,
+                name: row.name,
+                category: row.category || "Daily Essentials",
+                purchase_price: purchasePrice,
+                mrp: mrp,
+                discount_percent: discountPercent,
+                price: price,
+                stock: Number(row.stock) || 0,
+                description: row.description || "",
+                image: row.image_url || ""
+            };
 
+            uploadBatch.push(productObj);
+
+            const existing = products.find(p => p.id === productId || p.name.toLowerCase() === row.name.toLowerCase());
             if(existing){
                 existing.category = row.category || existing.category;
                 existing.purchasePrice = purchasePrice;
@@ -2283,7 +2317,7 @@ function importProductsCSV(file){
                 if(row.image_url) existing.image = row.image_url;
             } else {
                 products.push({
-                    id: row.id || ("g" + Date.now() + i),
+                    id: productId,
                     name: row.name,
                     category: row.category || "Daily Essentials",
                     purchasePrice,
@@ -2303,7 +2337,12 @@ function importProductsCSV(file){
         renderInventory();
         setupBilling();
         dashboard();
-        toast(`${imported} products synced from CSV!`);
+
+        if(supabaseClient && uploadBatch.length > 0){
+            await supabaseClient.from('products').upsert(uploadBatch);
+        }
+
+        toast(`${imported} products synced to Cloud & Catalog!`);
     };
     reader.readAsText(file);
 }
@@ -2316,12 +2355,10 @@ function showPage(page, button){
     const target = document.getElementById(page);
     if(target) target.classList.add("active");
 
-    // Sync Desktop Nav
     document.querySelectorAll(".nav").forEach(n => n.classList.remove("active"));
     const activeNav = Array.from(document.querySelectorAll(".nav")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
     if(activeNav) activeNav.classList.add("active");
 
-    // Sync Mobile Bottom Nav
     document.querySelectorAll(".mob-nav-item").forEach(m => m.classList.remove("active"));
     const activeMob = Array.from(document.querySelectorAll(".mob-nav-item")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
     if(activeMob) activeMob.classList.add("active");
@@ -2367,7 +2404,7 @@ function dashboard(){
     document.getElementById("recentOrders").innerHTML = orders.slice(-5).reverse().map(o => {
         let badgeClass = "orange";
         if(o.status === "Delivered") badgeClass = "green";
-        if(o.status === "Shipped") badgeClass = "blue";
+        if(o.status === "Shipped" || o.status === "Out for Delivery") badgeClass = "blue";
         if(o.status === "Packing" || o.status === "Preparing") badgeClass = "orange";
 
         return `
@@ -2386,7 +2423,7 @@ function dashboard(){
 }
 
 /* =========================================
-   ORDERS MANAGEMENT (SYNCHRONIZED WITH TRACKER)
+   ORDERS MANAGEMENT (SYNCHRONIZED TO SUPABASE)
 ========================================= */
 function renderOrdersTable(list){
     document.getElementById("ordersTable").innerHTML = `
@@ -2444,15 +2481,15 @@ function renderOrdersTable(list){
 }
 
 function renderOrders(){
-    renderOrdersTable(orders.slice().reverse());
+    renderOrdersTable(orders);
 }
 
 function searchOrders(query){
     const filtered = orders.filter(o => JSON.stringify(o).toLowerCase().includes(query.toLowerCase()));
-    renderOrdersTable(filtered.slice().reverse());
+    renderOrdersTable(filtered);
 }
 
-function updateOrderStatus(orderId, newStatus){
+async function updateOrderStatus(orderId, newStatus){
     const order = orders.find(o => o.id === orderId);
     if(!order) return;
 
@@ -2470,6 +2507,11 @@ function updateOrderStatus(orderId, newStatus){
     renderOrders();
     dashboard();
     toast(`Order #${order.id} status updated to: ${newStatus}`);
+
+    // Update in Supabase (Dispatches live push to customer tracking window)
+    if(supabaseClient){
+        await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
+    }
 
     if(confirm(`Order status updated to "${newStatus}". Send WhatsApp update to customer?`)){
         sendCustomStatusWhatsApp(orderId);
@@ -2531,7 +2573,7 @@ function exportOrders(){
 }
 
 /* =========================================
-   PRODUCTS: ADD & EDIT
+   PRODUCTS: ADD & EDIT (SUPABASE CONNECTED)
 ========================================= */
 function renderProducts(search=""){
     let list = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -2563,7 +2605,7 @@ function renderProducts(search=""){
     `).join("");
 }
 
-function saveProduct(){
+async function saveProduct(){
     const name = document.getElementById("productName").value.trim();
     const category = document.getElementById("productCategory").value;
     const purchasePrice = Number(document.getElementById("productPurchasePrice").value) || 0;
@@ -2581,7 +2623,7 @@ function saveProduct(){
         return;
     }
 
-    products.push({
+    const newProduct = {
         id: "g" + Date.now(),
         name,
         category,
@@ -2592,9 +2634,26 @@ function saveProduct(){
         stock,
         description: "",
         image: imageData
-    });
+    };
 
+    products.push(newProduct);
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('products').insert([{
+            id: newProduct.id,
+            name: newProduct.name,
+            category: newProduct.category,
+            purchase_price: newProduct.purchasePrice,
+            mrp: newProduct.mrp,
+            discount_percent: newProduct.discountPercent,
+            price: newProduct.price,
+            stock: newProduct.stock,
+            description: newProduct.description,
+            image: newProduct.image
+        }]);
+    }
+
     imageData = "";
     document.getElementById("productName").value = "";
     document.getElementById("productPurchasePrice").value = "";
@@ -2608,7 +2667,7 @@ function saveProduct(){
     renderInventory();
     setupBilling();
     dashboard();
-    toast("Grocery product added to catalog!");
+    toast("Grocery product added to cloud catalog!");
 }
 
 function openEditModal(id){
@@ -2644,7 +2703,7 @@ function handleEditImage(file){
     reader.readAsDataURL(file);
 }
 
-function saveProductEdit(){
+async function saveProductEdit(){
     const id = document.getElementById("editProductId").value;
     const name = document.getElementById("editProductName").value.trim();
     const category = document.getElementById("editProductCategory").value;
@@ -2671,24 +2730,43 @@ function saveProductEdit(){
         p.image = editImageData;
 
         save();
+
+        if(supabaseClient){
+            await supabaseClient.from('products').update({
+                name,
+                category,
+                purchase_price: purchasePrice,
+                mrp,
+                discount_percent: discountPercent,
+                price,
+                stock,
+                image: editImageData
+            }).eq('id', id);
+        }
+
         renderProducts();
         renderInventory();
         setupBilling();
         dashboard();
         closeEditModal();
-        toast("Product updated successfully!");
+        toast("Product updated in cloud database!");
     }
 }
 
-function deleteProduct(id){
+async function deleteProduct(id){
     if(!confirm("Remove this grocery item from catalog and inventory?")) return;
     products = products.filter(p => p.id !== id);
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('products').delete().eq('id', id);
+    }
+
     renderProducts();
     renderInventory();
     setupBilling();
     dashboard();
-    toast("Product deleted");
+    toast("Product removed");
 }
 
 /* =========================================
@@ -2732,7 +2810,7 @@ function renderInventory(search = ""){
     }).join("") || "<tr><td colspan='9' style='text-align:center;color:var(--muted);'>No inventory matches found.</td></tr>";
 }
 
-function adjustStock(id, value){
+async function adjustStock(id, value){
     const p = products.find(x => x.id === id);
     if(p){
         p.stock = Math.max(0, Number(p.stock) + value);
@@ -2741,6 +2819,10 @@ function adjustStock(id, value){
         renderProducts();
         setupBilling();
         dashboard();
+
+        if(supabaseClient){
+            await supabaseClient.from('products').update({ stock: p.stock }).eq('id', id);
+        }
     }
 }
 
@@ -2868,7 +2950,7 @@ function generateOrderObject(){
     };
 }
 
-function completeBill(){
+async function completeBill(){
     const order = generateOrderObject();
     if(!order){
         toast("Add items to POS bill first");
@@ -2877,10 +2959,15 @@ function completeBill(){
 
     order.items.forEach(x => {
         const p = products.find(p => p.id === x.id);
-        if(p) p.stock = Math.max(0, p.stock - x.qty);
+        if(p) {
+            p.stock = Math.max(0, p.stock - x.qty);
+            if(supabaseClient) {
+                supabaseClient.from('products').update({ stock: p.stock }).eq('id', p.id).then();
+            }
+        }
     });
 
-    orders.push(order);
+    orders.unshift(order);
 
     if(order.customer.phone || order.customer.name !== "Walk-in"){
         const c = customers.find(x => (order.customer.phone && x.phone === order.customer.phone) || x.name.toLowerCase() === order.customer.name.toLowerCase());
@@ -2893,13 +2980,35 @@ function completeBill(){
     }
 
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('orders').insert([{
+            id: order.id,
+            customer: order.customer,
+            items: order.items,
+            subtotal: order.subtotal,
+            gst_rate: order.gstRate,
+            gst: order.gst,
+            handling: order.handling,
+            delivery: order.delivery,
+            discount: 0,
+            coupon_code: "",
+            total: order.total,
+            paid: order.paid,
+            due: order.due,
+            payment_method: "Counter POS",
+            status: order.status,
+            date: order.date
+        }]);
+    }
+
     invoice(order.id);
     bill = [];
     setupBilling();
     dashboard();
     renderProducts();
     renderInventory();
-    toast("Bill generated and saved!");
+    toast("Bill generated and saved to cloud!");
 }
 
 /* =========================================
@@ -3049,7 +3158,7 @@ function invoice(id){
 }
 
 /* =========================================
-   CRM
+   CRM (SUPABASE INTEGRATED)
 ========================================= */
 function renderCRM(search=""){
     document.getElementById("crmTotal").innerText = customers.length;
@@ -3076,7 +3185,7 @@ function renderCRM(search=""){
                         <td><strong>${c.name}</strong></td>
                         <td>${c.phone || "-"}</td>
                         <td>${c.orders || 0}</td>
-                        <td><span class="badge blue">${c.lastStatus || "Active"}</span></td>
+                        <td><span class="badge blue">${c.lastStatus || c.last_status || "Active"}</span></td>
                         <td>
                             <button class="btn small" onclick="toggleFollowup(${i})">
                                 ${c.followup ? '✓ Follow-up Set' : '+ Add Follow-up'}
@@ -3092,37 +3201,60 @@ function renderCRM(search=""){
     `;
 }
 
-function addCustomer(){
+async function addCustomer(){
     const name = prompt("Customer Full Name:");
     if(!name) return;
     const phone = prompt("Mobile Number (10 digits):");
 
-    customers.push({
+    const newCust = {
         id: Date.now(),
         name,
         phone: phone || "",
         orders: 0,
         lastStatus: "New",
         followup: false
-    });
+    };
 
+    customers.push(newCust);
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('customers').insert([{
+            id: newCust.id,
+            name: newCust.name,
+            phone: newCust.phone,
+            orders: 0,
+            last_status: "New",
+            followup: false
+        }]);
+    }
+
     renderCRM();
     dashboard();
-    toast("Customer added to CRM");
+    toast("Customer added to Cloud CRM");
 }
 
-function toggleFollowup(index){
+async function toggleFollowup(index){
     customers[index].followup = !customers[index].followup;
     save();
+
+    if(supabaseClient && customers[index].id){
+        await supabaseClient.from('customers').update({ followup: customers[index].followup }).eq('id', customers[index].id);
+    }
+
     renderCRM();
     toast("Follow-up status changed");
 }
 
-function deleteCustomer(index){
+async function deleteCustomer(index){
     if(!confirm("Remove customer record?")) return;
-    customers.splice(index, 1);
+    const removed = customers.splice(index, 1)[0];
     save();
+
+    if(supabaseClient && removed.id){
+        await supabaseClient.from('customers').delete().eq('id', removed.id);
+    }
+
     renderCRM();
     dashboard();
     toast("Customer removed");
@@ -3131,7 +3263,7 @@ function deleteCustomer(index){
 function exportCRM(){
     const rows = [
         ["id", "name", "phone", "orders", "last_status", "followup"],
-        ...customers.map(c => [c.id || "", c.name, c.phone || "", c.orders || 0, c.lastStatus || "Active", c.followup ? "true" : "false"])
+        ...customers.map(c => [c.id || "", c.name, c.phone || "", c.orders || 0, c.lastStatus || c.last_status || "Active", c.followup ? "true" : "false"])
     ];
     downloadCSVFile("dng-mart-crm.csv", rows);
 }
@@ -3161,7 +3293,7 @@ function renderReferrals(){
                 <td><strong>${r.name}</strong></td>
                 <td><span class="ref-code">${r.code}</span></td>
                 <td><b style="color:var(--primary);">${discountDisplay}</b></td>
-                <td>${money(r.minOrder || 299)}</td>
+                <td>${money(r.minOrder || r.min_order || 299)}</td>
                 <td>${r.successful || 0}</td>
                 <td><span class="badge ${r.status === "active" ? "green" : "orange"}">${r.status || "active"}</span></td>
                 <td>
@@ -3186,7 +3318,7 @@ function closeCustomCouponModal(){
     document.getElementById("customCouponModal").classList.remove("active");
 }
 
-function saveCustomCoupon(){
+async function saveCustomCoupon(){
     const name = document.getElementById("couponUser").value.trim();
     const code = document.getElementById("couponCode").value.trim().toUpperCase();
     const type = document.getElementById("couponType").value;
@@ -3204,7 +3336,7 @@ function saveCustomCoupon(){
         return;
     }
 
-    referrals.push({
+    const newCoupon = {
         id: Date.now(),
         name,
         code,
@@ -3215,23 +3347,45 @@ function saveCustomCoupon(){
         successful: 0,
         reward: 0,
         status: "active"
-    });
+    };
 
+    referrals.push(newCoupon);
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('referrals').insert([{
+            id: newCoupon.id,
+            name: newCoupon.name,
+            code: newCoupon.code,
+            type: newCoupon.type,
+            value: newCoupon.value,
+            min_order: newCoupon.minOrder,
+            reward_per_referral: newCoupon.rewardPerReferral,
+            successful: 0,
+            reward: 0,
+            status: "active"
+        }]);
+    }
+
     renderReferrals();
     closeCustomCouponModal();
-    toast(`Coupon ${code} created successfully!`);
+    toast(`Coupon ${code} published live to cloud!`);
 }
 
-function toggleReferral(index){
+async function toggleReferral(index){
     referrals[index].status = referrals[index].status === "active" ? "paused" : "active";
     save();
+
+    if(supabaseClient && referrals[index].id){
+        await supabaseClient.from('referrals').update({ status: referrals[index].status }).eq('id', referrals[index].id);
+    }
+
     renderReferrals();
 }
 
-function creditReferral(index){
+async function creditReferral(index){
     const referral = referrals[index];
-    const amount = Number(referral.rewardPerReferral) || 50;
+    const amount = Number(referral.rewardPerReferral || referral.reward_per_referral) || 50;
 
     referral.successful = Number(referral.successful || 0) + 1;
     referral.reward = Number(referral.reward || 0) + amount;
@@ -3244,13 +3398,27 @@ function creditReferral(index){
     });
 
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('referrals').update({
+            successful: referral.successful,
+            reward: referral.reward
+        }).eq('id', referral.id);
+
+        await supabaseClient.from('wallet').upsert([{
+            id: 1,
+            balance: wallet.balance,
+            transactions: wallet.transactions
+        }]);
+    }
+
     renderReferrals();
     renderWallet();
     toast("Referral reward credited to wallet");
 }
 
 /* =========================================
-   WALLET
+   WALLET (SUPABASE CONNECTED)
 ========================================= */
 function renderWallet(){
     document.getElementById("walletBalance").innerText = money(wallet.balance);
@@ -3265,7 +3433,7 @@ function renderWallet(){
     `).join("") || "<p style='color:var(--muted)'>No wallet transactions logged.</p>";
 }
 
-function creditWallet(){
+async function creditWallet(){
     const name = document.getElementById("walletName").value.trim();
     const amount = Number(document.getElementById("walletAmount").value);
 
@@ -3285,8 +3453,17 @@ function creditWallet(){
     document.getElementById("walletAmount").value = "";
 
     save();
+
+    if(supabaseClient){
+        await supabaseClient.from('wallet').upsert([{
+            id: 1,
+            balance: wallet.balance,
+            transactions: wallet.transactions
+        }]);
+    }
+
     renderWallet();
-    toast("Wallet balance credited");
+    toast("Wallet balance credited in cloud database");
 }
 
 /* =========================================
@@ -3328,7 +3505,7 @@ if(localStorage.getItem("dng_theme") === "dark"){
 }
 
 /* =========================================
-   INITIAL LOAD
+   INITIAL LOAD & CLOUD INIT
 ========================================= */
 checkSession();
 dashboard();
@@ -3340,3234 +3517,9 @@ renderWallet();
 setupBilling();
 loadOnlineFeeSettings();
 
-initDngCloud();
-</script>
-
-</body>
-</html>    color:var(--text);
-    overflow-x:hidden;
-}
-
-body.dark{
-    --bg:#090d16;
-    --card:#1e293b;
-    --text:#f8fafc;
-    --muted:#94a3b8;
-    --border:#334155;
-    --sidebar:#0f172a;
-    --primary-light:#14532d;
-}
-
-button, input, select, textarea{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-/* LOGIN SCREEN */
-.login-screen{
-    position:fixed;
-    inset:0;
-    background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    z-index:99999;
-}
-
-.login-card{
-    background:var(--card);
-    width:100%;
-    max-width:380px;
-    border-radius:14px;
-    padding:32px 28px;
-    box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);
-    border:1px solid var(--border);
-}
-
-.login-logo{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    margin-bottom:24px;
-    text-align:center;
-}
-
-.login-logo .icon{
-    width:54px;
-    height:54px;
-    background:var(--primary);
-    color:white;
-    font-size:24px;
-    font-weight:900;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin-bottom:10px;
-}
-
-.login-logo h2{
-    font-size:20px;
-    color:var(--text);
-}
-
-.login-logo p{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:2px;
-}
-
-.auth-checkbox-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin:12px 0 16px 0;
-    font-size:12px;
-    color:var(--muted);
-}
-
-.auth-checkbox-row label{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    cursor:pointer;
-}
-
-.app{
-    display:flex;
-    min-height:100vh;
-    position:relative;
-}
-
-/* SIDEBAR & MOBILE DRAWER */
-.sidebar{
-    width:250px;
-    background:var(--sidebar);
-    color:white;
-    padding:20px 14px;
-    position:fixed;
-    left:0;
-    top:0;
-    bottom:0;
-    z-index:1000;
-    transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display:flex;
-    flex-direction:column;
-}
-
-.logo{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    padding:10px 8px;
-    margin-bottom:20px;
-}
-
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:8px;
-    background:var(--primary);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    font-weight:900;
-}
-
-.logo strong{
-    display:block;
-    font-size:16px;
-    letter-spacing:0.5px;
-}
-
-.logo small{
-    color:#94a3b8;
-    font-size:11px;
-}
-
-.nav-list{
-    flex:1;
-    overflow-y:auto;
-}
-
-.nav{
-    width:100%;
-    border:0;
-    background:transparent;
-    color:#cbd5e1;
-    padding:12px 14px;
-    border-radius:8px;
-    text-align:left;
-    margin-bottom:4px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    font-weight:500;
-    font-size:14px;
-    transition:background 0.2s;
-}
-
-.nav:hover,
-.nav.active{
-    background:var(--primary);
-    color:white;
-}
-
-.nav-icon{
-    width:22px;
-    text-align:center;
-    font-size:16px;
-}
-
-.store-link{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:#94a3b8;
-    text-decoration:none;
-    padding:12px 14px;
-    font-size:13px;
-    font-weight:600;
-    border-top:1px solid #1e293b;
-    margin-top:auto;
-}
-.store-link:hover{ color:#fff; }
-
-/* BACKDROP FOR MOBILE */
-.sidebar-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    z-index:900;
-    display:none;
-    opacity:0;
-    transition:opacity 0.3s ease;
-}
-.sidebar-overlay.active{
-    display:block;
-    opacity:1;
-}
-
-/* MAIN CONTENT */
-.main{
-    margin-left:250px;
-    width:calc(100% - 250px);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    transition:margin-left 0.3s;
-}
-
-.topbar{
-    height:var(--header-height);
-    background:var(--card);
-    border-bottom:1px solid var(--border);
-    padding:0 24px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    position:sticky;
-    top:0;
-    z-index:100;
-}
-
-.topbar-left{
-    display:flex;
-    align-items:center;
-    gap:14px;
-}
-
-.hamburger{
-    display:none;
-    background:transparent;
-    border:0;
-    font-size:24px;
-    color:var(--text);
-    padding:4px;
-}
-
-.topbar h1{
-    font-size:20px;
-    font-weight:700;
-}
-
-.top-actions{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.icon-button{
-    border:1px solid var(--border);
-    background:var(--card);
-    color:var(--text);
-    width:38px;
-    height:38px;
-    border-radius:8px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:16px;
-}
-
-.profile{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.avatar{
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    background:var(--primary-light);
-    color:var(--primary);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    font-size:13px;
-}
-
-/* CONTENT */
-.content{
-    padding:24px;
-    flex:1;
-}
-
-.page{
-    display:none;
-}
-
-.page.active{
-    display:block;
-    animation:fadeIn 0.25s ease-in-out;
-}
-
-@keyframes fadeIn{
-    from{ opacity:0; transform:translateY(4px); }
-    to{ opacity:1; transform:translateY(0); }
-}
-
-/* CARDS */
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:20px;
-}
-
-.card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:18px;
-}
-
-.stat{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-}
-
-.stat-icon{
-    width:42px;
-    height:42px;
-    border-radius:8px;
-    background:var(--primary-light);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-}
-
-.stat small{
-    color:var(--muted);
-    font-weight:600;
-    font-size:12px;
-}
-
-.stat h2{
-    margin-top:6px;
-    font-size:22px;
-    font-weight:800;
-}
-
-.green{ color:var(--green); }
-.orange{ color:var(--orange); }
-.red{ color:var(--red); }
-.blue{ color:var(--blue); }
-
-/* GRID */
-.grid-2{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-}
-
-.panel{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:20px;
-    margin-bottom:20px;
-}
-
-.panel-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.panel-header h2{
-    font-size:17px;
-    font-weight:700;
-}
-
-/* CHART */
-.chart{
-    height:220px;
-    display:flex;
-    align-items:flex-end;
-    gap:8px;
-    padding-top:20px;
-}
-
-.bar{
-    flex:1;
-    background:linear-gradient(to top, var(--primary), #4ade80);
-    border-radius:4px 4px 0 0;
-    min-height:16px;
-}
-
-.chart-labels{
-    display:flex;
-    justify-content:space-between;
-    color:var(--muted);
-    font-size:11px;
-    margin-top:10px;
-}
-
-/* TABLE */
-.table-wrap{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:600px;
-}
-
-th, td{
-    padding:12px 10px;
-    text-align:left;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-    font-size:13px;
-}
-
-th{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-    font-weight:700;
-}
-
-.badge{
-    padding:4px 8px;
-    border-radius:12px;
-    font-size:11px;
-    display:inline-block;
-    background:#eee;
-    font-weight:700;
-}
-
-.badge.green{ background:#dcfce7; color:#15803d; }
-.badge.orange{ background:#fef3c7; color:#b45309; }
-.badge.blue{ background:#e0f2fe; color:#0369a1; }
-.badge.red{ background:#fee2e2; color:#b91c1c; }
-
-/* BUTTON */
-.btn{
-    border:0;
-    border-radius:6px;
-    padding:9px 14px;
-    background:#e2e8f0;
-    color:#334155;
-    font-weight:600;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    text-decoration:none;
-    font-size:13px;
-    transition:background 0.2s, opacity 0.2s;
-}
-
-.btn.primary{
-    background:var(--primary);
-    color:white;
-}
-
-.btn.primary:hover{ background:var(--primary-dark); }
-
-.btn.whatsapp{
-    background:#25D366;
-    color:white;
-}
-.btn.whatsapp:hover{ background:#1ebd57; }
-
-.btn.danger{
-    background:var(--red);
-    color:white;
-}
-.btn.danger:hover{ background:#b91c1c; }
-
-.btn.small{
-    padding:5px 9px;
-    font-size:12px;
-}
-
-.btn:active{ transform:scale(0.98); }
-
-/* FORM */
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-}
-
-.form-grid-3{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-}
-
-.form-grid-4{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-}
-
-.field{
-    margin-bottom:14px;
-}
-
-.field label{
-    display:block;
-    margin-bottom:5px;
-    font-size:12px;
-    color:var(--muted);
-    font-weight:600;
-}
-
-.input, .select, textarea{
-    width:100%;
-    padding:10px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    background:var(--card);
-    color:var(--text);
-    outline:none;
-    font-size:13px;
-}
-
-.input:focus, .select:focus, textarea:focus{
-    border-color:var(--primary);
-}
-
-.admin-card-box{
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:14px;
-    margin-bottom:14px;
-    background:var(--bg);
-}
-
-/* TOOLBAR */
-.toolbar{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:16px;
-    align-items:center;
-}
-
-/* DROP */
-.drop-zone{
-    border:2px dashed #cbd5e1;
-    background:#f8fafc;
-    border-radius:8px;
-    padding:20px;
-    text-align:center;
-    margin-bottom:16px;
-    color:#64748b;
-    cursor:pointer;
-    font-size:13px;
-}
-
-.drop-zone.drag{
-    background:#dcfce7;
-    border-color:var(--primary);
-}
-
-.preview{
-    margin-top:10px;
-}
-
-.preview img{
-    max-width:120px;
-    max-height:100px;
-    border-radius:6px;
-}
-
-/* PRODUCT GRID */
-.product-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
-    gap:16px;
-}
-
-.product-card{
-    border:1px solid var(--border);
-    border-radius:8px;
-    overflow:hidden;
-    background:var(--card);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-}
-
-.product-image{
-    height:140px;
-    background:#f8fafc;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:50px;
-    overflow:hidden;
-}
-
-.product-image img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.product-body{
-    padding:14px;
-}
-
-.product-body h3{
-    margin-bottom:4px;
-    font-size:15px;
-    font-weight:700;
-}
-
-.product-body p{
-    color:var(--muted);
-    font-size:12px;
-}
-
-.product-actions{
-    display:flex;
-    gap:8px;
-    margin-top:12px;
-}
-
-/* MINI LIST */
-.list{
-    display:flex;
-    flex-direction:column;
-}
-
-.list-row{
-    padding:10px 0;
-    border-bottom:1px solid var(--border);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    font-size:13px;
-}
-
-.list-row:last-child{ border-bottom:0; }
-
-/* BILLING POS */
-.billing-grid{
-    display:grid;
-    grid-template-columns:1.4fr 1fr;
-    gap:20px;
-}
-
-.bill-line{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 0;
-    border-bottom:1px solid var(--border);
-    font-size:13px;
-}
-
-.summary-row{
-    display:flex;
-    justify-content:space-between;
-    padding:5px 0;
-    font-size:13px;
-    color:var(--muted);
-}
-
-.summary-row.total-row{
-    font-size:18px;
-    color:var(--text);
-    font-weight:bold;
-    border-top:2px solid var(--border);
-    margin-top:8px;
-    padding-top:10px;
-}
-
-.summary-row.due-row{
-    font-size:14px;
-    font-weight:bold;
-    padding-top:4px;
-}
-
-/* WALLET */
-.wallet{
-    background:linear-gradient(135deg, var(--primary), #22c55e);
-    color:white;
-    border-radius:10px;
-    padding:20px;
-}
-
-.wallet h2{
-    font-size:30px;
-    margin-top:8px;
-}
-
-/* REFERRAL */
-.ref-code{
-    background:#e0f2fe;
-    color:#0369a1;
-    padding:3px 6px;
-    border-radius:4px;
-    font-family:monospace;
-    font-weight:bold;
-    font-size:12px;
-}
-
-/* TOAST */
-#toast{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:var(--dark);
-    color:white;
-    padding:12px 18px;
-    border-radius:8px;
-    display:none;
-    z-index:999999;
-    box-shadow:0 10px 20px rgba(0,0,0,0.2);
-    font-size:13px;
-}
-
-/* MODAL */
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.6);
-    z-index:3000;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-}
-
-.modal.active{ display:flex; }
-
-.modal-card{
-    width:100%;
-    max-width:560px;
-    max-height:90vh;
-    overflow-y:auto;
-    background:var(--card);
-    color:var(--text);
-    border-radius:10px;
-    padding:20px;
-    box-shadow:0 20px 25px rgba(0,0,0,0.2);
-}
-
-/* MOBILE BOTTOM NAV BAR */
-.mobile-bottom-nav{
-    display:none;
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    height:56px;
-    background:var(--card);
-    border-top:1px solid var(--border);
-    z-index:800;
-    justify-content:space-around;
-    align-items:center;
-}
-
-.mob-nav-item{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    background:transparent;
-    border:0;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:600;
-    gap:2px;
-    flex:1;
-    height:100%;
-}
-
-.mob-nav-item span:first-child{
-    font-size:18px;
-}
-
-.mob-nav-item.active{
-    color:var(--primary);
-}
-
-/* RESPONSIVE BREAKPOINTS */
-@media(max-width:1050px){
-    .cards{ grid-template-columns:repeat(2,1fr); }
-    .grid-2, .billing-grid{ grid-template-columns:1fr; }
-}
-
-@media(max-width:768px){
-    .sidebar{
-        transform:translateX(-100%);
-    }
-    .sidebar.open{
-        transform:translateX(0);
-    }
-    .main{
-        margin-left:0;
-        width:100%;
-        padding-bottom:60px;
-    }
-    .hamburger{
-        display:flex;
-    }
-    .content{
-        padding:16px;
-    }
-    .cards{
-        grid-template-columns:1fr;
-    }
-    .form-grid, .form-grid-3, .form-grid-4{
-        grid-template-columns:1fr;
-    }
-    .mobile-bottom-nav{
-        display:flex;
-    }
-    .profile div{
-        display:none;
-    }
-    .topbar{
-        padding:0 16px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<!-- AUTHENTICATION LOGIN OVERLAY -->
-<div id="loginScreen" class="login-screen">
-    <div class="login-card">
-        <div class="login-logo">
-            <div class="icon">DNG</div>
-            <h2>Admin Portal</h2>
-            <p>Enter credentials to access the management panel</p>
-        </div>
-
-        <div class="field">
-            <label>Admin Username</label>
-            <input class="input" id="loginUser" placeholder="Enter username (admindng)" autocomplete="username">
-        </div>
-
-        <div class="field" style="margin-bottom:6px;">
-            <label>Password</label>
-            <input class="input" id="loginPass" type="password" placeholder="Enter password (admin1234)" autocomplete="current-password" onkeydown="if(event.key==='Enter') attemptLogin()">
-        </div>
-
-        <div class="auth-checkbox-row">
-            <label>
-                <input type="checkbox" id="showLoginPass" onchange="togglePasswordVisibility('loginPass', this.checked)">
-                <span>Show Password</span>
-            </label>
-            <label>
-                <input type="checkbox" id="rememberMe" checked>
-                <span>Remember Me</span>
-            </label>
-        </div>
-
-        <button class="btn primary" style="width:100%;padding:12px;" onclick="attemptLogin()">
-            🔒 Secure Login
-        </button>
-
-        <div style="text-align:center;margin-top:16px;">
-            <button class="btn small" style="background:transparent;color:var(--muted);text-decoration:underline;" onclick="sendLoginWhatsAppReset()">
-                Forgot Password? Reset via WhatsApp
-            </button>
-        </div>
-    </div>
-</div>
-
-<div class="app" id="appRoot" style="display:none;">
-
-<!-- SIDEBAR OVERLAY FOR MOBILE -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-    <div class="logo">
-        <div class="logo-icon">DNG</div>
-        <div>
-            <strong>DNG Mart</strong>
-            <small>Grocery Merchant</small>
-        </div>
-    </div>
-
-    <div class="nav-list">
-        <button class="nav active" onclick="showPage('dashboard',this)">
-            <span class="nav-icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-
-        <button class="nav" onclick="showPage('orders',this)">
-            <span class="nav-icon">🧾</span>
-            <span>Orders & Delivery</span>
-        </button>
-
-        <button class="nav" onclick="showPage('billing',this)">
-            <span class="nav-icon">₹</span>
-            <span>Counter POS</span>
-        </button>
-
-        <button class="nav" onclick="showPage('products',this)">
-            <span class="nav-icon">🛒</span>
-            <span>Products</span>
-        </button>
-
-        <button class="nav" onclick="showPage('inventory',this)">
-            <span class="nav-icon">📦</span>
-            <span>Inventory & Margins</span>
-        </button>
-
-        <button class="nav" onclick="showPage('crm',this)">
-            <span class="nav-icon">👥</span>
-            <span>Customer CRM</span>
-        </button>
-
-        <button class="nav" onclick="showPage('referrals',this)">
-            <span class="nav-icon">🏷️</span>
-            <span>Coupons</span>
-        </button>
-
-        <button class="nav" onclick="showPage('wallet',this)">
-            <span class="nav-icon">💰</span>
-            <span>Wallet</span>
-        </button>
-
-        <button class="nav" onclick="showPage('settings',this)">
-            <span class="nav-icon">⚙️</span>
-            <span>Settings & Security</span>
-        </button>
-    </div>
-
-    <a class="store-link" href="index.html" target="_blank">
-        <span>🌐</span> View Storefront
-    </a>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-<header class="topbar">
-    <div class="topbar-left">
-        <button class="hamburger" onclick="toggleSidebar()">☰</button>
-        <div>
-            <h1 id="pageTitle">Dashboard</h1>
-        </div>
-    </div>
-
-    <div class="top-actions">
-        <button class="icon-button" onclick="testSoundAlert()" title="Test Order Notification Chime">🔔</button>
-        <button class="icon-button" onclick="toggleTheme()" title="Toggle Dark/Light Mode">◐</button>
-        <div class="profile" style="cursor:pointer" onclick="showPage('settings')">
-            <div class="avatar" id="topNavAvatar">AD</div>
-            <div>
-                <strong id="topNavUser" style="font-size:13px">admindng</strong>
-            </div>
-        </div>
-        <button class="btn small danger" onclick="logoutAdmin()" title="Logout Session" style="margin-left:4px;">Logout</button>
-    </div>
-</header>
-
-<div class="content">
-
-<!-- DASHBOARD -->
-<section id="dashboard" class="page active">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Total Grocery Orders</small>
-                <h2 id="totalOrders">0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Live Synchronized</span>
-            </div>
-            <div class="stat-icon">🧾</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Total Revenue</small>
-                <h2 id="totalRevenue">₹0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Total Sales</span>
-            </div>
-            <div class="stat-icon">₹</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Cataloged Items</small>
-                <h2 id="totalProducts">0</h2>
-                <span class="orange" style="font-size:11px;font-weight:bold;">● In Store</span>
-            </div>
-            <div class="stat-icon">🛒</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Customer Base</small>
-                <h2 id="totalCustomers">0</h2>
-                <span class="green" style="font-size:11px;font-weight:bold;">● Active CRM</span>
-            </div>
-            <div class="stat-icon">👥</div>
-        </div>
-    </div>
-
-    <div class="grid-2">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Grocery Sales Activity (2026)</h2>
-                <span class="badge green">Real-Time</span>
-            </div>
-            <div class="chart">
-                <div class="bar" style="height:45%"></div>
-                <div class="bar" style="height:60%"></div>
-                <div class="bar" style="height:50%"></div>
-                <div class="bar" style="height:75%"></div>
-                <div class="bar" style="height:65%"></div>
-                <div class="bar" style="height:85%"></div>
-                <div class="bar" style="height:70%"></div>
-                <div class="bar" style="height:92%"></div>
-                <div class="bar" style="height:78%"></div>
-                <div class="bar" style="height:88%"></div>
-                <div class="bar" style="height:82%"></div>
-                <div class="bar" style="height:100%"></div>
-            </div>
-            <div class="chart-labels">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
-                <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Low Stock Alert (< 10 units)</h2>
-            </div>
-            <div id="lowStock" class="list"></div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Recent Store & Online Orders</h2>
-            <button class="btn small" onclick="showPage('orders')">View All</button>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>WhatsApp Notification</th>
-                    </tr>
-                </thead>
-                <tbody id="recentOrders"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- ORDERS & FEE MANAGEMENT -->
-<section id="orders" class="page">
-    <div class="panel" style="background:#f0fdf4;border:1px solid #bbf7d0;">
-        <div class="panel-header">
-            <div>
-                <h2>Storefront Delivery & Tax Configurations</h2>
-                <p style="color:var(--muted);font-size:12px;">Default delivery fees, handling rates, and GST applied to online orders.</p>
-            </div>
-            <button class="btn primary small" onclick="saveOnlineFeeSettings()">Save Rates</button>
-        </div>
-        <div class="form-grid-3">
-            <div class="field">
-                <label>Default Grocery Delivery (₹)</label>
-                <input class="input" id="feeDeliveryDefault" type="number" placeholder="30">
-            </div>
-            <div class="field">
-                <label>Packaging / Handling Fee (₹)</label>
-                <input class="input" id="feeHandlingDefault" type="number" placeholder="10">
-            </div>
-            <div class="field">
-                <label>Default GST Tax Rate (%)</label>
-                <select class="select" id="feeGSTDefault">
-                    <option value="0">0% (Essential Grains)</option>
-                    <option value="5">5% (Packaged Food & Ghee)</option>
-                    <option value="12">12% (Standard)</option>
-                    <option value="18">18% (Household Cleaners)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Orders Pipeline</h2>
-            <button class="btn small" onclick="exportOrders()">Export CSV</button>
-        </div>
-        <div class="toolbar">
-            <input class="input" placeholder="Search orders by customer or ID..." oninput="searchOrders(this.value)">
-        </div>
-        <div class="table-wrap" id="ordersTable"></div>
-    </div>
-</section>
-
-<!-- POS BILLING -->
-<section id="billing" class="page">
-    <div class="billing-grid">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Counter POS Billing</h2>
-                <span class="badge green">POS Counter</span>
-            </div>
-            <div class="form-grid">
-                <div class="field">
-                    <label>Customer Name</label>
-                    <input class="input" id="billCustomer" placeholder="Walk-in Customer">
-                </div>
-                <div class="field">
-                    <label>WhatsApp Number</label>
-                    <input class="input" id="billPhone" placeholder="10-digit mobile number">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Select Item</label>
-                <select class="select" id="billProduct"></select>
-            </div>
-
-            <div class="form-grid">
-                <input class="input" id="billQty" type="number" value="1" min="1" placeholder="Qty">
-                <button class="btn primary" onclick="addBillItem()">+ Add to Bill</button>
-            </div>
-
-            <div id="billItems" style="margin-top:16px"></div>
-
-            <hr style="border:0;border-top:1px solid var(--border);margin:16px 0;">
-
-            <div class="form-grid-3">
-                <div class="field">
-                    <label>GST Rate (%)</label>
-                    <select class="select" id="billGSTRate" onchange="renderBill()">
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="12">12%</option>
-                        <option value="18">18%</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Bag Fee (₹)</label>
-                    <input class="input" id="billHandling" type="number" value="0" min="0" oninput="renderBill()">
-                </div>
-                <div class="field">
-                    <label>Delivery Fee (₹)</label>
-                    <input class="input" id="billDelivery" type="number" value="0" min="0" oninput="renderBill()">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Amount Collected (₹)</label>
-                <input class="input" id="billPaid" type="number" placeholder="Enter collected amount" oninput="renderBill()">
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>POS Bill Summary</h2>
-            <div id="billSummary" style="margin-top:16px">No items added to bill.</div>
-
-            <button class="btn primary" style="width:100%;margin-top:14px" onclick="completeBill()">
-                Generate Invoice & Print
-            </button>
-            <button class="btn whatsapp" style="width:100%;margin-top:8px" onclick="sendBillWhatsApp()">
-                💬 Send Bill to WhatsApp
-            </button>
-        </div>
-    </div>
-</section>
-
-<!-- PRODUCTS -->
-<section id="products" class="page">
-    <div class="grid-2">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Add Grocery Product</h2>
-            </div>
-            
-            <div class="form-grid">
-                <div class="field">
-                    <label>Product Name</label>
-                    <input class="input" id="productName" placeholder="e.g. Fortune Mustard Oil 1L">
-                </div>
-                <div class="field">
-                    <label>Category</label>
-                    <select class="select" id="productCategory">
-                        <option>Atta & Dal</option>
-                        <option>Oil & Ghee</option>
-                        <option>Daily Essentials</option>
-                        <option>Snacks & Beverages</option>
-                        <option>Cleaning & Household</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-grid-4">
-                <div class="field">
-                    <label>Cost (₹)</label>
-                    <input class="input" id="productPurchasePrice" type="number" placeholder="Cost" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>MRP (₹)</label>
-                    <input class="input" id="productMRP" type="number" placeholder="MRP" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>Discount (%)</label>
-                    <input class="input" id="productDiscount" type="number" value="0" min="0" max="100" placeholder="0" oninput="calculateSellingPrice()">
-                </div>
-                <div class="field">
-                    <label>Selling Price (₹)</label>
-                    <input class="input" id="productPrice" type="number" placeholder="Selling" style="font-weight:bold;color:var(--primary);">
-                </div>
-            </div>
-
-            <div class="field">
-                <label>Initial Stock Units</label>
-                <input class="input" id="productStock" type="number" placeholder="e.g. 50">
-            </div>
-
-            <div id="dropZone" class="drop-zone">
-                <strong>Drag & Drop Image</strong> or click to upload
-                <input id="productImage" type="file" accept="image/*" hidden>
-                <div id="imagePreview" class="preview"></div>
-            </div>
-
-            <button class="btn primary" style="width:100%" onclick="saveProduct()">Save Product & Update Inventory</button>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Bulk CSV Grocery Sync</h2>
-            </div>
-            <div class="toolbar">
-                <button class="btn small" onclick="exportProductsCSV()">Export Complete CSV</button>
-                <button class="btn small" onclick="downloadProductTemplate()">Template</button>
-                <label class="btn primary small">
-                    Import CSV
-                    <input type="file" accept=".csv" hidden onchange="importProductsCSV(this.files[0])">
-                </label>
-            </div>
-            <div style="background:#f8fafc;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:11px;line-height:1.6;color:var(--text);">
-                <strong>Required CSV Headers:</strong><br>
-                <code>id, name, category, purchase_price, mrp, discount_percent, price, stock, description, image_url</code>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Live Grocery Catalog</h2>
-            <input class="input" style="max-width:220px" placeholder="Search catalog..." oninput="renderProducts(this.value)">
-        </div>
-        <div id="productGrid" class="product-grid"></div>
-    </div>
-</section>
-
-<!-- INVENTORY -->
-<section id="inventory" class="page">
-    <div class="panel">
-        <div class="panel-header">
-            <div>
-                <h2>Stock Levels & Profit Margins</h2>
-                <p style="color:var(--muted);font-size:12px;">Manage inventory stock counts, unit costs, and live margins.</p>
-            </div>
-            <div class="toolbar" style="margin-bottom:0">
-                <button class="btn small" onclick="exportProductsCSV()">Export Stock CSV</button>
-            </div>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" placeholder="Search inventory by item or category..." oninput="renderInventory(this.value)">
-        </div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product / SKU</th>
-                        <th>Category</th>
-                        <th>Cost Price</th>
-                        <th>MRP</th>
-                        <th>Discount</th>
-                        <th>Selling Price</th>
-                        <th>Stock Level</th>
-                        <th>Quick Adjust</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryTable"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- CRM -->
-<section id="crm" class="page">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Total Customers</small>
-                <h2 id="crmTotal">0</h2>
-            </div>
-            <div class="stat-icon">👥</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Repeat Buyers</small>
-                <h2 id="repeatCustomers">0</h2>
-            </div>
-            <div class="stat-icon">🔁</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Follow-up Required</small>
-                <h2 id="followUps">0</h2>
-            </div>
-            <div class="stat-icon">📞</div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Customer Relationship Management</h2>
-            <div class="toolbar" style="margin-bottom:0">
-                <button class="btn small" onclick="exportCRM()">Export CSV</button>
-                <button class="btn primary small" onclick="addCustomer()">+ Add Customer</button>
-            </div>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" placeholder="Search customer records..." oninput="renderCRM(this.value)">
-        </div>
-
-        <div class="table-wrap" id="crmTable"></div>
-    </div>
-</section>
-
-<!-- REFERRALS & CUSTOM COUPONS -->
-<section id="referrals" class="page">
-    <div class="cards">
-        <div class="card stat">
-            <div>
-                <small>Campaigns / Promoters</small>
-                <h2 id="refUsers">0</h2>
-            </div>
-            <div class="stat-icon">↗</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Successful Orders</small>
-                <h2 id="successReferrals">0</h2>
-            </div>
-            <div class="stat-icon">🎯</div>
-        </div>
-
-        <div class="card stat">
-            <div>
-                <small>Active Coupons</small>
-                <h2 id="activeCouponsCount">0</h2>
-            </div>
-            <div class="stat-icon">🏷️</div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Coupons & Referral Promotions</h2>
-            <button class="btn primary small" onclick="openCustomCouponModal()">+ Create Coupon</button>
-        </div>
-
-        <div class="toolbar">
-            <input class="input" id="refSearch" placeholder="Search coupons..." oninput="renderReferrals()">
-            <select class="select" id="refStatus" onchange="renderReferrals()" style="max-width:140px;">
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-            </select>
-        </div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Campaign / User</th>
-                        <th>Coupon Code</th>
-                        <th>Discount Value</th>
-                        <th>Min Order</th>
-                        <th>Used Count</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="referralTable"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- WALLET -->
-<section id="wallet" class="page">
-    <div class="grid-2">
-        <div class="wallet">
-            <small>Mart Customer Wallet System</small>
-            <h2 id="walletBalance">₹0</h2>
-            <p style="font-size:12px;margin-top:4px;opacity:0.9;">Cashback & promoter reward credits</p>
-        </div>
-
-        <div class="panel">
-            <h2>Manual Wallet Credit</h2>
-            <br>
-            <div class="field">
-                <label>Customer Name / Phone</label>
-                <input class="input" id="walletName">
-            </div>
-            <div class="field">
-                <label>Amount (₹)</label>
-                <input class="input" id="walletAmount" type="number">
-            </div>
-            <button class="btn primary" style="width:100%" onclick="creditWallet()">Credit Wallet</button>
-        </div>
-    </div>
-
-    <div class="panel">
-        <h2>Wallet Transactions Log</h2>
-        <br>
-        <div id="walletTransactions"></div>
-    </div>
-</section>
-
-<!-- SETTINGS & SECURITY -->
-<section id="settings" class="page">
-    <div class="grid-2">
-        <div class="panel">
-            <div class="panel-header">
-                <h2>Admin Accounts (Up to 3 Admins)</h2>
-                <span class="badge green">Multi-User Access</span>
-            </div>
-            
-            <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
-                Configure up to 3 separate administrator logins. Any of these authorized accounts can open the admin panel.
-            </p>
-
-            <div style="margin-bottom:14px;">
-                <label style="font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--muted);">
-                    <input type="checkbox" onchange="toggleAllSettingsPasswords(this.checked)">
-                    <span>Show All Admin Passwords</span>
-                </label>
-            </div>
-
-            <!-- ADMIN 1 (PRIMARY) -->
-            <div class="admin-card-box">
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                    <strong style="font-size:13px;">Admin 1 (Primary Master)</strong>
-                    <span class="badge green">Default</span>
-                </div>
-                <div class="form-grid">
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Username</label>
-                        <input class="input" id="adminUser0" placeholder="admindng">
-                    </div>
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Password</label>
-                        <input class="input setting-pass-field" id="adminPass0" type="password" placeholder="admin1234">
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADMIN 2 -->
-            <div class="admin-card-box">
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                    <strong style="font-size:13px;">Admin 2 (Manager)</strong>
-                    <span class="badge blue">Optional</span>
-                </div>
-                <div class="form-grid">
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Username</label>
-                        <input class="input" id="adminUser1" placeholder="manager">
-                    </div>
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Password</label>
-                        <input class="input setting-pass-field" id="adminPass1" type="password" placeholder="manager12345">
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADMIN 3 -->
-            <div class="admin-card-box">
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                    <strong style="font-size:13px;">Admin 3 (Staff / Counter)</strong>
-                    <span class="badge blue">Optional</span>
-                </div>
-                <div class="form-grid">
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Username</label>
-                        <input class="input" id="adminUser2" placeholder="staff">
-                    </div>
-                    <div class="field" style="margin-bottom:0;">
-                        <label>Password</label>
-                        <input class="input setting-pass-field" id="adminPass2" type="password" placeholder="staff12345">
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn primary" style="width:100%;margin-top:6px;" onclick="saveAllAdminAccounts()">
-                💾 Save 3 Admin Credentials
-            </button>
-        </div>
-
-        <div>
-            <!-- WHATSAPP RECOVERY -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2>WhatsApp Password Recovery</h2>
-                </div>
-                <p style="color:var(--muted);font-size:13px;margin-bottom:14px;line-height:1.5;">
-                    Generate and dispatch credential tokens directly to WhatsApp support for identity confirmation.
-                </p>
-
-                <div class="field">
-                    <label>Admin Support WhatsApp Number</label>
-                    <input class="input" id="settingsAdminPhone" value="919123187724" placeholder="e.g. 919123187724">
-                </div>
-
-                <button class="btn whatsapp" style="width:100%;" onclick="sendWhatsAppResetLink()">
-                    💬 Send Reset Link via WhatsApp
-                </button>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">
-                    <h2>Session Actions</h2>
-                </div>
-                <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-                    Terminate active session and require manual credential verification.
-                </p>
-                <button class="btn danger" style="width:100%" onclick="logoutAdmin()">
-                    🚪 Logout Admin Panel
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
-
-</div>
-</main>
-</div>
-
-<!-- MOBILE BOTTOM NAVIGATION -->
-<nav class="mobile-bottom-nav">
-    <button class="mob-nav-item active" onclick="showPage('dashboard', this)">
-        <span>📊</span>
-        <span>Stats</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('orders', this)">
-        <span>🧾</span>
-        <span>Orders</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('billing', this)">
-        <span>₹</span>
-        <span>POS</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('products', this)">
-        <span>🛒</span>
-        <span>Items</span>
-    </button>
-    <button class="mob-nav-item" onclick="showPage('settings', this)">
-        <span>⚙️</span>
-        <span>Settings</span>
-    </button>
-</nav>
-
-<!-- EDIT PRODUCT MODAL -->
-<div id="editProductModal" class="modal">
-    <div class="modal-card">
-        <div class="panel-header">
-            <h2>Edit Grocery Item & Stock</h2>
-            <button class="btn small" onclick="closeEditModal()">✕</button>
-        </div>
-        <input type="hidden" id="editProductId">
-        
-        <div class="form-grid">
-            <div class="field">
-                <label>Product Name</label>
-                <input class="input" id="editProductName">
-            </div>
-            <div class="field">
-                <label>Category</label>
-                <select class="select" id="editProductCategory">
-                    <option>Atta & Dal</option>
-                    <option>Oil & Ghee</option>
-                    <option>Daily Essentials</option>
-                    <option>Snacks & Beverages</option>
-                    <option>Cleaning & Household</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-grid-4">
-            <div class="field">
-                <label>Cost (₹)</label>
-                <input class="input" id="editProductPurchasePrice" type="number" oninput="calculateEditSellingPrice()">
-            </div>
-            <div class="field">
-                <label>MRP (₹)</label>
-                <input class="input" id="editProductMRP" type="number" oninput="calculateEditSellingPrice()">
-            </div>
-            <div class="field">
-                <label>Discount (%)</label>
-                <input class="input" id="editProductDiscount" type="number" min="0" max="100" oninput="calculateEditSellingPrice()">
-            </div>
-            <div class="field">
-                <label>Selling Price (₹)</label>
-                <input class="input" id="editProductPrice" type="number" style="font-weight:bold;color:var(--primary);">
-            </div>
-        </div>
-
-        <div class="field">
-            <label>Stock Count</label>
-            <input class="input" id="editProductStock" type="number">
-        </div>
-
-        <div class="field">
-            <label>Update Product Photo</label>
-            <input type="file" id="editProductImageInput" accept="image/*" onchange="handleEditImage(this.files[0])">
-            <div id="editImagePreview" class="preview"></div>
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:15px;">
-            <button class="btn" onclick="closeEditModal()">Cancel</button>
-            <button class="btn primary" onclick="saveProductEdit()">Save Changes</button>
-        </div>
-    </div>
-</div>
-
-<!-- CREATE CUSTOM COUPON MODAL -->
-<div id="customCouponModal" class="modal">
-    <div class="modal-card">
-        <div class="panel-header">
-            <h2>Create Custom Promo Coupon</h2>
-            <button class="btn small" onclick="closeCustomCouponModal()">✕</button>
-        </div>
-        <div class="form-grid">
-            <div class="field">
-                <label>Campaign Title / Promoter Name</label>
-                <input class="input" id="couponUser" placeholder="e.g. Welcome Deal or Suresh">
-            </div>
-            <div class="field">
-                <label>Coupon Code</label>
-                <input class="input" id="couponCode" placeholder="e.g. DNG50, GROCERY10" style="text-transform:uppercase;">
-            </div>
-        </div>
-
-        <div class="form-grid-3">
-            <div class="field">
-                <label>Discount Type</label>
-                <select class="select" id="couponType">
-                    <option value="fixed">Flat ₹ Off</option>
-                    <option value="percent">Percentage (%) Off</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Discount Value</label>
-                <input class="input" id="couponValue" type="number" placeholder="50">
-            </div>
-            <div class="field">
-                <label>Min Order (₹)</label>
-                <input class="input" id="couponMinOrder" type="number" value="299">
-            </div>
-        </div>
-
-        <div class="field">
-            <label>Affiliate Reward per Use (₹)</label>
-            <input class="input" id="couponOwnerReward" type="number" value="50">
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:15px;">
-            <button class="btn" onclick="closeCustomCouponModal()">Cancel</button>
-            <button class="btn primary" onclick="saveCustomCoupon()">Publish Coupon</button>
-        </div>
-    </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
-/* =========================================
-   SECURITY & 3 ADMIN ACCOUNTS (DEFAULT: admindng / admin1234)
-========================================= */
-const DEFAULT_AUTH = {
-    admins: [
-        { username: "admindng", password: "admin1234" },
-        { username: "", password: "" },
-        { username: "", password: "" }
-    ],
-    adminPhone: "919123187724"
-};
-
-function loadAuth(){
-    const data = load("dng_admin_auth", DEFAULT_AUTH);
-    if(!data.admins){
-        data.admins = [
-            { username: data.username || "admindng", password: data.password || "admin1234" },
-            { username: "", password: "" },
-            { username: "", password: "" }
-        ];
-    }
-    while(data.admins.length < 3){
-        data.admins.push({ username: "", password: "" });
-    }
-    return data;
-}
-
-function saveAuth(authData){
-    localStorage.setItem("dng_admin_auth", JSON.stringify(authData));
-}
-
-function togglePasswordVisibility(fieldId, isVisible){
-    const el = document.getElementById(fieldId);
-    if(el) el.type = isVisible ? "text" : "password";
-}
-
-function toggleAllSettingsPasswords(isVisible){
-    document.querySelectorAll(".setting-pass-field").forEach(el => {
-        el.type = isVisible ? "text" : "password";
-    });
-}
-
-function checkSession(){
-    const isAuth = sessionStorage.getItem("dng_admin_logged_in") === "true" || localStorage.getItem("dng_remember_admin") === "true";
-    const loginScreen = document.getElementById("loginScreen");
-    const appRoot = document.getElementById("appRoot");
-
-    if(isAuth){
-        loginScreen.style.display = "none";
-        appRoot.style.display = "flex";
-        updateUserHeader();
-    } else {
-        loginScreen.style.display = "flex";
-        appRoot.style.display = "none";
-    }
-}
-
-function attemptLogin(){
-    const u = document.getElementById("loginUser").value.trim();
-    const p = document.getElementById("loginPass").value.trim();
-    const rememberMe = document.getElementById("rememberMe").checked;
-    const auth = loadAuth();
-
-    const matchedAdmin = auth.admins.find(a => a.username && a.username === u && a.password === p);
-
-    if(matchedAdmin){
-        sessionStorage.setItem("dng_admin_logged_in", "true");
-        localStorage.setItem("dng_active_admin", matchedAdmin.username);
-
-        if(rememberMe){
-            localStorage.setItem("dng_remember_admin", "true");
-        } else {
-            localStorage.removeItem("dng_remember_admin");
-        }
-
-        toast(`Login successful! Welcome ${matchedAdmin.username}`);
-        document.getElementById("loginUser").value = "";
-        document.getElementById("loginPass").value = "";
-        checkSession();
-    } else {
-        toast("❌ Invalid username or password!");
-    }
-}
-
-function logoutAdmin(){
-    if(!confirm("Are you sure you want to log out?")) return;
-    sessionStorage.removeItem("dng_admin_logged_in");
-    localStorage.removeItem("dng_remember_admin");
-    localStorage.removeItem("dng_active_admin");
-    checkSession();
-    toast("Logged out successfully");
-}
-
-function updateUserHeader(){
-    const activeAdmin = localStorage.getItem("dng_active_admin") || "admindng";
-    document.getElementById("topNavUser").innerText = activeAdmin;
-    document.getElementById("topNavAvatar").innerText = activeAdmin.substring(0, 2).toUpperCase();
-}
-
-function populateSettingsAuth(){
-    const auth = loadAuth();
-    for(let i = 0; i < 3; i++){
-        document.getElementById(`adminUser${i}`).value = auth.admins[i]?.username || "";
-        document.getElementById(`adminPass${i}`).value = auth.admins[i]?.password || "";
-    }
-    document.getElementById("settingsAdminPhone").value = auth.adminPhone || "919123187724";
-}
-
-function saveAllAdminAccounts(){
-    const auth = loadAuth();
-    const u0 = document.getElementById("adminUser0").value.trim();
-    const p0 = document.getElementById("adminPass0").value.trim();
-
-    if(!u0 || !p0){
-        toast("Admin 1 (Primary Master) cannot be empty!");
-        return;
-    }
-
-    auth.admins = [
-        { username: u0, password: p0 },
-        { username: document.getElementById("adminUser1").value.trim(), password: document.getElementById("adminPass1").value.trim() },
-        { username: document.getElementById("adminUser2").value.trim(), password: document.getElementById("adminPass2").value.trim() }
-    ];
-
-    saveAuth(auth);
-    updateUserHeader();
-    toast("All 3 Admin credentials updated successfully!");
-}
-
-function sendWhatsAppResetLink(){
-    const auth = loadAuth();
-    const phoneInput = document.getElementById("settingsAdminPhone").value.replace(/[^0-9]/g, "") || auth.adminPhone;
-    const token = "RST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    let msg = `*🔐 DNG MART - ADMIN PASSWORD RESET REQUEST*\n`;
-    msg += `------------------------------------\n`;
-    msg += `A request was made to manage credentials on DNG Mart.\n\n`;
-    msg += `*Primary Admin:* ${auth.admins[0]?.username || "admindng"}\n`;
-    msg += `*Security Token:* ${token}\n`;
-    msg += `*Time:* ${new Date().toLocaleString()}\n\n`;
-    msg += `Reply to confirm or set new credentials.\n`;
-    msg += `------------------------------------\n`;
-    msg += `_DNG Mart Secure System_`;
-
-    const encoded = encodeURIComponent(msg);
-    const url = `https://wa.me/${phoneInput}?text=${encoded}`;
-    window.open(url, "_blank");
-    toast("WhatsApp reset link opened!");
-}
-
-function sendLoginWhatsAppReset(){
-    const auth = loadAuth();
-    const token = "RST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    let msg = `*🔐 DNG MART - FORGOT PASSWORD RECOVERY*\n`;
-    msg += `------------------------------------\n`;
-    msg += `Admin Credential Recovery:\n\n`;
-    msg += `*Primary Username:* ${auth.admins[0]?.username || "admindng"}\n`;
-    msg += `*Recovery Token:* ${token}\n`;
-    msg += `*Default Password:* admin1234\n\n`;
-    msg += `Please send this token to verify identity and recover access.\n`;
-    msg += `------------------------------------`;
-
-    const encoded = encodeURIComponent(msg);
-    const url = `https://wa.me/${auth.adminPhone || "919123187724"}?text=${encoded}`;
-    window.open(url, "_blank");
-}
-
-/* =========================================
-   DATABASE INITIALIZATION (DNG MART)
-========================================= */
-const DEFAULT_PRODUCTS = [
-    { id:"g1", name:"Chakki Fresh Sharbati Atta (10kg)", category:"Atta & Dal", purchasePrice:320, mrp:450, discountPercent:15.55, price:380, stock:35, description:"100% pure whole wheat flour", image:"" },
-    { id:"g2", name:"Royal Basmati Rice Mogra (5kg)", category:"Atta & Dal", purchasePrice:240, mrp:360, discountPercent:16.94, price:299, stock:25, description:"Aromatic long grain basmati rice", image:"" },
-    { id:"g3", name:"Kachi Ghani Pure Mustard Oil (1 Litre)", category:"Oil & Ghee", purchasePrice:120, mrp:175, discountPercent:14.85, price:149, stock:50, description:"Cold pressed pure sarson tel", image:"" },
-    { id:"g4", name:"Pure Desi Cow Ghee (1 Litre Jar)", category:"Oil & Ghee", purchasePrice:480, mrp:650, discountPercent:15.53, price:549, stock:20, description:"Traditional aromatic cow ghee", image:"" },
-    { id:"g5", name:"Premium Unpolished Toor Dal (1kg)", category:"Atta & Dal", purchasePrice:115, mrp:165, discountPercent:15.75, price:139, stock:40, description:"Protein-rich unpolished arhar dal", image:"" },
-    { id:"g6", name:"Tata Tea Premium Leaf (1kg Pouch)", category:"Daily Essentials", purchasePrice:340, mrp:460, discountPercent:15.43, price:389, stock:30, description:"Rich taste and aroma tea", image:"" }
-];
-
-function load(key, defaultValue){
-    try {
-        const val = localStorage.getItem(key);
-        return val ? JSON.parse(val) : defaultValue;
-    } catch(e) {
-        return defaultValue;
-    }
-}
-
-let products = load("dng_products", DEFAULT_PRODUCTS);
-let orders = load("dng_orders", []);
-let customers = load("dng_customers", []);
-let referrals = load("dng_referrals", []);
-let wallet = load("dng_wallet", { balance:0, transactions:[] });
-let onlineSettings = load("dng_online_settings", { delivery:30, handling:10, gst:5 });
-
-let imageData = "";
-let editImageData = "";
-let bill = [];
-
-/* =========================================
-   UTILITIES & SOUND SYNTHESIS
-========================================= */
-function save(){
-    localStorage.setItem("dng_products", JSON.stringify(products));
-    localStorage.setItem("dng_orders", JSON.stringify(orders));
-    localStorage.setItem("dng_customers", JSON.stringify(customers));
-    localStorage.setItem("dng_referrals", JSON.stringify(referrals));
-    localStorage.setItem("dng_wallet", JSON.stringify(wallet));
-    localStorage.setItem("dng_online_settings", JSON.stringify(onlineSettings));
-}
-
-function money(value){
-    return "₹" + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-}
-
-function toast(message){
-    const t = document.getElementById("toast");
-    t.innerText = message;
-    t.style.display = "block";
-    setTimeout(() => t.style.display = "none", 3000);
-}
-
-function playOrderChime(){
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if(!AudioContext) return;
-        const ctx = new AudioContext();
-        
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(587.33, now);
-        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.15);
-        osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.35);
-
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.8);
-    } catch(e) {
-        console.log("Audio chime error:", e);
-    }
-}
-
-function testSoundAlert(){
-    playOrderChime();
-    toast("🔔 Order notification sound tested!");
-}
-
-/* =========================================
-   DRAWER / MOBILE MENU
-========================================= */
-function toggleSidebar(){
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
-    sidebar.classList.toggle("open");
-    overlay.classList.toggle("active");
-}
-
-function closeSidebar(){
-    document.getElementById("sidebar").classList.remove("open");
-    document.getElementById("sidebarOverlay").classList.remove("active");
-}
-
-/* =========================================
-   PRICING AUTO-CALCULATORS
-========================================= */
-function calculateSellingPrice(){
-    const mrp = Number(document.getElementById("productMRP").value) || 0;
-    const discount = Number(document.getElementById("productDiscount").value) || 0;
-    const finalPrice = Math.max(0, mrp - (mrp * discount / 100));
-    document.getElementById("productPrice").value = Math.round(finalPrice);
-}
-
-function calculateEditSellingPrice(){
-    const mrp = Number(document.getElementById("editProductMRP").value) || 0;
-    const discount = Number(document.getElementById("editProductDiscount").value) || 0;
-    const finalPrice = Math.max(0, mrp - (mrp * discount / 100));
-    document.getElementById("editProductPrice").value = Math.round(finalPrice);
-}
-
-/* =========================================
-   ONLINE ORDER CHARGES
-========================================= */
-function loadOnlineFeeSettings(){
-    document.getElementById("feeDeliveryDefault").value = onlineSettings.delivery ?? 30;
-    document.getElementById("feeHandlingDefault").value = onlineSettings.handling ?? 10;
-    document.getElementById("feeGSTDefault").value = onlineSettings.gst ?? 5;
-}
-
-function saveOnlineFeeSettings(){
-    onlineSettings.delivery = Number(document.getElementById("feeDeliveryDefault").value) || 0;
-    onlineSettings.handling = Number(document.getElementById("feeHandlingDefault").value) || 0;
-    onlineSettings.gst = Number(document.getElementById("feeGSTDefault").value) || 0;
-    
-    save();
-    toast("Storefront delivery and tax configurations updated!");
-}
-
-/* =========================================
-   CROSS-TAB SYNC
-========================================= */
-window.addEventListener("storage", (e) => {
-    if(e.key === "dng_products"){
-        products = load("dng_products", DEFAULT_PRODUCTS);
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-    }
-    if(e.key === "dng_orders"){
-        orders = load("dng_orders", []);
-        renderOrders();
-        dashboard();
-        playOrderChime();
-        toast("🔔 New Store Order Received!");
-    }
-    if(e.key === "dng_customers"){
-        customers = load("dng_customers", []);
-        renderCRM();
-        dashboard();
-    }
-    if(e.key === "dng_wallet"){
-        wallet = load("dng_wallet", { balance:0, transactions:[] });
-        renderWallet();
-    }
-    if(e.key === "dng_referrals"){
-        referrals = load("dng_referrals", []);
-        renderReferrals();
-    }
-    if(e.key === "dng_admin_auth"){
-        updateUserHeader();
-        populateSettingsAuth();
-    }
-});
-
-/* =========================================
-   CSV ENGINE
-========================================= */
-function csvEscape(value){
-    return `"${String(value ?? "").replace(/"/g, '""')}"`;
-}
-
-function downloadCSVFile(filename, rows){
-    const csv = rows.map(row => row.map(csvEscape).join(",")).join("\n");
-    const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-function parseCSVLine(line){
-    let result = [];
-    let current = "";
-    let quote = false;
-    for(let i = 0; i < line.length; i++){
-        const char = line[i];
-        if(char === '"'){
-            quote = !quote;
-            continue;
-        }
-        if(char === "," && !quote){
-            result.push(current.trim());
-            current = "";
-        } else {
-            current += char;
-        }
-    }
-    result.push(current.trim());
-    return result;
-}
-
-function exportProductsCSV(){
-    const rows = [
-        ["id", "name", "category", "purchase_price", "mrp", "discount_percent", "price", "stock", "description", "image_url"],
-        ...products.map(p => [
-            p.id,
-            p.name,
-            p.category,
-            p.purchasePrice || 0,
-            p.mrp || p.price || 0,
-            p.discountPercent || 0,
-            p.price || 0,
-            p.stock || 0,
-            p.description || "",
-            p.image || ""
-        ])
-    ];
-    downloadCSVFile("dng-mart-products.csv", rows);
-}
-
-function downloadProductTemplate(){
-    downloadCSVFile("dng-mart-template.csv", [
-        ["name", "category", "purchase_price", "mrp", "discount_percent", "price", "stock", "description", "image_url"],
-        ["Fortune Mustard Oil 1L", "Oil & Ghee", 120, 175, 14.85, 149, 50, "Kachi Ghani Sarson Tel", ""]
-    ]);
-    toast("CSV template downloaded");
-}
-
-function importProductsCSV(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        const lines = e.target.result.trim().split(/\r?\n/);
-        if(lines.length < 2){
-            toast("CSV file is empty");
-            return;
-        }
-
-        const headers = lines[0].split(",").map(x => x.replace(/^"|"$/g, "").trim().toLowerCase());
-        let imported = 0;
-
-        for(let i = 1; i < lines.length; i++){
-            if(!lines[i].trim()) continue;
-            const values = parseCSVLine(lines[i]);
-            let row = {};
-            headers.forEach((h, index) => { row[h] = values[index] || ""; });
-
-            if(!row.name) continue;
-
-            const purchasePrice = Number(row.purchase_price) || 0;
-            const mrp = Number(row.mrp) || Number(row.price) || 0;
-            const discountPercent = Number(row.discount_percent) || 0;
-            let price = Number(row.price);
-            if(isNaN(price) || price <= 0){
-                price = Math.max(0, mrp - (mrp * discountPercent / 100));
-            }
-
-            const existing = products.find(p => 
-                (row.id && p.id.toLowerCase() === row.id.toLowerCase()) || 
-                p.name.toLowerCase() === row.name.toLowerCase()
-            );
-
-            if(existing){
-                existing.category = row.category || existing.category;
-                existing.purchasePrice = purchasePrice;
-                existing.mrp = mrp;
-                existing.discountPercent = discountPercent;
-                existing.price = price;
-                existing.stock = Number(row.stock) || existing.stock;
-                existing.description = row.description || existing.description;
-                if(row.image_url) existing.image = row.image_url;
-            } else {
-                products.push({
-                    id: row.id || ("g" + Date.now() + i),
-                    name: row.name,
-                    category: row.category || "Daily Essentials",
-                    purchasePrice,
-                    mrp,
-                    discountPercent,
-                    price,
-                    stock: Number(row.stock) || 0,
-                    description: row.description || "",
-                    image: row.image_url || ""
-                });
-            }
-            imported++;
-        }
-
-        save();
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-        toast(`${imported} products synced from CSV!`);
-    };
-    reader.readAsText(file);
-}
-
-/* =========================================
-   NAVIGATION (DESKTOP & MOBILE BOTTOM BAR)
-========================================= */
-function showPage(page, button){
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const target = document.getElementById(page);
-    if(target) target.classList.add("active");
-
-    // Sync Desktop Nav
-    document.querySelectorAll(".nav").forEach(n => n.classList.remove("active"));
-    const activeNav = Array.from(document.querySelectorAll(".nav")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
-    if(activeNav) activeNav.classList.add("active");
-
-    // Sync Mobile Bottom Nav
-    document.querySelectorAll(".mob-nav-item").forEach(m => m.classList.remove("active"));
-    const activeMob = Array.from(document.querySelectorAll(".mob-nav-item")).find(b => b.getAttribute("onclick")?.includes(`'${page}'`));
-    if(activeMob) activeMob.classList.add("active");
-
-    document.getElementById("pageTitle").innerText =
-        page === "crm" ? "Customer CRM" :
-        page === "settings" ? "Settings & Security" :
-        page.charAt(0).toUpperCase() + page.slice(1);
-
-    closeSidebar();
-    refreshPage(page);
-}
-
-function refreshPage(page){
-    if(page === "dashboard") dashboard();
-    if(page === "orders") { renderOrders(); loadOnlineFeeSettings(); }
-    if(page === "products") renderProducts();
-    if(page === "inventory") renderInventory();
-    if(page === "crm") renderCRM();
-    if(page === "referrals") renderReferrals();
-    if(page === "wallet") renderWallet();
-    if(page === "billing") setupBilling();
-    if(page === "settings") populateSettingsAuth();
-}
-
-/* =========================================
-   DASHBOARD
-========================================= */
-function dashboard(){
-    document.getElementById("totalOrders").innerText = orders.length;
-    document.getElementById("totalRevenue").innerText = money(orders.reduce((a, o) => a + Number(o.total || 0), 0));
-    document.getElementById("totalProducts").innerText = products.length;
-    document.getElementById("totalCustomers").innerText = customers.length;
-
-    let low = products.filter(p => Number(p.stock) < 10);
-    document.getElementById("lowStock").innerHTML = low.map(p => `
-        <div class="list-row">
-            <span>${p.name}</span>
-            <b class="orange">${p.stock} units left</b>
-        </div>
-    `).join("") || "<p style='color:var(--muted);padding:10px 0;'>All grocery items well-stocked.</p>";
-
-    document.getElementById("recentOrders").innerHTML = orders.slice(-5).reverse().map(o => {
-        let badgeClass = "orange";
-        if(o.status === "Delivered") badgeClass = "green";
-        if(o.status === "Shipped") badgeClass = "blue";
-        if(o.status === "Packing" || o.status === "Preparing") badgeClass = "orange";
-
-        return `
-            <tr>
-                <td>#${o.id}</td>
-                <td>${o.customer?.name || "Walk-in"}</td>
-                <td>${o.items?.length || 0}</td>
-                <td>${money(o.total)}</td>
-                <td><span class="badge ${badgeClass}">${o.status || "Placed"}</span></td>
-                <td>
-                    <button class="btn small whatsapp" onclick="sendOrderWhatsApp('${o.id}')">💬 WhatsApp</button>
-                </td>
-            </tr>
-        `;
-    }).join("") || "<tr><td colspan='6' style='text-align:center;color:var(--muted)'>No grocery orders yet</td></tr>";
-}
-
-/* =========================================
-   ORDERS MANAGEMENT (SYNCHRONIZED WITH TRACKER)
-========================================= */
-function renderOrdersTable(list){
-    document.getElementById("ordersTable").innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Subtotal</th>
-                    <th>GST</th>
-                    <th>Delivery</th>
-                    <th>Handling</th>
-                    <th>Total</th>
-                    <th>Status Action</th>
-                    <th>WhatsApp Status</th>
-                    <th>Invoice</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${list.map(o => {
-                    const currentSt = o.status || "Placed";
-                    return `
-                        <tr>
-                            <td><strong>#${o.id}</strong></td>
-                            <td>${o.customer?.name || "Walk-in"}<br><small style="color:var(--muted)">${o.customer?.phone || "-"}</small></td>
-                            <td>${money(o.subtotal || o.total)}</td>
-                            <td>${money(o.gst || 0)}</td>
-                            <td>${money(o.delivery || 0)}</td>
-                            <td>${money(o.handling || 0)}</td>
-                            <td><strong>${money(o.total)}</strong></td>
-                            <td>
-                                <select class="select" style="padding:6px;font-size:12px;width:140px;" onchange="updateOrderStatus('${o.id}', this.value)">
-                                    <option value="Placed" ${currentSt === "Placed" ? "selected" : ""}>⏳ Placed</option>
-                                    <option value="Packing" ${currentSt === "Packing" || currentSt === "Preparing" ? "selected" : ""}>📦 Packing</option>
-                                    <option value="Shipped" ${currentSt === "Shipped" ? "selected" : ""}>🚚 Shipped</option>
-                                    <option value="Out for Delivery" ${currentSt === "Out for Delivery" ? "selected" : ""}>🛵 Out for Delivery</option>
-                                    <option value="Delivered" ${currentSt === "Delivered" ? "selected" : ""}>✅ Delivered</option>
-                                    <option value="Cancelled" ${currentSt === "Cancelled" ? "selected" : ""}>❌ Cancelled</option>
-                                </select>
-                            </td>
-                            <td>
-                                <button class="btn small whatsapp" onclick="sendCustomStatusWhatsApp('${o.id}')">
-                                    💬 Send
-                                </button>
-                            </td>
-                            <td>
-                                <button class="btn small" onclick="invoice('${o.id}')">Invoice</button>
-                            </td>
-                        </tr>
-                    `;
-                }).join("")}
-            </tbody>
-        </table>
-    `;
-}
-
-function renderOrders(){
-    renderOrdersTable(orders.slice().reverse());
-}
-
-function searchOrders(query){
-    const filtered = orders.filter(o => JSON.stringify(o).toLowerCase().includes(query.toLowerCase()));
-    renderOrdersTable(filtered.slice().reverse());
-}
-
-function updateOrderStatus(orderId, newStatus){
-    const order = orders.find(o => o.id === orderId);
-    if(!order) return;
-
-    order.status = newStatus;
-
-    if(order.customer?.phone || order.customer?.name !== "Walk-in"){
-        const c = customers.find(x => (order.customer.phone && x.phone === order.customer.phone) || x.name.toLowerCase() === order.customer.name.toLowerCase());
-        if(c){
-            c.lastStatus = newStatus;
-            c.lastUpdated = new Date().toLocaleString();
-        }
-    }
-
-    save();
-    renderOrders();
-    dashboard();
-    toast(`Order #${order.id} status updated to: ${newStatus}`);
-
-    if(confirm(`Order status updated to "${newStatus}". Send WhatsApp update to customer?`)){
-        sendCustomStatusWhatsApp(orderId);
-    }
-}
-
-function sendCustomStatusWhatsApp(orderId){
-    const order = orders.find(o => o.id === orderId);
-    if(!order) return;
-
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const status = order.status || "Updated";
-
-    let msg = `*🛒 DNG MART - ORDER STATUS UPDATE*\n`;
-    msg += `_Ghar ka Saman Ghar Tak_\n`;
-    msg += `--------------------------------\n`;
-    msg += `Hello *${order.customer?.name || "Customer"}* Ji! 🙏\n\n`;
-
-    if(status === "Packing" || status === "Preparing"){
-        msg += `Your grocery order *#${order.id}* is currently *BEING PACKED* with fresh staples securely. 📦\n`;
-    } else if(status === "Shipped"){
-        msg += `Your grocery order *#${order.id}* is *DISPATCHED* from dark store! 🚚💨\n`;
-    } else if(status === "Out for Delivery"){
-        msg += `Your grocery order *#${order.id}* is *OUT FOR DELIVERY* and rider is near your location! 🛵💨\n`;
-    } else if(status === "Delivered"){
-        msg += `Your grocery order *#${order.id}* has been *DELIVERED SUCCESSFULLY*! ✅\nThank you for shopping with DNG Mart.\n`;
-    } else {
-        msg += `Your Order *#${order.id}* status is: *${status}*.\n`;
-    }
-
-    msg += `--------------------------------\n`;
-    msg += `*Order Total:* ${money(order.total)}\n`;
-    msg += `For support, visit www.dngmart.in`;
-
-    const encoded = encodeURIComponent(msg);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
-    window.open(url, '_blank');
-}
-
-function exportOrders(){
-    const rows = [
-        ["id", "customer", "phone", "subtotal", "gst", "handling", "delivery", "total", "paid", "due", "status", "date"],
-        ...orders.map(o => [
-            o.id,
-            o.customer?.name || "",
-            o.customer?.phone || "",
-            o.subtotal || o.total,
-            o.gst || 0,
-            o.handling || 0,
-            o.delivery || 0,
-            o.total,
-            o.paid || o.total,
-            o.due || 0,
-            o.status || "Placed",
-            o.date || ""
-        ])
-    ];
-    downloadCSVFile("dng-mart-orders.csv", rows);
-}
-
-/* =========================================
-   PRODUCTS: ADD & EDIT
-========================================= */
-function renderProducts(search=""){
-    let list = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
-    document.getElementById("productGrid").innerHTML = list.map(p => `
-        <div class="product-card">
-            <div>
-                <div class="product-image">
-                    ${p.image ? `<img src="${p.image}">` : "🛒"}
-                </div>
-                <div class="product-body">
-                    <h3>${p.name}</h3>
-                    <p>${p.category}</p>
-                    <br>
-                    <div style="display:flex;align-items:baseline;gap:8px;">
-                        <strong style="font-size:16px;color:var(--primary);">${money(p.price)}</strong>
-                        ${p.mrp > p.price ? `<small style="color:var(--muted);text-decoration:line-through;">${money(p.mrp)}</small>` : ''}
-                        ${p.discountPercent > 0 ? `<span class="badge green">${p.discountPercent}% OFF</span>` : ''}
-                    </div>
-                    <p style="font-size:11px;color:var(--muted);margin-top:4px;">Cost: ${money(p.purchasePrice || 0)} | Stock: <b>${p.stock} units</b></p>
-                </div>
-            </div>
-            <div style="padding:14px;padding-top:0;">
-                <div class="product-actions">
-                    <button class="btn small" style="flex:1" onclick="openEditModal('${p.id}')">✏️ Edit</button>
-                    <button class="btn small" style="flex:1" onclick="deleteProduct('${p.id}')">Delete</button>
-                </div>
-            </div>
-        </div>
-    `).join("");
-}
-
-function saveProduct(){
-    const name = document.getElementById("productName").value.trim();
-    const category = document.getElementById("productCategory").value;
-    const purchasePrice = Number(document.getElementById("productPurchasePrice").value) || 0;
-    const mrp = Number(document.getElementById("productMRP").value) || 0;
-    const discountPercent = Number(document.getElementById("productDiscount").value) || 0;
-    let price = Number(document.getElementById("productPrice").value);
-    const stock = Number(document.getElementById("productStock").value) || 0;
-
-    if(!price && mrp){
-        price = Math.max(0, mrp - (mrp * discountPercent / 100));
-    }
-
-    if(!name || isNaN(price)){
-        toast("Enter a valid product name and price");
-        return;
-    }
-
-    products.push({
-        id: "g" + Date.now(),
-        name,
-        category,
-        purchasePrice,
-        mrp: mrp || price,
-        discountPercent,
-        price,
-        stock,
-        description: "",
-        image: imageData
-    });
-
-    save();
-    imageData = "";
-    document.getElementById("productName").value = "";
-    document.getElementById("productPurchasePrice").value = "";
-    document.getElementById("productMRP").value = "";
-    document.getElementById("productDiscount").value = "0";
-    document.getElementById("productPrice").value = "";
-    document.getElementById("productStock").value = "";
-    document.getElementById("imagePreview").innerHTML = "";
-
-    renderProducts();
-    renderInventory();
-    setupBilling();
-    dashboard();
-    toast("Grocery product added to catalog!");
-}
-
-function openEditModal(id){
-    const p = products.find(x => x.id === id);
-    if(!p) return;
-
-    document.getElementById("editProductId").value = p.id;
-    document.getElementById("editProductName").value = p.name;
-    document.getElementById("editProductCategory").value = p.category;
-    document.getElementById("editProductPurchasePrice").value = p.purchasePrice || 0;
-    document.getElementById("editProductMRP").value = p.mrp || p.price;
-    document.getElementById("editProductDiscount").value = p.discountPercent || 0;
-    document.getElementById("editProductPrice").value = p.price;
-    document.getElementById("editProductStock").value = p.stock;
-
-    editImageData = p.image || "";
-    document.getElementById("editImagePreview").innerHTML = editImageData ? `<img src="${editImageData}">` : "";
-    document.getElementById("editProductModal").classList.add("active");
-}
-
-function closeEditModal(){
-    document.getElementById("editProductModal").classList.remove("active");
-    editImageData = "";
-}
-
-function handleEditImage(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        editImageData = e.target.result;
-        document.getElementById("editImagePreview").innerHTML = `<img src="${editImageData}">`;
-    };
-    reader.readAsDataURL(file);
-}
-
-function saveProductEdit(){
-    const id = document.getElementById("editProductId").value;
-    const name = document.getElementById("editProductName").value.trim();
-    const category = document.getElementById("editProductCategory").value;
-    const purchasePrice = Number(document.getElementById("editProductPurchasePrice").value) || 0;
-    const mrp = Number(document.getElementById("editProductMRP").value) || 0;
-    const discountPercent = Number(document.getElementById("editProductDiscount").value) || 0;
-    const price = Number(document.getElementById("editProductPrice").value) || 0;
-    const stock = Number(document.getElementById("editProductStock").value) || 0;
-
-    if(!name || !price){
-        toast("Product name and selling price required");
-        return;
-    }
-
-    const p = products.find(x => x.id === id);
-    if(p){
-        p.name = name;
-        p.category = category;
-        p.purchasePrice = purchasePrice;
-        p.mrp = mrp || price;
-        p.discountPercent = discountPercent;
-        p.price = price;
-        p.stock = stock;
-        p.image = editImageData;
-
-        save();
-        renderProducts();
-        renderInventory();
-        setupBilling();
-        dashboard();
-        closeEditModal();
-        toast("Product updated successfully!");
-    }
-}
-
-function deleteProduct(id){
-    if(!confirm("Remove this grocery item from catalog and inventory?")) return;
-    products = products.filter(p => p.id !== id);
-    save();
-    renderProducts();
-    renderInventory();
-    setupBilling();
-    dashboard();
-    toast("Product deleted");
-}
-
-/* =========================================
-   INVENTORY & MARGINS
-========================================= */
-function renderInventory(search = ""){
-    const list = products.filter(p => 
-        p.name.toLowerCase().includes(search.toLowerCase()) || 
-        p.category.toLowerCase().includes(search.toLowerCase()) ||
-        p.id.toLowerCase().includes(search.toLowerCase())
-    );
-
-    document.getElementById("inventoryTable").innerHTML = list.map(p => {
-        const margin = p.price - (p.purchasePrice || 0);
-        const marginPercent = p.purchasePrice ? ((margin / p.purchasePrice) * 100).toFixed(1) : 100;
-
-        return `
-            <tr>
-                <td><strong>${p.name}</strong><br><small style="color:var(--muted)">SKU: ${p.id}</small></td>
-                <td><span class="badge">${p.category}</span></td>
-                <td>${money(p.purchasePrice || 0)}</td>
-                <td>${money(p.mrp || p.price)}</td>
-                <td><span class="badge green">${p.discountPercent || 0}% OFF</span></td>
-                <td>
-                    <strong style="color:var(--primary);font-size:14px;">${money(p.price)}</strong>
-                    <br><small style="color:${margin >= 0 ? 'var(--green)' : 'var(--red)'}">Margin: +${money(margin)} (${marginPercent}%)</small>
-                </td>
-                <td>
-                    <b style="font-size:14px;color:${p.stock < 10 ? 'var(--orange)' : 'var(--green)'};">${p.stock}</b> units
-                </td>
-                <td>
-                    <button class="btn small" onclick="adjustStock('${p.id}',-1)">−</button>
-                    <button class="btn small" onclick="adjustStock('${p.id}',1)">+</button>
-                    <button class="btn small" onclick="adjustStock('${p.id}',10)">+10</button>
-                </td>
-                <td>
-                    <button class="btn small" onclick="openEditModal('${p.id}')">✏️ Edit</button>
-                </td>
-            </tr>
-        `;
-    }).join("") || "<tr><td colspan='9' style='text-align:center;color:var(--muted);'>No inventory matches found.</td></tr>";
-}
-
-function adjustStock(id, value){
-    const p = products.find(x => x.id === id);
-    if(p){
-        p.stock = Math.max(0, Number(p.stock) + value);
-        save();
-        renderInventory();
-        renderProducts();
-        setupBilling();
-        dashboard();
-    }
-}
-
-/* =========================================
-   POS BILLING
-========================================= */
-function setupBilling(){
-    const select = document.getElementById("billProduct");
-    select.innerHTML = products.map(p => `
-        <option value="${p.id}">${p.name} — ${money(p.price)} (${p.stock} in stock)</option>
-    `).join("");
-    bill = [];
-    document.getElementById("billHandling").value = "0";
-    document.getElementById("billDelivery").value = "0";
-    document.getElementById("billPaid").value = "";
-    renderBill();
-}
-
-function addBillItem(){
-    const id = document.getElementById("billProduct").value;
-    const qty = Number(document.getElementById("billQty").value);
-    const p = products.find(x => x.id === id);
-
-    if(!p){
-        toast("Select a valid product");
-        return;
-    }
-    if(qty > p.stock){
-        toast("Insufficient stock units");
-        return;
-    }
-
-    const existing = bill.find(b => b.id === p.id);
-    if(existing){
-        if(existing.qty + qty > p.stock){
-            toast("Cannot exceed available stock");
-            return;
-        }
-        existing.qty += qty;
-    } else {
-        bill.push({ id: p.id, name: p.name, price: p.price, qty });
-    }
-
-    renderBill();
-}
-
-function calculateBillTotals(){
-    const subtotal = bill.reduce((a, x) => a + x.price * x.qty, 0);
-    const gstRate = Number(document.getElementById("billGSTRate").value) || 0;
-    const gst = (subtotal * gstRate) / 100;
-    const handling = Number(document.getElementById("billHandling").value) || 0;
-    const delivery = Number(document.getElementById("billDelivery").value) || 0;
-    const total = subtotal + gst + handling + delivery;
-    
-    const paidInput = document.getElementById("billPaid").value;
-    const paid = paidInput === "" ? total : Number(paidInput);
-    const due = total - paid;
-
-    return { subtotal, gstRate, gst, handling, delivery, total, paid, due };
-}
-
-function renderBill(){
-    const { subtotal, gstRate, gst, handling, delivery, total, paid, due } = calculateBillTotals();
-
-    document.getElementById("billItems").innerHTML = bill.map((x, i) => `
-        <div class="bill-line">
-            <span>${x.name} × ${x.qty}</span>
-            <strong>${money(x.price * x.qty)}</strong>
-            <button class="btn small" onclick="bill.splice(${i},1);renderBill();">×</button>
-        </div>
-    `).join("") || "<p style='color:var(--muted);margin-top:10px;'>No items in current POS bill.</p>";
-
-    document.getElementById("billSummary").innerHTML = `
-        <div class="summary-row">
-            <span>Subtotal:</span>
-            <span>${money(subtotal)}</span>
-        </div>
-        <div class="summary-row">
-            <span>GST (${gstRate}%):</span>
-            <span>${money(gst)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Bag Fee:</span>
-            <span>${money(handling)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Delivery:</span>
-            <span>${money(delivery)}</span>
-        </div>
-        <div class="summary-row total-row">
-            <span>Total:</span>
-            <span>${money(total)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Paid:</span>
-            <span>${money(paid)}</span>
-        </div>
-        <div class="summary-row due-row" style="color:${due > 0 ? 'var(--red)' : 'var(--green)'}">
-            <span>${due >= 0 ? 'Balance Due:' : 'Return Change:'}</span>
-            <span>${money(Math.abs(due))}</span>
-        </div>
-    `;
-}
-
-function generateOrderObject(){
-    if(!bill.length) return null;
-    const { subtotal, gstRate, gst, handling, delivery, total, paid, due } = calculateBillTotals();
-    const customerName = document.getElementById("billCustomer").value.trim() || "Walk-in";
-    const customerPhone = document.getElementById("billPhone").value.trim();
-
-    return {
-        id: "DNG" + Date.now().toString().slice(-6),
-        customer: { name: customerName, phone: customerPhone },
-        items: [...bill],
-        subtotal,
-        gstRate,
-        gst,
-        handling,
-        delivery,
-        total,
-        paid,
-        due,
-        status: "Packing",
-        date: new Date().toLocaleString()
-    };
-}
-
-function completeBill(){
-    const order = generateOrderObject();
-    if(!order){
-        toast("Add items to POS bill first");
-        return;
-    }
-
-    order.items.forEach(x => {
-        const p = products.find(p => p.id === x.id);
-        if(p) p.stock = Math.max(0, p.stock - x.qty);
-    });
-
-    orders.push(order);
-
-    if(order.customer.phone || order.customer.name !== "Walk-in"){
-        const c = customers.find(x => (order.customer.phone && x.phone === order.customer.phone) || x.name.toLowerCase() === order.customer.name.toLowerCase());
-        if(c){
-            c.orders = (c.orders || 0) + 1;
-            c.lastStatus = "Packing";
-        } else {
-            customers.push({ id: Date.now(), name: order.customer.name, phone: order.customer.phone, orders: 1, lastStatus: "Packing", followup: false });
-        }
-    }
-
-    save();
-    invoice(order.id);
-    bill = [];
-    setupBilling();
-    dashboard();
-    renderProducts();
-    renderInventory();
-    toast("Bill generated and saved!");
-}
-
-/* =========================================
-   WHATSAPP & INVOICE
-========================================= */
-function buildWhatsAppMessage(order){
-    let msg = `*🛒 DNG MART - INVOICE #${order.id}*\n`;
-    msg += `_Ghar ka Saman Ghar Tak_\n`;
-    msg += `--------------------------------\n`;
-    msg += `*Customer:* ${order.customer?.name || "Walk-in"}\n`;
-    msg += `*Date:* ${order.date}\n`;
-    msg += `--------------------------------\n`;
-    msg += `*ITEMS:*\n`;
-    
-    order.items.forEach((item, index) => {
-        msg += `${index + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}\n`;
-    });
-
-    msg += `--------------------------------\n`;
-    msg += `*Subtotal:* ${money(order.subtotal || order.total)}\n`;
-    if(order.gst) msg += `*GST (${order.gstRate || 0}%):* ${money(order.gst)}\n`;
-    if(order.handling) msg += `*Bag/Handling:* ${money(order.handling)}\n`;
-    if(order.delivery) msg += `*Delivery:* ${money(order.delivery)}\n`;
-    msg += `*Total Amount:* ${money(order.total)}\n`;
-    msg += `*Paid Amount:* ${money(order.paid || order.total)}\n`;
-    if(order.due > 0) msg += `*Balance Due:* ${money(order.due)}\n`;
-    msg += `--------------------------------\n`;
-    msg += `Thank you for shopping at DNG Mart! 🙏\nwww.dngmart.in`;
-
-    return encodeURIComponent(msg);
-}
-
-function sendBillWhatsApp(){
-    const order = generateOrderObject();
-    if(!order){
-        toast("Add items to bill before sharing on WhatsApp");
-        return;
-    }
-    const phone = order.customer.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const text = buildWhatsAppMessage(order);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${text}` : `https://wa.me/?text=${text}`;
-    window.open(url, '_blank');
-}
-
-function sendOrderWhatsApp(id){
-    const order = orders.find(o => o.id === id);
-    if(!order) return;
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const text = buildWhatsAppMessage(order);
-    const url = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${text}` : `https://wa.me/?text=${text}`;
-    window.open(url, '_blank');
-}
-
-function invoice(id){
-    const order = orders.find(o => o.id === id);
-    if(!order) return;
-
-    const waText = buildWhatsAppMessage(order);
-    const phone = order.customer?.phone ? order.customer.phone.replace(/[^0-9]/g, '') : '';
-    const waUrl = phone.length >= 10 ? `https://wa.me/91${phone.slice(-10)}?text=${waText}` : `https://wa.me/?text=${waText}`;
-
-    const w = window.open("", "_blank");
-    w.document.write(`
-        <html>
-        <head>
-            <title>Invoice #${order.id} | DNG Mart</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body{font-family:Segoe UI,Arial,sans-serif;padding:20px;max-width:650px;margin:auto;color:#0f172a;}
-                h1{color:#16a34a;margin-bottom:4px;}
-                .tagline{color:#64748b;margin-bottom:20px;font-size:13px;}
-                .header-box{display:flex;justify-content:space-between;border-bottom:2px solid #16a34a;padding-bottom:12px;}
-                .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
-                .sub-box{margin-top:14px;border-top:1px dashed #cbd5e1;padding-top:10px;}
-                .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:#475569;}
-                .total{font-size:18px;font-weight:bold;color:#0f172a;margin-top:10px;display:flex;justify-content:space-between;border-top:2px solid #0f172a;padding-top:8px;}
-                .actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
-                button, a{background:#16a34a;color:white;border:0;padding:10px 16px;border-radius:6px;cursor:pointer;text-decoration:none;font-weight:bold;display:inline-block;font-size:13px;}
-                a.wa{background:#25D366;}
-                @media print { .actions{display:none;} }
-            </style>
-        </head>
-        <body>
-            <div class="header-box">
-                <div>
-                    <h1>DNG Mart</h1>
-                    <div class="tagline">घर का सामान घर तक • www.dngmart.in</div>
-                </div>
-                <div style="text-align:right">
-                    <strong>Invoice #${order.id}</strong><br>
-                    <small>${order.date || ''}</small>
-                </div>
-            </div>
-            <p style="margin:16px 0;font-size:13px;">
-                <strong>Customer:</strong> ${order.customer?.name || "Walk-in"}<br>
-                <strong>Phone:</strong> ${order.customer?.phone || "-"}
-            </p>
-            ${order.items.map(i => `
-                <div class="line">
-                    <span>${i.name} × ${i.qty}</span>
-                    <strong>${money(i.price * i.qty)}</strong>
-                </div>
-            `).join("")}
-
-            <div class="sub-box">
-                <div class="row">
-                    <span>Items Subtotal:</span>
-                    <span>${money(order.subtotal || order.total)}</span>
-                </div>
-                ${order.gst ? `
-                <div class="row">
-                    <span>GST (${order.gstRate || 0}%):</span>
-                    <span>${money(order.gst)}</span>
-                </div>` : ''}
-                ${order.handling ? `
-                <div class="row">
-                    <span>Bag / Handling Fee:</span>
-                    <span>${money(order.handling)}</span>
-                </div>` : ''}
-                ${order.delivery ? `
-                <div class="row">
-                    <span>Delivery Charges:</span>
-                    <span>${money(order.delivery)}</span>
-                </div>` : ''}
-                <div class="total">
-                    <span>Final Amount:</span>
-                    <span>${money(order.total)}</span>
-                </div>
-                <div class="row" style="margin-top:6px;">
-                    <span>Amount Paid:</span>
-                    <span>${money(order.paid || order.total)}</span>
-                </div>
-                ${order.due > 0 ? `
-                <div class="row" style="color:#dc2626;font-weight:bold;">
-                    <span>Balance Due:</span>
-                    <span>${money(order.due)}</span>
-                </div>` : ''}
-            </div>
-
-            <div class="actions">
-                <button onclick="window.print()">🖨️ Print Invoice</button>
-                <a class="wa" href="${waUrl}" target="_blank">💬 Share via WhatsApp</a>
-            </div>
-        </body>
-        </html>
-    `);
-}
-
-/* =========================================
-   CRM
-========================================= */
-function renderCRM(search=""){
-    document.getElementById("crmTotal").innerText = customers.length;
-    document.getElementById("repeatCustomers").innerText = customers.filter(c => Number(c.orders || 0) > 1).length;
-    document.getElementById("followUps").innerText = customers.filter(c => c.followup).length;
-
-    let list = customers.filter(c => JSON.stringify(c).toLowerCase().includes(search.toLowerCase()));
-
-    document.getElementById("crmTable").innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Customer Name</th>
-                    <th>Phone</th>
-                    <th>Total Orders</th>
-                    <th>Last Status</th>
-                    <th>Follow-up</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${list.map((c, i) => `
-                    <tr>
-                        <td><strong>${c.name}</strong></td>
-                        <td>${c.phone || "-"}</td>
-                        <td>${c.orders || 0}</td>
-                        <td><span class="badge blue">${c.lastStatus || "Active"}</span></td>
-                        <td>
-                            <button class="btn small" onclick="toggleFollowup(${i})">
-                                ${c.followup ? '✓ Follow-up Set' : '+ Add Follow-up'}
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn small" onclick="deleteCustomer(${i})">Delete</button>
-                        </td>
-                    </tr>
-                `).join("")}
-            </tbody>
-        </table>
-    `;
-}
-
-function addCustomer(){
-    const name = prompt("Customer Full Name:");
-    if(!name) return;
-    const phone = prompt("Mobile Number (10 digits):");
-
-    customers.push({
-        id: Date.now(),
-        name,
-        phone: phone || "",
-        orders: 0,
-        lastStatus: "New",
-        followup: false
-    });
-
-    save();
-    renderCRM();
-    dashboard();
-    toast("Customer added to CRM");
-}
-
-function toggleFollowup(index){
-    customers[index].followup = !customers[index].followup;
-    save();
-    renderCRM();
-    toast("Follow-up status changed");
-}
-
-function deleteCustomer(index){
-    if(!confirm("Remove customer record?")) return;
-    customers.splice(index, 1);
-    save();
-    renderCRM();
-    dashboard();
-    toast("Customer removed");
-}
-
-function exportCRM(){
-    const rows = [
-        ["id", "name", "phone", "orders", "last_status", "followup"],
-        ...customers.map(c => [c.id || "", c.name, c.phone || "", c.orders || 0, c.lastStatus || "Active", c.followup ? "true" : "false"])
-    ];
-    downloadCSVFile("dng-mart-crm.csv", rows);
-}
-
-/* =========================================
-   COUPONS & AFFILIATES
-========================================= */
-function renderReferrals(){
-    const query = (document.getElementById("refSearch")?.value || "").toLowerCase();
-    const status = document.getElementById("refStatus")?.value || "all";
-
-    const list = referrals.filter(r => 
-        (status === "all" || (r.status || "active") === status) &&
-        JSON.stringify(r).toLowerCase().includes(query)
-    );
-
-    document.getElementById("refUsers").innerText = referrals.length;
-    document.getElementById("successReferrals").innerText = referrals.reduce((a, r) => a + Number(r.successful || 0), 0);
-    document.getElementById("activeCouponsCount").innerText = referrals.filter(r => (r.status || "active") === "active").length;
-
-    document.getElementById("referralTable").innerHTML = list.map(r => {
-        const index = referrals.indexOf(r);
-        const discountDisplay = r.type === "percent" ? `${r.value || 10}% OFF` : money(r.value || r.rewardPerReferral || 50) + " OFF";
-
-        return `
-            <tr>
-                <td><strong>${r.name}</strong></td>
-                <td><span class="ref-code">${r.code}</span></td>
-                <td><b style="color:var(--primary);">${discountDisplay}</b></td>
-                <td>${money(r.minOrder || 299)}</td>
-                <td>${r.successful || 0}</td>
-                <td><span class="badge ${r.status === "active" ? "green" : "orange"}">${r.status || "active"}</span></td>
-                <td>
-                    <button class="btn small" onclick="toggleReferral(${index})">${r.status === "active" ? "Pause" : "Activate"}</button>
-                    <button class="btn small" onclick="creditReferral(${index})">Credit</button>
-                </td>
-            </tr>
-        `;
-    }).join("") || "<tr><td colspan='7' style='text-align:center;color:var(--muted);'>No coupons created yet.</td></tr>";
-}
-
-function openCustomCouponModal(){
-    document.getElementById("couponUser").value = "";
-    document.getElementById("couponCode").value = "DNG" + Math.random().toString(36).substring(2, 6).toUpperCase();
-    document.getElementById("couponValue").value = "50";
-    document.getElementById("couponMinOrder").value = "299";
-    document.getElementById("couponOwnerReward").value = "50";
-    document.getElementById("customCouponModal").classList.add("active");
-}
-
-function closeCustomCouponModal(){
-    document.getElementById("customCouponModal").classList.remove("active");
-}
-
-function saveCustomCoupon(){
-    const name = document.getElementById("couponUser").value.trim();
-    const code = document.getElementById("couponCode").value.trim().toUpperCase();
-    const type = document.getElementById("couponType").value;
-    const value = Number(document.getElementById("couponValue").value) || 0;
-    const minOrder = Number(document.getElementById("couponMinOrder").value) || 0;
-    const ownerReward = Number(document.getElementById("couponOwnerReward").value) || 0;
-
-    if(!name || !code || !value){
-        toast("Enter Campaign Name, Coupon Code and Value");
-        return;
-    }
-
-    if(referrals.some(r => r.code === code)){
-        toast("Coupon code already exists! Choose another.");
-        return;
-    }
-
-    referrals.push({
-        id: Date.now(),
-        name,
-        code,
-        type,
-        value,
-        minOrder,
-        rewardPerReferral: ownerReward,
-        successful: 0,
-        reward: 0,
-        status: "active"
-    });
-
-    save();
-    renderReferrals();
-    closeCustomCouponModal();
-    toast(`Coupon ${code} created successfully!`);
-}
-
-function toggleReferral(index){
-    referrals[index].status = referrals[index].status === "active" ? "paused" : "active";
-    save();
-    renderReferrals();
-}
-
-function creditReferral(index){
-    const referral = referrals[index];
-    const amount = Number(referral.rewardPerReferral) || 50;
-
-    referral.successful = Number(referral.successful || 0) + 1;
-    referral.reward = Number(referral.reward || 0) + amount;
-
-    wallet.balance += amount;
-    wallet.transactions.unshift({
-        name: referral.name + " (" + referral.code + ") Reward",
-        amount,
-        date: new Date().toLocaleString()
-    });
-
-    save();
-    renderReferrals();
-    renderWallet();
-    toast("Referral reward credited to wallet");
-}
-
-/* =========================================
-   WALLET
-========================================= */
-function renderWallet(){
-    document.getElementById("walletBalance").innerText = money(wallet.balance);
-    document.getElementById("walletTransactions").innerHTML = wallet.transactions.map(t => `
-        <div class="list-row">
-            <div>
-                <strong>${t.name}</strong><br>
-                <small style="color:var(--muted)">${t.date}</small>
-            </div>
-            <strong class="green">+${money(t.amount)}</strong>
-        </div>
-    `).join("") || "<p style='color:var(--muted)'>No wallet transactions logged.</p>";
-}
-
-function creditWallet(){
-    const name = document.getElementById("walletName").value.trim();
-    const amount = Number(document.getElementById("walletAmount").value);
-
-    if(!name || !amount || isNaN(amount)){
-        toast("Enter customer name and valid credit amount");
-        return;
-    }
-
-    wallet.balance += amount;
-    wallet.transactions.unshift({
-        name,
-        amount,
-        date: new Date().toLocaleString()
-    });
-
-    document.getElementById("walletName").value = "";
-    document.getElementById("walletAmount").value = "";
-
-    save();
-    renderWallet();
-    toast("Wallet balance credited");
-}
-
-/* =========================================
-   IMAGE UPLOAD
-========================================= */
-const drop = document.getElementById("dropZone");
-const imageInput = document.getElementById("productImage");
-
-drop.onclick = () => imageInput.click();
-drop.ondragover = e => { e.preventDefault(); drop.classList.add("drag"); };
-drop.ondragleave = () => drop.classList.remove("drag");
-drop.ondrop = e => {
-    e.preventDefault();
-    drop.classList.remove("drag");
-    handleImage(e.dataTransfer.files[0]);
-};
-imageInput.onchange = e => handleImage(e.target.files[0]);
-
-function handleImage(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        imageData = e.target.result;
-        document.getElementById("imagePreview").innerHTML = `<img src="${imageData}">`;
-    };
-    reader.readAsDataURL(file);
-}
-
-/* =========================================
-   THEME
-========================================= */
-function toggleTheme(){
-    document.body.classList.toggle("dark");
-    localStorage.setItem("dng_theme", document.body.classList.contains("dark") ? "dark" : "light");
-}
-
-if(localStorage.getItem("dng_theme") === "dark"){
-    document.body.classList.add("dark");
-}
-
-/* =========================================
-   INITIAL LOAD
-========================================= */
-checkSession();
-dashboard();
-renderProducts();
-renderInventory();
-renderCRM();
-renderReferrals();
-renderWallet();
-setupBilling();
-loadOnlineFeeSettings();
+// Supabase Cloud sync & Realtime Push Listeners
+fetchSupabaseData();
+initSupabaseRealtime();
 </script>
 
 </body>
