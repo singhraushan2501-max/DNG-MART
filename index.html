@@ -59,7 +59,7 @@ body{
     padding: 12px 24px;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 14px;
+    gap: 16px;
 }
 
 .bk-logo-block{
@@ -99,7 +99,7 @@ body{
 
 .bk-search-bar{
     flex: 1;
-    max-width: 480px;
+    max-width: 550px;
     position: relative;
     display: flex;
     align-items: center;
@@ -132,14 +132,14 @@ body{
 .bk-nav-actions{
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-shrink: 0;
 }
 
 .bk-auth-btn{
     background: transparent;
     border: 1px solid var(--border-color);
-    padding: 8px 12px;
+    padding: 8px 14px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 13px;
@@ -169,28 +169,13 @@ body{
     gap: 5px;
 }
 
-.bk-admin-link{
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #92400e;
-    padding: 8px 11px;
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 12.5px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-.bk-admin-link:hover{ background: #fef3c7; }
-
 .bk-cart-pill{
     background: var(--blinkit-green);
     color: #ffffff;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 15px;
+    padding: 9px 16px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 14px;
@@ -735,11 +720,6 @@ body{
                 <span>🚚</span> Track Order
             </button>
 
-            <!-- Store Admin Portal Link -->
-            <a class="bk-admin-link" href="admin.html" target="_blank">
-                <span>🔐</span> Admin
-            </a>
-
             <!-- Customer Auth Button -->
             <button class="bk-auth-btn" id="authNavBtn" onclick="openAuthModal()">
                 <span>👤</span> <span id="authNavText">Login / Signup</span>
@@ -1122,7 +1102,6 @@ window.addEventListener("storage", (e) => {
         const previousOrders = orders;
         orders = loadData("dng_orders", []);
         
-        // If an order changed for the logged-in user, trigger live notification
         if(currentUser){
             orders.forEach(newO => {
                 const oldO = previousOrders.find(x => x.id === newO.id);
