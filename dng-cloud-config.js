@@ -3,6 +3,6 @@
    NEVER put the Supabase service_role key in this file.
 */
 window.DNG_CLOUD_CONFIG = {
-    url: "YOUR_SUPABASE_PROJECT_URL",
-    anonKey: "YOUR_SUPABASE_ANON_KEY"
+    url: "https://zrujdpihhyvvdwtrzvoh.supabase.co",
+    anonKey: sb_publishable_ccLoSscAKvQr3WsTcN4Zqw_SmC8iN-P
 };
